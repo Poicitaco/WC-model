@@ -1,0 +1,14 @@
+[
+  {
+    "id": "world-cup-blue",
+    "ten": "World Cup Blue",
+    "tep": "world-cup-blue.svg",
+    "url": "/static/photobooth_frames/world-cup-blue.svg"
+  },
+  {
+    "id": "match-day",
+    "ten": "Match Day",
+    "tep": "match-day.svg",
+    "url": "/static/photobooth_frames/match-day.svg"
+  }
+]

@@ -1,0 +1,13 @@
+﻿feature,importance,importance_percent,feature_vi
+chenh_lech_fifa_rank,0.2302892371791584,23.028923717915834,Chênh lệch FIFA ranking
+chenh_lech_elo,0.1621658044598467,16.21658044598467,Chênh lệch Elo
+elo_expected_win_prob,0.15967829101628278,15.967829101628276,Xác suất thắng kỳ vọng Elo
+san_trung_lap,0.12585702795279768,12.585702795279765,Sân trung lập
+chenh_lech_kinh_nghiem_wc,0.06170245524812175,6.170245524812174,Chênh lệch kinh nghiệm World Cup
+chenh_lech_ban_thua_tb,0.060530722889080325,6.053072288908031,Chênh lệch bàn thua TB
+chenh_lech_ban_thang_tb,0.053448493067425454,5.344849306742544,Chênh lệch bàn thắng TB
+chenh_lech_phong_do,0.052124604368883956,5.212460436888394,Chênh lệch phong độ 5 trận
+chenh_lech_doi_dau,0.04777211561805445,4.777211561805443,Chênh lệch đối đầu
+chenh_lech_thang_wc,0.04643124820034852,4.643124820034851,Chênh lệch số trận thắng World Cup
+is_host_team_A,0.0,0.0,Đội A là chủ nhà
+is_host_team_B,0.0,0.0,Đội B là chủ nhà

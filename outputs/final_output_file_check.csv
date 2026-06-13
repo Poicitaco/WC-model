@@ -1,0 +1,14 @@
+﻿Tên file,Tồn tại,Dung lượng KB,Đường dẫn
+Dự đoán vòng bảng,True,7.12,/content/gdrive/MyDrive/WC2026_FINAL/outputs/group_stage_predictions_best_model.csv
+Kết quả vòng bảng có tỷ số,True,9.61,/content/gdrive/MyDrive/WC2026_FINAL/outputs/group_stage_results_with_scores.csv
+Bảng xếp hạng vòng bảng,True,1.46,/content/gdrive/MyDrive/WC2026_FINAL/outputs/group_standings_best_model.csv
+32 đội vào knock-out,True,1.59,/content/gdrive/MyDrive/WC2026_FINAL/outputs/qualified_teams_round_of_32.csv
+Kết quả knock-out,True,9.36,/content/gdrive/MyDrive/WC2026_FINAL/outputs/knockout_predictions_best_model.csv
+Bracket knock-out,True,3.91,/content/gdrive/MyDrive/WC2026_FINAL/outputs/knockout_bracket_display_best_model.csv
+Bảng đội vô địch,True,0.07,/content/gdrive/MyDrive/WC2026_FINAL/outputs/champion_prediction_best_model.csv
+Bảng Top 4,True,0.12,/content/gdrive/MyDrive/WC2026_FINAL/outputs/top4_prediction_best_model.csv
+Bảng xếp hạng 48 đội,True,2.17,/content/gdrive/MyDrive/WC2026_FINAL/outputs/ranking_48_teams_best_model.csv
+Top 4 summary,True,0.24,/content/gdrive/MyDrive/WC2026_FINAL/outputs/top4_summary_best_model.csv
+Tổng kết cuối,True,0.08,/content/gdrive/MyDrive/WC2026_FINAL/outputs/final_worldcup2026_summary_best_model.csv
+Ảnh Champion + Top 4,False,0.0,/content/gdrive/MyDrive/WC2026_FINAL/figures/worldcup2026_champion_top4_balanced.png
+Best model,True,65517.08,/content/gdrive/MyDrive/WC2026_FINAL/models/best_model_final.pkl

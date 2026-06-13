@@ -1,0 +1,11 @@
+Bản_sao_của_CUỐI_KÌ_(2).ipynb
+DATA_RAW/
+figures/
+models/random_forest_baseline.pkl
+models/random_forest_tuned.pkl
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.gemini/

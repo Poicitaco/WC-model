@@ -1,0 +1,12 @@
+chenh_lech_phong_do
+chenh_lech_ban_thang_tb
+chenh_lech_ban_thua_tb
+chenh_lech_doi_dau
+chenh_lech_fifa_rank
+chenh_lech_elo
+elo_expected_win_prob
+chenh_lech_kinh_nghiem_wc
+chenh_lech_thang_wc
+san_trung_lap
+is_host_team_A
+is_host_team_B

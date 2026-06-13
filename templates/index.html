@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự Đoán World Cup 2026 - AI Analytics</title>
+    <!-- Nhúng Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nencoc: '#f8f9fa',
+                        viencoc: '#0b57d0',
+                        vienkinh: '#dadce0'
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        (() => {
+            const themeDaLuu = localStorage.getItem('wc2026-theme');
+            const themeMacDinh = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.dataset.theme = themeDaLuu || themeMacDinh;
+        })();
+    </script>
+    <!-- Nhúng CSS tùy chỉnh -->
+    <link rel="stylesheet" href="/static/style.css?v=6">
+    <!-- Tabler Icons: bộ icon nét mảnh, đồng nhất cho dashboard -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
+</head>
+<body class="bg-[#f8f9fa] text-[#1f1f1f] intro-dang-chay">
+
+    <div id="man-mo-dau" class="man-mo-dau" role="status" aria-live="polite">
+        <div class="rem-rap rem-trai"></div>
+        <div class="rem-rap rem-phai"></div>
+        <div class="anh-sang-san-khau"></div>
+        <div class="noi-dung-mo-dau">
+            <div class="bieu-tuong-mo-dau"><i class="ti ti-ball-football"></i></div>
+            <span class="nhan-mo-dau">World Cup 2026</span>
+            <h1>Dự đoán World Cup<br><em>cùng AI</em></h1>
+            <p id="trang-thai-mo-dau">Đang khởi động sân khấu dữ liệu...</p>
+            <div class="thanh-tien-trinh-mo-dau"><span id="tien-trinh-mo-dau"></span></div>
+            <div class="chi-so-mo-dau">
+                <span>48 đội tuyển</span>
+                <span>104 trận đấu</span>
+                <span>4 thuật toán</span>
+            </div>
+        </div>
+        <button type="button" id="bo-qua-mo-dau" class="bo-qua-mo-dau">Bỏ qua <i class="ti ti-arrow-right"></i></button>
+    </div>
+
+    <!-- Thanh điều hướng đầu trang phong cách Google -->
+    <nav class="sticky top-0 z-50 border-b border-[#dadce0] bg-[#ffffff] shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0b57d0] to-[#1a73e8] flex items-center justify-center shadow-sm">
+                        <i class="ti ti-ball-football text-2xl text-white"></i>
+                    </div>
+                    <div>
+                        <span class="text-base font-bold tracking-tight text-[#1f1f1f] block leading-none mb-1">World Cup 2026</span>
+                        <span class="text-[10px] text-[#0b57d0] font-mono uppercase tracking-widest block font-bold">AI Predictor</span>
+                    </div>
+                </div>
+
+                <!-- Các Tab Điều Hướng chính -->
+                <div class="thanh-tab-chinh flex space-x-6 md:space-x-8">
+                    <div onclick="chuyenTab('gia-lap')" id="tab-gia-lap" class="nut-tab kich-hoat text-sm py-2">
+                        <i class="ti ti-device-desktop-analytics mr-1"></i> Giả Lập Trận Đấu
+                    </div>
+                    <div onclick="chuyenTab('lich-thi-dau')" id="tab-lich-thi-dau" class="nut-tab text-sm py-2">
+                        <i class="ti ti-calendar-event mr-1"></i> Lịch Thi Đấu
+                    </div>
+                    <div onclick="chuyenTab('photobooth')" id="tab-photobooth" class="nut-tab text-sm py-2">
+                        <i class="ti ti-camera mr-1"></i> Photobooth
+                    </div>
+                    <div onclick="chuyenTab('vong-bang')" id="tab-vong-bang" class="nut-tab text-sm py-2">
+                        <i class="ti ti-trophy mr-1"></i> Vòng Bảng
+                    </div>
+                    <div onclick="chuyenTab('knockout')" id="tab-knockout" class="nut-tab text-sm py-2">
+                        <i class="ti ti-git-fork mr-1"></i> Nhánh Knockout
+                    </div>
+                    <div onclick="chuyenTab('mo-hinh')" id="tab-mo-hinh" class="nut-tab text-sm py-2">
+                        <i class="ti ti-chart-bar mr-1"></i> Phân Tích Mô Hình
+                    </div>
+                    <button type="button" id="nut-doi-theme" onclick="doiTheme()" class="nut-doi-theme" aria-label="Chuyển giao diện sáng tối" title="Chuyển giao diện sáng tối">
+                        <i id="bieu-tuong-theme" class="ti ti-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Khung nội dung chính -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- 1. TAB GIẢ LẬP TRẬN ĐẤU -->
+        <section id="khung-gia-lap" class="space-y-8">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Trình Giả Lập Trực Tiếp</span>
+                <h1 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">AI Match Predictor</h1>
+                <p class="text-[#5f6368] text-sm">Chọn hai đội bóng để chạy mô hình Random Forest Tuned dự đoán kết quả, phần trăm thắng và mô phỏng tỷ số dựa trên ELO, FIFA Rank và phong độ lịch sử.</p>
+            </div>
+
+            <!-- Khung chọn đội bóng -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                <!-- Chọn Đội A -->
+                <div class="lg:col-span-4 md3-card p-6 flex flex-col items-center justify-between text-center bg-white">
+                    <div class="w-full">
+                        <span class="text-xs font-mono text-[#0b57d0] tracking-wider uppercase mb-3 block font-bold">ĐỘI TUYỂN A</span>
+                        <div class="mb-4">
+                            <select id="chon-doi-a" onchange="capNhatGiaoDienDoi('a')" class="w-full bg-[#f8f9fa] border border-[#dadce0] text-[#1f1f1f] rounded-xl p-3 outline-none focus:border-[#0b57d0] transition text-sm">
+                                <!-- Điền danh sách đội ở JS -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="my-6">
+                        <img id="co-doi-a" class="w-32 h-20 object-cover rounded-lg shadow-sm border border-gray-200" src="https://flagcdn.com/w160/us.png" alt="Cờ">
+                    </div>
+                    <div id="thong-tin-doi-a" class="w-full space-y-2 text-xs border-t border-gray-150 pt-4 text-left">
+                        <!-- Cập nhật bằng JS -->
+                    </div>
+                </div>
+
+                <!-- Bộ Điều Khiển Giữa -->
+                <div class="lg:col-span-4 md3-card p-6 flex flex-col justify-between items-center text-center bg-white">
+                    <div class="w-full">
+                        <span class="text-xs font-mono text-[#5f6368] tracking-wider uppercase mb-3 block font-bold">CÀI ĐẶT TRẬN ĐẤU</span>
+                        <div class="space-y-4 text-left">
+                            <div>
+                                <label class="text-[10px] font-mono text-[#5f6368] uppercase block mb-1">Ngày thi đấu</label>
+                                <input id="ngay-dau" type="date" value="2026-06-11" class="w-full bg-[#f8f9fa] border border-[#dadce0] text-[#1f1f1f] rounded-lg p-2 text-sm outline-none focus:border-[#0b57d0]">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-mono text-[#5f6368] uppercase block mb-1">Thuật toán dự đoán</label>
+                                <select id="chon-thuat-toan" class="w-full bg-[#f8f9fa] border border-[#dadce0] text-[#1f1f1f] rounded-lg p-2 text-sm outline-none focus:border-[#0b57d0]">
+                                    <option value="random_forest_tuned">Đang tải thuật toán...</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+                                <label class="text-xs text-[#1f1f1f] font-medium">Sân trung lập</label>
+                                <input id="san-trung-lap" type="checkbox" checked class="w-5 h-5 rounded accent-[#0b57d0]">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full my-6">
+                        <button onclick="chayGiaLapTranDau()" class="w-full py-3.5 px-6 rounded-full nut-bam-chinh font-bold text-sm flex items-center justify-center gap-2">
+                            <i class="ti ti-bolt text-lg"></i> GIẢ LẬP TRẬN ĐẤU
+                        </button>
+                    </div>
+
+                    <div id="mo-ta-thuat-toan" class="text-[10px] text-[#5f6368] font-mono">
+                        Đang tải thông tin thuật toán...
+                    </div>
+                </div>
+
+                <!-- Chọn Đội B -->
+                <div class="lg:col-span-4 md3-card p-6 flex flex-col items-center justify-between text-center bg-white">
+                    <div class="w-full">
+                        <span class="text-xs font-mono text-red-600 tracking-wider uppercase mb-3 block font-bold">ĐỘI TUYỂN B</span>
+                        <div class="mb-4">
+                            <select id="chon-doi-b" onchange="capNhatGiaoDienDoi('b')" class="w-full bg-[#f8f9fa] border border-[#dadce0] text-[#1f1f1f] rounded-xl p-3 outline-none focus:border-[#0b57d0] transition text-sm">
+                                <!-- Điền danh sách đội ở JS -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="my-6">
+                        <img id="co-doi-b" class="w-32 h-20 object-cover rounded-lg shadow-sm border border-gray-200" src="https://flagcdn.com/w160/mx.png" alt="Cờ">
+                    </div>
+                    <div id="thong-tin-doi-b" class="w-full space-y-2 text-xs border-t border-gray-150 pt-4 text-left">
+                        <!-- Cập nhật bằng JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kết quả giả lập trận đấu dạng NẰM NGANG -->
+            <div id="khung-ket-qua" class="hidden">
+                <div class="md3-card p-6 bg-white space-y-6">
+                    <h3 class="text-sm font-bold text-[#1f1f1f] border-b border-gray-150 pb-2 flex items-center gap-2">
+                        <i class="ti ti-presentation-analytics text-[#0b57d0]"></i> KẾT QUẢ GIẢ LẬP AI
+                    </h3>
+
+                    <!-- Bố cục nằm ngang như người dùng mong muốn -->
+                    <div class="the-tran-dau">
+                        <div class="dong-thong-tin-dau">
+                            <span class="nhan-bang-badge">Dự đoán AI</span>
+                            <div class="thong-tin-tran-phai">
+                                <span class="ma-tran-so" id="ket-qua-ma-tran">Trận Đấu</span>
+                                <span class="thoi-gian-tran" id="ket-qua-ngay-gio">13/06 08:00</span>
+                            </div>
+                        </div>
+                        <div class="dong-thi-dau-chinh">
+                            <!-- Đội A -->
+                            <div class="doi-a-khung">
+                                <span id="ket-qua-ten-doi-a">United States</span>
+                                <img id="ket-qua-co-doi-a" class="co-quoc-gia" src="" alt="Cờ">
+                            </div>
+                            <!-- Khung trung tâm chứa tỷ số ở trên và phần trăm ở dưới -->
+                            <div class="khung-ty-so-giua">
+                                <div id="ket-qua-ken-ty-so" class="ken-ty-so">
+                                    2 - 1
+                                </div>
+                                <div id="ket-qua-ken-phan-tram" class="dong-phan-tram">
+                                    45% - 30%
+                                </div>
+                            </div>
+                            <!-- Đội B -->
+                            <div class="doi-b-khung">
+                                <img id="ket-qua-co-doi-b" class="co-quoc-gia" src="" alt="Cờ">
+                                <span id="ket-qua-ten-doi-b">Mexico</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chú thích chi tiết -->
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#f8f9fa] p-4 rounded-xl text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-gray-700">Đội thắng:</span>
+                            <span id="ket-qua-doi-thang" class="text-[#0b57d0] font-bold">United States</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <span class="text-gray-500">Thắng: <strong id="ti-le-a-text" class="text-[#137333]">45%</strong></span>
+                            <span class="text-gray-500">Hòa: <strong id="ti-le-h-text" class="text-gray-700">25%</strong></span>
+                            <span class="text-gray-500">Thua: <strong id="ti-le-b-text" class="text-[#c5221f]">30%</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Các chỉ số đặc trưng (Features) -->
+                    <div class="border-t border-gray-150 pt-4">
+                        <h4 class="text-xs font-bold text-gray-700 mb-3"><i class="ti ti-scale"></i> Phân Tích Thông Số Đặc Trưng (Features)</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="khung-so-sanh-dac-trung">
+                            <!-- Chèn bằng JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Skeleton -->
+            <div id="khung-dang-tai" class="hidden">
+                <div class="md3-card p-6 bg-white space-y-4">
+                    <div class="h-4 w-40 bo-xuong-tai"></div>
+                    <div class="h-16 w-full bo-xuong-tai"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. TAB LỊCH THI ĐẤU THEO NGÀY -->
+        <section id="khung-lich-thi-dau" class="hidden space-y-6">
+            <div class="text-center max-w-2xl mx-auto mb-6">
+                <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Toàn bộ giải đấu</span>
+                <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Lịch Thi Đấu Theo Ngày</h2>
+                <p class="text-[#5f6368] text-sm">Theo dõi từng ngày thi đấu từ vòng bảng đến chung kết, cùng tỷ số và xác suất dự đoán của mô hình.</p>
+            </div>
+
+            <div class="khung-thanh-ngay md3-card bg-white p-3">
+                <div class="flex justify-end items-center gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="chuyenNgayLich(-1)" id="nut-ngay-truoc" class="nut-dieu-huong-ngay" aria-label="Ngày thi đấu trước">
+                            <i class="ti ti-chevron-left"></i>
+                        </button>
+                        <input id="chon-ngay-lich" type="date" onchange="chonNgayTuLich(this.value)" class="o-chon-ngay">
+                        <button type="button" onclick="chuyenNgayLich(1)" id="nut-ngay-sau" class="nut-dieu-huong-ngay" aria-label="Ngày thi đấu tiếp theo">
+                            <i class="ti ti-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="thanh-ngay-thi-dau" class="thanh-ngay-thi-dau" aria-label="Chọn ngày thi đấu"></div>
+            </div>
+
+            <div class="tieu-de-lich-ngay">
+                <h3 id="tieu-de-ngay-lich" class="text-2xl font-bold text-[#1f1f1f]">Đang tải lịch thi đấu...</h3>
+            </div>
+
+            <div id="tom-tat-ngay-lich" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+
+            <div id="danh-sach-lich-theo-ngay" class="space-y-3 max-w-4xl mx-auto"></div>
+
+            <div id="lich-trong" class="hidden md3-card bg-white p-10 text-center max-w-2xl mx-auto">
+                <i class="ti ti-calendar-off text-4xl text-[#0b57d0]"></i>
+                <h3 class="font-bold text-[#1f1f1f] mt-3">Không có trận đấu trong ngày này</h3>
+                <p class="text-sm text-[#5f6368] mt-1">Hãy chọn ngày thi đấu gần nhất trên thanh lịch.</p>
+            </div>
+        </section>
+
+        <!-- 3. TAB PHOTOBOOTH -->
+        <section id="khung-photobooth" class="hidden space-y-6">
+            <div class="text-center max-w-2xl mx-auto mb-6">
+                <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Kỷ niệm World Cup</span>
+                <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Photobooth Cổ Động Viên</h2>
+                <p class="text-[#5f6368] text-sm">Chụp ảnh bằng camera, chọn khung yêu thích và tải ảnh về ngay.</p>
+            </div>
+
+            <div class="photobooth-layout">
+                <div class="photobooth-stage md3-card">
+                    <video id="camera-photobooth" autoplay playsinline muted></video>
+                    <canvas id="canvas-photobooth" width="1080" height="1350"></canvas>
+                    <img id="khung-overlay-photobooth" class="khung-overlay-photobooth" alt="">
+                    <div id="photobooth-placeholder" class="photobooth-placeholder">
+                        <i class="ti ti-camera"></i>
+                        <strong>Sẵn sàng chụp ảnh</strong>
+                        <span>Bật camera hoặc tải ảnh từ thiết bị</span>
+                    </div>
+                </div>
+
+                <aside class="photobooth-controls md3-card">
+                    <div>
+                        <span class="nhan-dieu-khien">1. Nguồn ảnh</span>
+                        <div class="photobooth-actions">
+                            <button type="button" onclick="batCamera()" class="nut-bam-chinh"><i class="ti ti-video"></i> Bật camera</button>
+                            <label class="nut-hanh-dong-card primary photobooth-upload">
+                                <i class="ti ti-photo-up"></i> Tải ảnh
+                                <input id="tai-anh-photobooth" type="file" accept="image/*" hidden>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="nhan-dieu-khien">2. Chọn khung ảnh</span>
+                        <div id="danh-sach-khung-photobooth" class="danh-sach-khung-photobooth"></div>
+                    </div>
+                    <div class="photobooth-actions">
+                        <button type="button" onclick="chupAnhPhotobooth()" class="nut-bam-chinh"><i class="ti ti-camera"></i> Chụp ảnh</button>
+                        <button type="button" onclick="taiAnhPhotobooth()" class="nut-hanh-dong-card primary"><i class="ti ti-download"></i> Tải xuống</button>
+                    </div>
+                    <p id="thong-bao-photobooth" class="text-xs text-[#5f6368]"></p>
+                </aside>
+            </div>
+        </section>
+
+        <!-- 4. TAB VÒNG BẢNG & XẾP HẠNG -->
+        <section id="khung-vong-bang" class="hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Kết quả chi tiết</span>
+                <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Bảng Xếp Hạng Vòng Bảng</h2>
+                <p class="text-[#5f6368] text-sm">Xem bảng xếp hạng 12 bảng đấu (A - L) và kết quả giả lập trận đấu nằm ngang hiển thị phần trăm dự đoán của mô hình.</p>
+            </div>
+
+            <!-- Bộ lọc bảng đấu -->
+            <div class="flex justify-center mb-6">
+                <div id="bo-loc-bang-dau" class="flex flex-wrap gap-2 justify-center"></div>
+            </div>
+
+            <!-- Lưới layout Vòng bảng -->
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                <!-- BXH cụ thể (Cột trái) -->
+                <div class="xl:col-span-5 md3-card p-5 bg-white">
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-4 flex items-center justify-between border-b border-gray-100 pb-2">
+                        <span id="tieu-de-bxh-bang">Bảng A - Điểm Số</span>
+                        <span class="text-[10px] font-mono bg-emerald-500/10 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-bold">MÔ PHỎNG</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-[#f8f9fa] border-b border-gray-200 text-gray-500 font-mono">
+                                <tr>
+                                    <th class="py-2.5 px-2 text-center">Hạng</th>
+                                    <th class="py-2.5 px-3">Đội tuyển</th>
+                                    <th class="py-2.5 px-2 text-center">Trận</th>
+                                    <th class="py-2.5 px-2 text-center">HS</th>
+                                    <th class="py-2.5 px-3 text-center text-[#0b57d0] font-bold">Điểm</th>
+                                </tr>
+                            </thead>
+                            <tbody id="than-bang-xep-hang">
+                                <!-- Chèn bằng JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Danh sách trận đấu nằm ngang (Cột phải) -->
+                <div class="xl:col-span-7 space-y-4">
+                    <h3 class="text-sm font-bold text-[#1f1f1f] px-1"><i class="ti ti-calendar-event"></i> Trận đấu & Tỷ lệ dự đoán</h3>
+                    <div id="danh-sach-tran-bang" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                        <!-- Chèn bằng JS dưới dạng card nằm ngang -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. TAB NHÁNH ĐẤU KNOCKOUT -->
+        <section id="khung-knockout" class="hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Vòng Loại Trực Tiếp</span>
+                <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Trận Đấu Knockout</h2>
+                <p class="text-[#5f6368] text-sm">Kết quả giả lập vòng loại trực tiếp từ vòng 32 đội đến trận chung kết, hiển thị phần trăm cơ hội đi tiếp của hai đội tuyển.</p>
+            </div>
+
+            <!-- Bộ lọc Vòng đấu Knockout -->
+            <div class="flex justify-center space-x-2 border-b border-gray-200 pb-2 mb-6">
+                <button onclick="chuyenVongKnockout('vong-32')" id="nut-ko-32" class="px-4 py-2 text-xs font-bold rounded-full transition">Vòng 1/16 (32 đội)</button>
+                <button onclick="chuyenVongKnockout('vong-16')" id="nut-ko-16" class="px-4 py-2 text-xs font-bold rounded-full transition">Vòng 1/8 (16 đội)</button>
+                <button onclick="chuyenVongKnockout('vong-tuket')" id="nut-ko-tuket" class="px-4 py-2 text-xs font-bold rounded-full transition">Tứ kết</button>
+                <button onclick="chuyenVongKnockout('vong-banket')" id="nut-ko-banket" class="px-4 py-2 text-xs font-bold rounded-full transition">Bán kết & Chung kết</button>
+            </div>
+
+            <!-- Các trận đấu Knockout nằm ngang -->
+            <div class="space-y-3 max-w-4xl mx-auto" id="khung-danh-sach-knockout">
+                <!-- Chèn bằng JS -->
+            </div>
+        </section>
+
+        <!-- 6. TAB PHÂN TÍCH MÔ HÌNH -->
+        <section id="khung-mo-hinh" class="hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">AI Performance</span>
+                <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Chỉ Số Đánh Giá Mô Hình</h2>
+                <p class="text-[#5f6368] text-sm">So sánh hiệu năng mô hình đã được kiểm tra trên tập dữ liệu lịch sử và chi tiết các đặc trưng quan trọng.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- Bảng số liệu mô hình -->
+                <div class="lg:col-span-7 md3-card p-6 bg-white">
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-4 border-b border-gray-100 pb-2"><i class="ti ti-file-analytics"></i> Bảng So Sánh Các Mô Hình</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-[#f8f9fa] border-b border-gray-200 text-gray-500 font-mono">
+                                <tr>
+                                    <th class="py-3 px-4">Phiên bản mô hình</th>
+                                    <th class="py-3 px-2 text-center">Train Acc</th>
+                                    <th class="py-3 px-2 text-center">Test Acc</th>
+                                    <th class="py-3 px-2 text-center">Macro F1</th>
+                                    <th class="py-3 px-2 text-center">Weighted F1</th>
+                                    <th class="py-3 px-2 text-center">Overfit Gap</th>
+                                </tr>
+                            </thead>
+                            <tbody id="than-so-lieu-mo-hinh">
+                                <!-- Chèn bằng JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Thẻ Tầm quan trọng Đặc trưng -->
+                <div class="lg:col-span-5 md3-card p-6 bg-white flex flex-col justify-between min-h-[300px]">
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-4 border-b border-gray-100 pb-2"><i class="ti ti-key"></i> Tầm Quan Trọng Đặc Trưng</h3>
+                    <div class="flex-grow flex items-center justify-center bg-[#f8f9fa] rounded-xl p-3 border border-gray-200">
+                        <img id="anh-feature-importance" class="max-h-60 w-auto rounded object-contain" src="/static/anh/feature_importance_best_model.png" alt="Feature Importance">
+                    </div>
+                    <p class="text-[11px] text-[#5f6368] mt-3 text-center">Chênh lệch chỉ số ELO và tỷ lệ cơ hội thắng dựa trên ELO là đặc trưng chính quyết định dự đoán.</p>
+                </div>
+            </div>
+
+            <!-- Các biểu đồ phụ -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div class="md3-card p-6 bg-white">
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-3"><i class="ti ti-chart-dots"></i> Phân Bố Mô Phỏng (Bubble Chart)</h3>
+                    <div class="bg-[#f8f9fa] rounded-xl p-3 border border-gray-200 flex items-center justify-center">
+                        <img id="anh-bubble-chart" class="max-h-60 w-auto rounded object-contain" src="/static/anh/bubble_chart_mo_phong_4_mo_hinh.png" alt="Bubble Chart">
+                    </div>
+                </div>
+                <div class="md3-card p-6 bg-white">
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-3"><i class="ti ti-layout-grid"></i> Heatmap Chỉ Số Đánh Giá</h3>
+                    <div class="bg-[#f8f9fa] rounded-xl p-3 border border-gray-200 flex items-center justify-center">
+                        <img id="anh-metrics-heatmap" class="max-h-60 w-auto rounded object-contain" src="/static/anh/model_metrics_heatmap_soft_purple_yellow.png" alt="Heatmap">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 bg-white py-6 mt-12 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-bold">24022941-Nguyễn Thị Lan Anh</p>
+        </div>
+    </footer>
+
+    <!-- Khởi tạo Javascript logic -->
+    <script>
+        // Bản đồ mã quốc gia
+        const MA_QUOC_GIA = {
+            "Argentina": "ar", "Australia": "au", "Austria": "at", "Belgium": "be",
+            "Bosnia and Herzegovina": "ba", "Brazil": "br", "Canada": "ca", "Cape Verde": "cv",
+            "Colombia": "co", "Croatia": "hr", "Czechia": "cz", "Democratic Republic of the Congo": "cd",
+            "Ecuador": "ec", "Egypt": "eg", "England": "gb-eng", "France": "fr",
+            "Germany": "de", "Ghana": "gh", "Haiti": "ht", "Iran": "ir",
+            "Iraq": "iq", "Ivory Coast": "ci", "Japan": "jp", "Jordan": "jo",
+            "Mexico": "mx", "Morocco": "ma", "Netherlands": "nl", "New Zealand": "nz",
+            "Norway": "no", "Panama": "pa", "Paraguay": "py", "Portugal": "pt",
+            "Qatar": "qa", "Saudi Arabia": "sa", "Scotland": "gb-sct", "Senegal": "sn",
+            "South Africa": "za", "South Korea": "kr", "Spain": "es", "Sweden": "se",
+            "Switzerland": "ch", "Tunisia": "tn", "Turkey": "tr", "United States": "us",
+            "Uruguay": "uy", "Uzbekistan": "uz", "Curaçao": "cw", "Hòa": "draw"
+        };
+
+        // Biến toàn cục lưu trữ dữ liệu
+        let danhSachDoiBong = [];
+        let duLieuLichThiDau = null;
+        let duLieuVongBang = null;
+        let duLieuKnockout = null;
+        let duLieuMoHinh = null;
+        let ngayLichHienTai = null;
+        let bangHienTai = 'A';
+        let vongKnockoutHienTai = 'vong-32';
+        let cameraStream = null;
+        let anhNguonPhotobooth = null;
+        let khungPhotoboothHienTai = null;
+
+        // Trả về cờ
+        function layDuongDanCo(tenDoi) {
+            const ma = MA_QUOC_GIA[tenDoi];
+            if (!ma || ma === 'draw') {
+                return 'https://cdn.simpleicons.org/fastapi/ffffff';
+            }
+            return `https://flagcdn.com/w80/${ma}.png`;
+        }
+
+        function capNhatNutTheme() {
+            const laDark = document.documentElement.dataset.theme === 'dark';
+            const bieuTuong = document.getElementById('bieu-tuong-theme');
+            const nutTheme = document.getElementById('nut-doi-theme');
+            bieuTuong.className = laDark ? 'ti ti-sun' : 'ti ti-moon';
+            nutTheme.title = laDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối';
+            nutTheme.setAttribute('aria-label', nutTheme.title);
+        }
+
+        function doiTheme() {
+            const themeMoi = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.theme = themeMoi;
+            localStorage.setItem('wc2026-theme', themeMoi);
+            capNhatNutTheme();
+        }
+
+        async function chayManMoDau() {
+            const manMoDau = document.getElementById('man-mo-dau');
+            const trangThai = document.getElementById('trang-thai-mo-dau');
+            const tienTrinh = document.getElementById('tien-trinh-mo-dau');
+            const giamChuyenDong = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let daDong = false;
+
+            const dongManMoDau = () => {
+                if (daDong) return;
+                daDong = true;
+                sessionStorage.setItem('wc2026-intro-da-xem', 'true');
+                tienTrinh.style.width = '100%';
+                trangThai.textContent = 'Sân khấu đã sẵn sàng';
+                setTimeout(() => {
+                    manMoDau.classList.add('mo-rem');
+                    document.body.classList.remove('intro-dang-chay');
+                }, giamChuyenDong ? 50 : 350);
+                setTimeout(() => manMoDau.remove(), giamChuyenDong ? 250 : 1500);
+            };
+
+            document.getElementById('bo-qua-mo-dau').onclick = dongManMoDau;
+            if (sessionStorage.getItem('wc2026-intro-da-xem') === 'true') {
+                dongManMoDau();
+                return;
+            }
+
+            const cacBuoc = [
+                ['Đang kết nối dữ liệu 48 đội tuyển...', 22],
+                ['Đang đọc lịch thi đấu 104 trận...', 48],
+                ['Đang đánh thức các mô hình AI...', 76],
+                ['Đang dựng sân khấu dự đoán...', 94]
+            ];
+            const taiNgam = Promise.allSettled([
+                fetch('/api/danh-sach-doi'),
+                fetch('/api/lich-thi-dau'),
+                fetch('/api/thuat-toan'),
+                fetch('/api/khung-anh')
+            ]);
+
+            for (const [noiDung, phanTram] of cacBuoc) {
+                trangThai.textContent = noiDung;
+                tienTrinh.style.width = `${phanTram}%`;
+                await new Promise(resolve => setTimeout(resolve, giamChuyenDong ? 40 : 520));
+            }
+            await taiNgam;
+            dongManMoDau();
+        }
+
+        async function taiDanhSachThuatToan() {
+            const chon = document.getElementById('chon-thuat-toan');
+            const moTa = document.getElementById('mo-ta-thuat-toan');
+            try {
+                const danhSach = await fetch('/api/thuat-toan').then(phanHoi => phanHoi.json());
+                chon.innerHTML = '';
+                danhSach.forEach(thuatToan => {
+                    const luaChon = document.createElement('option');
+                    luaChon.value = thuatToan.ma;
+                    luaChon.textContent = thuatToan.kha_dung ? thuatToan.ten : `${thuatToan.ten} (chưa khả dụng)`;
+                    luaChon.disabled = !thuatToan.kha_dung;
+                    luaChon.dataset.moTa = thuatToan.kha_dung ? thuatToan.mo_ta : thuatToan.ly_do;
+                    chon.appendChild(luaChon);
+                });
+                chon.value = danhSach.some(item => item.ma === 'random_forest_tuned' && item.kha_dung)
+                    ? 'random_forest_tuned'
+                    : danhSach.find(item => item.kha_dung)?.ma || '';
+                moTa.textContent = chon.selectedOptions[0]?.dataset.moTa || 'Không có thuật toán khả dụng.';
+                chon.onchange = () => {
+                    moTa.textContent = chon.selectedOptions[0]?.dataset.moTa || '';
+                };
+            } catch (loi) {
+                chon.innerHTML = '<option value="random_forest_tuned">Random Forest Tuned</option>';
+                moTa.textContent = 'Không tải được danh sách thuật toán, đang dùng model mặc định.';
+            }
+        }
+
+        // Tải danh sách đội
+        const taiDanhSachDoiBong = async () => {
+            try {
+                const phanHoi = await fetch('/api/danh-sach-doi');
+                danhSachDoiBong = await phanHoi.json();
+                
+                const chonDoiA = document.getElementById('chon-doi-a');
+                const chonDoiB = document.getElementById('chon-doi-b');
+                
+                chonDoiA.innerHTML = '';
+                chonDoiB.innerHTML = '';
+                
+                danhSachDoiBong.forEach(doi => {
+                    const luaChonA = document.createElement('option');
+                    luaChonA.value = doi.ten;
+                    luaChonA.textContent = `[Bảng ${doi.bang}] ${doi.ten}`;
+                    chonDoiA.appendChild(luaChonA);
+
+                    const luaChonB = document.createElement('option');
+                    luaChonB.value = doi.ten;
+                    luaChonB.textContent = `[Bảng ${doi.bang}] ${doi.ten}`;
+                    if (doi.ten === 'Mexico') {
+                        luaChonB.selected = true;
+                    }
+                    chonDoiB.appendChild(luaChonB);
+                });
+                
+                capNhatGiaoDienDoi('a');
+                capNhatGiaoDienDoi('b');
+                
+                khoiTaoBoLocVongBang();
+            } catch (loi) {
+                console.error("Lỗi khi tải danh sách đội bóng:", loi);
+            }
+        };
+
+        // Cập nhật thông số
+        function capNhatGiaoDienDoi(loai) {
+            const chon = document.getElementById(`chon-doi-${loai}`);
+            const tenDoi = chon.value;
+            const anhCo = document.getElementById(`co-doi-${loai}`);
+            const khungThongTin = document.getElementById(`thong-tin-doi-${loai}`);
+            
+            anhCo.src = layDuongDanCo(tenDoi);
+            
+            const thongTinDoi = danhSachDoiBong.find(d => d.ten === tenDoi);
+            if (thongTinDoi) {
+                khungThongTin.innerHTML = `
+                    <div class="flex justify-between border-b border-gray-100 pb-1.5">
+                        <span class="text-gray-500">FIFA Rank:</span>
+                        <span class="font-bold text-[#1f1f1f]">#${thongTinDoi.fifa_rank}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-100 pb-1.5">
+                        <span class="text-gray-500">Elo Rating:</span>
+                        <span class="font-bold text-[#0b57d0]">${Math.round(thongTinDoi.elo)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Kinh nghiệm WC:</span>
+                        <span class="font-bold text-[#1f1f1f]">${thongTinDoi.so_lan_du_wc} lần (${thongTinDoi.so_tran_wc} trận)</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Chạy giả lập trận đấu
+        const chayGiaLapTranDau = async () => {
+            const doiA = document.getElementById('chon-doi-a').value;
+            const doiB = document.getElementById('chon-doi-b').value;
+            const ngayGio = document.getElementById('ngay-dau').value;
+            const sanTrungLap = document.getElementById('san-trung-lap').checked ? 1 : 0;
+            const thuatToan = document.getElementById('chon-thuat-toan').value;
+            
+            if (doiA === doiB) {
+                alert("Vui lòng chọn hai đội bóng khác nhau để giả lập!");
+                return;
+            }
+            
+            document.getElementById('khung-ket-qua').classList.add('hidden');
+            document.getElementById('khung-dang-tai').classList.remove('hidden');
+            
+            try {
+                const phanHoi = await fetch('/api/du-doan-tran-dau', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doi_a: doiA,
+                        doi_b: doiB,
+                        ngay_gio: ngayGio,
+                        san_trung_lap: sanTrungLap,
+                        thuat_toan: thuatToan
+                    })
+                });
+                
+                const duLieu = await phanHoi.json();
+                if (!phanHoi.ok || duLieu.loi) {
+                    throw new Error(duLieu.loi || 'Không thể chạy dự đoán');
+                }
+                
+                setTimeout(() => {
+                    document.getElementById('khung-dang-tai').classList.add('hidden');
+                    hienThiKetQuaDuDoan(duLieu);
+                }, 800);
+                
+            } catch (loi) {
+                console.error("Lỗi khi chạy giả lập:", loi);
+                document.getElementById('khung-dang-tai').classList.add('hidden');
+                alert(loi.message);
+            }
+        };
+
+        // Hiển thị kết quả dự đoán dạng nằm ngang
+        function hienThiKetQuaDuDoan(duLieu) {
+            document.getElementById('ket-qua-ten-doi-a').textContent = duLieu.doi_a;
+            document.getElementById('ket-qua-ten-doi-b').textContent = duLieu.doi_b;
+            document.getElementById('ket-qua-co-doi-a').src = layDuongDanCo(duLieu.doi_a);
+            document.getElementById('ket-qua-co-doi-b').src = layDuongDanCo(duLieu.doi_b);
+            
+            // Format ngày giờ
+            const dateObj = new Date(duLieu.ngay_gio || "2026-06-11");
+            const ngayGioFormat = dateObj.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+            const gioFormat = dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+            document.getElementById('ket-qua-ngay-gio').textContent = `${ngayGioFormat} ${gioFormat}`;
+            
+            // Lấy xác suất
+            const pA = Math.round(duLieu.ti_le.p_a_thang * 100);
+            const pH = Math.round(duLieu.ti_le.p_hoa * 100);
+            const pB = Math.round(duLieu.ti_le.p_a_thua * 100);
+            
+            document.getElementById('ti-le-a-text').textContent = `${pA}%`;
+            document.getElementById('ti-le-h-text').textContent = `${pH}%`;
+            document.getElementById('ti-le-b-text').textContent = `${pB}%`;
+            
+            // Giữa cờ sẽ là tỷ số ở trên và phần trăm ở dưới
+            const kenTySo = document.getElementById('ket-qua-ken-ty-so');
+            kenTySo.textContent = duLieu.ty_so;
+            
+            const kenPhanTram = document.getElementById('ket-qua-ken-phan-tram');
+            kenPhanTram.textContent = `${pA}% - ${pB}%`;
+            
+            // Đội thắng
+            const thongBaoDoiThang = document.getElementById('ket-qua-doi-thang');
+            if (duLieu.doi_thang === 'Hòa') {
+                thongBaoDoiThang.textContent = "Hai đội hòa nhau";
+                thongBaoDoiThang.className = "text-gray-500 font-bold";
+            } else {
+                thongBaoDoiThang.textContent = `${duLieu.doi_thang} thắng cuộc`;
+                thongBaoDoiThang.className = "text-[#137333] font-bold";
+            }
+            
+            // Đặc trưng
+            const khungDacTrung = document.getElementById('khung-so-sanh-dac-trung');
+            khungDacTrung.innerHTML = '';
+            
+            const dt = duLieu.dac_trung;
+            const nhanDacTrung = {
+                "chenh_lech_elo": "Chênh lệch Elo",
+                "chenh_lech_fifa_rank": "Chênh lệch FIFA Rank",
+                "chenh_lech_phong_do": "Chênh lệch Phong độ",
+                "chenh_lech_doi_dau": "Chênh lệch Đối đầu",
+                "elo_expected_win_prob": "Cơ hội thắng theo ELO",
+                "chenh_lech_kinh_nghiem_wc": "Chênh lệch số trận WC"
+            };
+            
+            Object.keys(nhanDacTrung).forEach(khoa => {
+                const giaTri = dt[khoa];
+                let giaTriHienThi = typeof giaTri === 'number' ? giaTri.toFixed(1) : giaTri;
+                
+                if (khoa === 'elo_expected_win_prob') {
+                    giaTriHienThi = `${(giaTri * 100).toFixed(0)}%`;
+                } else if (giaTri > 0) {
+                    giaTriHienThi = `+${giaTriHienThi}`;
+                }
+                
+                const card = document.createElement('div');
+                card.className = "bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center text-xs";
+                card.innerHTML = `
+                    <span class="text-gray-500 font-medium">${nhanDacTrung[khoa]}</span>
+                    <span class="font-bold text-[#0b57d0] font-mono bg-blue-50/50 px-2 py-0.5 rounded border border-blue-100">${giaTriHienThi}</span>
+                `;
+                khungDacTrung.appendChild(card);
+            });
+            
+            document.getElementById('khung-ket-qua').classList.remove('hidden');
+        }
+
+        // Tải và hiển thị lịch thi đấu theo từng ngày
+        const taiDuLieuLichThiDau = async () => {
+            if (duLieuLichThiDau) {
+                hienThiLichTheoNgay();
+                return;
+            }
+
+            const khungDanhSach = document.getElementById('danh-sach-lich-theo-ngay');
+            khungDanhSach.innerHTML = `
+                <div class="md3-card bg-white p-6 space-y-4">
+                    <div class="h-4 w-40 bo-xuong-tai"></div>
+                    <div class="h-20 w-full bo-xuong-tai"></div>
+                    <div class="h-20 w-full bo-xuong-tai"></div>
+                </div>
+            `;
+
+            try {
+                const phanHoi = await fetch('/api/lich-thi-dau');
+                duLieuLichThiDau = await phanHoi.json();
+                if (!phanHoi.ok || duLieuLichThiDau.loi) {
+                    throw new Error(duLieuLichThiDau.loi || 'Không thể tải lịch thi đấu');
+                }
+
+                const homNay = new Date();
+                const ngayHomNay = [
+                    homNay.getFullYear(),
+                    String(homNay.getMonth() + 1).padStart(2, '0'),
+                    String(homNay.getDate()).padStart(2, '0')
+                ].join('-');
+                ngayLichHienTai = duLieuLichThiDau.cac_ngay.includes(ngayHomNay)
+                    ? ngayHomNay
+                    : duLieuLichThiDau.cac_ngay[0];
+                hienThiLichTheoNgay();
+            } catch (loi) {
+                console.error("Lỗi khi tải lịch thi đấu:", loi);
+                khungDanhSach.innerHTML = `
+                    <div class="md3-card bg-white p-8 text-center text-sm text-[#c5221f]">
+                        Không thể tải lịch thi đấu. Vui lòng thử lại sau.
+                    </div>
+                `;
+            }
+        };
+
+        function dinhDangNgayLich(ngay, dayDu = false) {
+            const ngayObj = new Date(`${ngay}T12:00:00`);
+            if (dayDu) {
+                return `Ngày ${ngayObj.toLocaleDateString('vi-VN', {day: 'numeric', month: 'numeric'})}`;
+            }
+            return ngayObj.toLocaleDateString('vi-VN', {weekday: 'short', day: '2-digit', month: '2-digit'});
+        }
+
+        function chonNgayTuLich(ngay) {
+            ngayLichHienTai = ngay;
+            hienThiLichTheoNgay();
+        }
+
+        function chuyenNgayLich(khoangCach) {
+            if (!duLieuLichThiDau || !duLieuLichThiDau.cac_ngay.length) return;
+
+            let viTri = duLieuLichThiDau.cac_ngay.indexOf(ngayLichHienTai);
+            if (viTri === -1) {
+                viTri = duLieuLichThiDau.cac_ngay.findIndex(ngay => ngay > ngayLichHienTai);
+                if (viTri === -1) viTri = duLieuLichThiDau.cac_ngay.length - 1;
+            } else {
+                viTri += khoangCach;
+            }
+
+            viTri = Math.max(0, Math.min(duLieuLichThiDau.cac_ngay.length - 1, viTri));
+            ngayLichHienTai = duLieuLichThiDau.cac_ngay[viTri];
+            hienThiLichTheoNgay();
+        }
+
+        function hienThiLichTheoNgay() {
+            if (!duLieuLichThiDau || !ngayLichHienTai) return;
+
+            const cacNgay = duLieuLichThiDau.cac_ngay;
+            const tranTrongNgay = duLieuLichThiDau.danh_sach_tran.filter(
+                tran => tran.ngay_gio.slice(0, 10) === ngayLichHienTai
+            );
+            const viTriNgay = cacNgay.indexOf(ngayLichHienTai);
+            const laNgayCoTran = viTriNgay !== -1;
+
+            document.getElementById('tieu-de-ngay-lich').textContent = dinhDangNgayLich(ngayLichHienTai, true);
+            document.getElementById('chon-ngay-lich').value = ngayLichHienTai;
+            document.getElementById('nut-ngay-truoc').disabled = !laNgayCoTran || viTriNgay === 0;
+            document.getElementById('nut-ngay-sau').disabled = !laNgayCoTran || viTriNgay === cacNgay.length - 1;
+
+            const thanhNgay = document.getElementById('thanh-ngay-thi-dau');
+            thanhNgay.innerHTML = '';
+            cacNgay.forEach(ngay => {
+                const soTran = duLieuLichThiDau.danh_sach_tran.filter(tran => tran.ngay_gio.slice(0, 10) === ngay).length;
+                const ngayObj = new Date(`${ngay}T12:00:00`);
+                const nut = document.createElement('button');
+                nut.type = 'button';
+                nut.className = `nut-ngay-lich ${ngay === ngayLichHienTai ? 'kich-hoat' : ''}`;
+                nut.textContent = `${ngayObj.toLocaleDateString('vi-VN', {weekday: 'long'})}, ${ngayObj.toLocaleDateString('vi-VN', {day: 'numeric', month: 'numeric'})}`;
+                nut.title = `${soTran} trận`;
+                nut.onclick = () => chonNgayTuLich(ngay);
+                thanhNgay.appendChild(nut);
+                if (ngay === ngayLichHienTai) {
+                    requestAnimationFrame(() => nut.scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'center'}));
+                }
+            });
+
+            const tomTat = document.getElementById('tom-tat-ngay-lich');
+            const soTranVongBang = tranTrongNgay.filter(tran => tran.vong === 'Vòng bảng').length;
+            const soTranKnockout = tranTrongNgay.length - soTranVongBang;
+            tomTat.innerHTML = `
+                <div class="the-tom-tat-lich"><i class="ti ti-ball-football"></i><div><strong>${tranTrongNgay.length}</strong><span>Tổng số trận</span></div></div>
+                <div class="the-tom-tat-lich"><i class="ti ti-users-group"></i><div><strong>${soTranVongBang}</strong><span>Trận vòng bảng</span></div></div>
+                <div class="the-tom-tat-lich"><i class="ti ti-git-fork"></i><div><strong>${soTranKnockout}</strong><span>Trận knockout</span></div></div>
+            `;
+
+            const khungDanhSach = document.getElementById('danh-sach-lich-theo-ngay');
+            const lichTrong = document.getElementById('lich-trong');
+            khungDanhSach.innerHTML = '';
+            lichTrong.classList.toggle('hidden', tranTrongNgay.length > 0);
+
+            tranTrongNgay.forEach(tran => {
+                const card = document.createElement('article');
+                const laChungKet = tran.vong === 'Chung kết';
+                card.className = `the-tran-dau the-tran-lich ${laChungKet ? 'chung-ket' : ''}`;
+
+                const gioFormat = new Date(tran.ngay_gio.replace(' ', 'T')).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+                const pA = Math.round(tran.p_a_thang * 100);
+                const pB = Math.round(tran.p_a_thua * 100);
+                const nhanVong = tran.bang ? `Bảng ${tran.bang}` : tran.vong;
+
+                card.innerHTML = `
+                    <div class="cot-gio-lich">
+                        <strong>${gioFormat}</strong>
+                        <span>Trận ${tran.ma_tran}</span>
+                    </div>
+                    <div class="noi-dung-tran-lich">
+                        <div class="dong-thong-tin-dau">
+                            <span class="nhan-bang-badge">${nhanVong}</span>
+                            <span class="text-[11px] text-[#5f6368] font-medium">${tran.vong}</span>
+                        </div>
+                        <div class="dong-thi-dau-chinh">
+                            <div class="doi-a-khung">
+                                <span>${tran.doi_a}</span>
+                                <img class="co-quoc-gia" src="${layDuongDanCo(tran.doi_a)}" alt="Cờ ${tran.doi_a}">
+                            </div>
+                            <div class="khung-ty-so-giua">
+                                <div class="ken-ty-so">${tran.ban_thang_a} - ${tran.ban_thang_b}</div>
+                                <div class="dong-phan-tram">${pA}% - ${pB}%</div>
+                            </div>
+                            <div class="doi-b-khung">
+                                <img class="co-quoc-gia" src="${layDuongDanCo(tran.doi_b)}" alt="Cờ ${tran.doi_b}">
+                                <span>${tran.doi_b}</span>
+                            </div>
+                            <div class="nut-bam-khung">
+                                <button onclick="moGiaLapDoi('${tran.doi_a}', '${tran.doi_b}', '${ngayLichHienTai}')" class="nut-hanh-dong-card primary">
+                                    Dự đoán AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                khungDanhSach.appendChild(card);
+            });
+        }
+
+        // Khởi tạo bộ lọc bảng đấu
+        function khoiTaoBoLocVongBang() {
+            const khungBoLoc = document.getElementById('bo-loc-bang-dau');
+            khungBoLoc.innerHTML = '';
+            
+            const mangBang = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+            mangBang.forEach(b => {
+                const nut = document.createElement('button');
+                nut.className = `px-4 py-2 rounded-full text-xs font-bold transition ${b === bangHienTai ? 'bg-[#0b57d0] text-white' : 'bg-white text-gray-500 border border-gray-300 hover:bg-gray-50'}`;
+                nut.textContent = `Bảng ${b}`;
+                nut.onclick = () => {
+                    bangHienTai = b;
+                    Array.from(khungBoLoc.children).forEach(n => {
+                        if (n.textContent === `Bảng ${b}`) {
+                            n.className = "px-4 py-2 rounded-full text-xs font-bold transition bg-[#0b57d0] text-white";
+                        } else {
+                            n.className = "px-4 py-2 rounded-full text-xs font-bold transition bg-white text-gray-500 border border-gray-300 hover:bg-gray-50";
+                        }
+                    });
+                    hienThiBangXepHang();
+                };
+                khungBoLoc.appendChild(nut);
+            });
+        }
+
+        // Tải dữ liệu vòng bảng
+        const taiDuLieuVongBang = async () => {
+            if (duLieuVongBang) return;
+            try {
+                const phanHoi = await fetch('/api/du-doan-vong-bang');
+                duLieuVongBang = await phanHoi.json();
+                hienThiBangXepHang();
+            } catch (loi) {
+                console.error("Lỗi khi tải dữ liệu vòng bảng:", loi);
+            }
+        };
+
+        // Hiển thị vòng bảng
+        function hienThiBangXepHang() {
+            if (!duLieuVongBang) return;
+            
+            document.getElementById('tieu-de-bxh-bang').textContent = `Bảng ${bangHienTai} - Điểm Số`;
+            
+            const thanBang = document.getElementById('than-bang-xep-hang');
+            thanBang.innerHTML = '';
+            
+            const bxhBang = duLieuVongBang.bxh_theo_bang[bangHienTai] || [];
+            bxhBang.forEach(doi => {
+                const dong = document.createElement('tr');
+                dong.className = "border-b border-gray-100 hover:bg-gray-50/50 transition text-xs";
+                const hangLop = doi.hang <= 2 ? 'text-[#137333] font-bold' : 'text-gray-500';
+                
+                dong.innerHTML = `
+                    <td class="py-3 px-2 text-center font-mono ${hangLop}">${doi.hang}</td>
+                    <td class="py-3 px-3 font-bold flex items-center gap-2">
+                        <img class="w-6 h-4 object-cover rounded border border-gray-200" src="${layDuongDanCo(doi.doi)}" alt="Cờ">
+                        <span>${doi.doi}</span>
+                    </td>
+                    <td class="py-3 px-2 text-center font-mono text-gray-500">${doi.so_tran}</td>
+                    <td class="py-3 px-2 text-center font-mono ${doi.hieu_so >= 0 ? 'text-[#137333]' : 'text-red-600'}">
+                        ${doi.hieu_so > 0 ? '+' : ''}${doi.hieu_so}
+                    </td>
+                    <td class="py-3 px-3 text-center font-bold text-[#0b57d0] font-mono text-sm">${doi.diem}</td>
+                `;
+                thanBang.appendChild(dong);
+            });
+
+            // Lịch thi đấu nằm ngang
+            const khungDanhSachTran = document.getElementById('danh-sach-tran-bang');
+            khungDanhSachTran.innerHTML = '';
+            
+            const tranBang = duLieuVongBang.danh_sach_tran.filter(t => t.bang === bangHienTai) || [];
+            tranBang.forEach(t => {
+                const card = document.createElement('div');
+                card.className = "the-tran-dau";
+                
+                const ngayGioFormat = new Date(t.ngay_gio).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                const gioFormat = new Date(t.ngay_gio).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+                
+                const pA = Math.round(t.p_a_thang * 100);
+                const pB = Math.round(t.p_a_thua * 100);
+                
+                let lopKenh = "ken-phan-tram hoa";
+                if (pA > pB + 10) lopKenh = "ken-phan-tram thang-a";
+                else if (pB > pA + 10) lopKenh = "ken-phan-tram";
+                
+                card.innerHTML = `
+                    <div class="dong-thong-tin-dau">
+                        <span class="nhan-bang-badge">Bảng ${t.bang}</span>
+                        <div class="thong-tin-tran-phai">
+                            <span class="ma-tran-so">Trận ${t.ma_tran}</span>
+                            <span class="thoi-gian-tran">${ngayGioFormat} ${gioFormat}</span>
+                        </div>
+                    </div>
+                    <div class="dong-thi-dau-chinh">
+                        <div class="doi-a-khung">
+                            <span>${t.doi_a}</span>
+                            <img class="co-quoc-gia" src="${layDuongDanCo(t.doi_a)}" alt="Cờ">
+                        </div>
+                        <div class="khung-ty-so-giua">
+                            <div class="ken-ty-so">
+                                ${t.ban_thang_a} - ${t.ban_thang_b}
+                            </div>
+                            <div class="dong-phan-tram">
+                                ${pA}% - ${pB}%
+                            </div>
+                        </div>
+                        <div class="doi-b-khung">
+                            <img class="co-quoc-gia" src="${layDuongDanCo(t.doi_b)}" alt="Cờ">
+                            <span>${t.doi_b}</span>
+                        </div>
+                        <div class="nut-bam-khung">
+                            <button onclick="moGiaLapDoi('${t.doi_a}', '${t.doi_b}')" class="nut-hanh-dong-card primary">
+                                Dự đoán AI
+                            </button>
+                        </div>
+                    </div>
+                `;
+                khungDanhSachTran.appendChild(card);
+            });
+        }
+
+        // Chọn vòng knockout
+        function chuyenVongKnockout(tenVong) {
+            vongKnockoutHienTai = tenVong;
+            const cacNut = ['32', '16', 'tuket', 'banket'];
+            
+            cacNut.forEach(n => {
+                const nut = document.getElementById(`nut-ko-${n}`);
+                if (`vong-${n}` === tenVong) {
+                    nut.className = "px-4 py-2 text-xs font-bold rounded-full bg-[#0b57d0] text-white";
+                } else {
+                    nut.className = "px-4 py-2 text-xs font-bold rounded-full bg-white text-gray-500 border border-gray-300 hover:bg-gray-50";
+                }
+            });
+            hienThiKnockout();
+        }
+
+        // Tải dữ liệu Knockout
+        const taiDuLieuKnockout = async () => {
+            if (duLieuKnockout) return;
+            try {
+                const phanHoi = await fetch('/api/du-doan-knockout');
+                duLieuKnockout = await phanHoi.json();
+                chuyenVongKnockout('vong-32');
+            } catch (loi) {
+                console.error("Lỗi khi tải dữ liệu knockout:", loi);
+            }
+        };
+
+        // Hiển thị Knockout nằm ngang
+        function hienThiKnockout() {
+            if (!duLieuKnockout) return;
+            
+            const khungDanhSachKo = document.getElementById('khung-danh-sach-knockout');
+            khungDanhSachKo.innerHTML = '';
+            
+            let boLocTen = '';
+            if (vongKnockoutHienTai === 'vong-32') boLocTen = 'Vòng 1/16';
+            else if (vongKnockoutHienTai === 'vong-16') boLocTen = 'Vòng 1/8';
+            else if (vongKnockoutHienTai === 'vong-tuket') boLocTen = 'Tứ kết';
+            
+            let tranKnockout = [];
+            if (vongKnockoutHienTai === 'vong-banket') {
+                tranKnockout = duLieuKnockout.filter(t => t.vong === 'Bán kết' || t.vong === 'Chung kết' || t.vong === 'Tranh hạng ba');
+            } else {
+                tranKnockout = duLieuKnockout.filter(t => t.vong === boLocTen);
+            }
+            
+            tranKnockout.forEach(t => {
+                const card = document.createElement('div');
+                card.className = "the-tran-dau md3-card bg-white";
+                
+                if (t.vong === 'Chung kết') {
+                    card.style.borderColor = 'var(--vang-nhe)';
+                    card.style.backgroundColor = 'var(--vang-nhe-mo)';
+                }
+                
+                const dateObj = new Date(t.ngay_gio);
+                const ngayGioFormat = dateObj.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+                const gioFormat = dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+                
+                const pA = Math.round(t.p_a_thang * 100);
+                const pB = Math.round(t.p_a_thua * 100);
+                
+                let lopKenh = "ken-phan-tram hoa";
+                if (pA > pB + 10) lopKenh = "ken-phan-tram thang-a";
+                else if (pB > pA + 10) lopKenh = "ken-phan-tram";
+                
+                const lopAWin = t.doi_thang === t.doi_a ? 'text-[#137333] font-bold' : 'text-gray-700';
+                const lopBWin = t.doi_thang === t.doi_b ? 'text-[#137333] font-bold' : 'text-gray-700';
+                
+                card.innerHTML = `
+                    <div class="dong-thong-tin-dau">
+                        <span class="nhan-bang-badge ${t.vong === 'Chung kết' ? 'bg-amber-100 text-amber-800' : ''}">${t.vong}</span>
+                        <div class="thong-tin-tran-phai">
+                            <span class="ma-tran-so">Trận ${t.ma_tran}</span>
+                            <span class="thoi-gian-tran text-gray-500">${ngayGioFormat} ${gioFormat}</span>
+                        </div>
+                    </div>
+                    <div class="dong-thi-dau-chinh">
+                        <div class="doi-a-khung">
+                            <span class="${lopAWin}">${t.doi_a}</span>
+                            <img class="co-quoc-gia" src="${layDuongDanCo(t.doi_a)}" alt="Cờ">
+                        </div>
+                        <div class="khung-ty-so-giua">
+                            <div class="ken-ty-so">
+                                ${t.ban_thang_a} - ${t.ban_thang_b}
+                            </div>
+                            <div class="dong-phan-tram">
+                                ${pA}% - ${pB}%
+                            </div>
+                        </div>
+                        <div class="doi-b-khung">
+                            <img class="co-quoc-gia" src="${layDuongDanCo(t.doi_b)}" alt="Cờ">
+                            <span class="${lopBWin}">${t.doi_b}</span>
+                        </div>
+                        <div class="nut-bam-khung">
+                            <button onclick="moGiaLapDoi('${t.doi_a}', '${t.doi_b}')" class="nut-hanh-dong-card primary">
+                                Dự đoán AI
+                            </button>
+                        </div>
+                    </div>
+                `;
+                khungDanhSachKo.appendChild(card);
+            });
+        }
+
+        function veAnhCover(context, nguon, rong, cao) {
+            const tiLe = Math.max(rong / nguon.videoWidth || rong / nguon.naturalWidth, cao / nguon.videoHeight || cao / nguon.naturalHeight);
+            const rongVe = (nguon.videoWidth || nguon.naturalWidth) * tiLe;
+            const caoVe = (nguon.videoHeight || nguon.naturalHeight) * tiLe;
+            context.drawImage(nguon, (rong - rongVe) / 2, (cao - caoVe) / 2, rongVe, caoVe);
+        }
+
+        async function taiKhungPhotobooth() {
+            const danhSach = document.getElementById('danh-sach-khung-photobooth');
+            if (danhSach.children.length) return;
+            try {
+                const cacKhung = await fetch('/api/khung-anh').then(phanHoi => phanHoi.json());
+                cacKhung.forEach((khung, viTri) => {
+                    const nut = document.createElement('button');
+                    nut.type = 'button';
+                    nut.className = `lua-chon-khung ${viTri === 0 ? 'kich-hoat' : ''}`;
+                    nut.innerHTML = `<img src="${khung.url}" alt="${khung.ten}"><span>${khung.ten}</span>`;
+                    nut.onclick = () => {
+                        document.querySelectorAll('.lua-chon-khung').forEach(item => item.classList.remove('kich-hoat'));
+                        nut.classList.add('kich-hoat');
+                        khungPhotoboothHienTai = khung;
+                        document.getElementById('khung-overlay-photobooth').src = khung.url;
+                        if (anhNguonPhotobooth) vePhotobooth(anhNguonPhotobooth);
+                    };
+                    danhSach.appendChild(nut);
+                });
+                if (cacKhung.length) {
+                    khungPhotoboothHienTai = cacKhung[0];
+                    document.getElementById('khung-overlay-photobooth').src = cacKhung[0].url;
+                }
+            } catch (loi) {
+                document.getElementById('thong-bao-photobooth').textContent = 'Không thể tải danh sách khung ảnh.';
+            }
+        }
+
+        async function batCamera() {
+            const thongBao = document.getElementById('thong-bao-photobooth');
+            try {
+                if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}, audio: false});
+                const video = document.getElementById('camera-photobooth');
+                video.srcObject = cameraStream;
+                video.classList.add('hien-thi');
+                document.getElementById('canvas-photobooth').classList.remove('hien-thi');
+                document.getElementById('photobooth-placeholder').classList.add('hidden');
+                thongBao.textContent = 'Camera đã sẵn sàng.';
+            } catch (loi) {
+                thongBao.textContent = 'Không thể mở camera. Hãy cấp quyền camera hoặc tải ảnh từ thiết bị.';
+            }
+        }
+
+        async function vePhotobooth(nguon) {
+            const canvas = document.getElementById('canvas-photobooth');
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            veAnhCover(context, nguon, canvas.width, canvas.height);
+            if (khungPhotoboothHienTai) {
+                const khung = new Image();
+                khung.onload = () => context.drawImage(khung, 0, 0, canvas.width, canvas.height);
+                khung.src = khungPhotoboothHienTai.url;
+            }
+            canvas.classList.add('hien-thi');
+            document.getElementById('camera-photobooth').classList.remove('hien-thi');
+            document.getElementById('photobooth-placeholder').classList.add('hidden');
+        }
+
+        function chupAnhPhotobooth() {
+            const video = document.getElementById('camera-photobooth');
+            if (video.srcObject && video.readyState >= 2) {
+                anhNguonPhotobooth = video;
+                vePhotobooth(video);
+                document.getElementById('thong-bao-photobooth').textContent = 'Đã chụp ảnh. Bạn có thể đổi khung hoặc tải xuống.';
+            } else if (anhNguonPhotobooth) {
+                vePhotobooth(anhNguonPhotobooth);
+            } else {
+                document.getElementById('thong-bao-photobooth').textContent = 'Hãy bật camera hoặc tải ảnh trước.';
+            }
+        }
+
+        function taiAnhPhotobooth() {
+            const canvas = document.getElementById('canvas-photobooth');
+            if (!canvas.classList.contains('hien-thi')) {
+                document.getElementById('thong-bao-photobooth').textContent = 'Hãy chụp hoặc tải ảnh trước.';
+                return;
+            }
+            const lienKet = document.createElement('a');
+            lienKet.download = `world-cup-photobooth-${Date.now()}.png`;
+            lienKet.href = canvas.toDataURL('image/png');
+            lienKet.click();
+        }
+
+        document.getElementById('tai-anh-photobooth').addEventListener('change', suKien => {
+            const tep = suKien.target.files[0];
+            if (!tep) return;
+            const anh = new Image();
+            anh.onload = () => {
+                anhNguonPhotobooth = anh;
+                vePhotobooth(anh);
+            };
+            anh.src = URL.createObjectURL(tep);
+        });
+
+        // Tải dữ liệu mô hình
+        const taiDuLieuMoHinh = async () => {
+            if (duLieuMoHinh) return;
+            try {
+                const phanHoi = await fetch('/api/so-lieu-mo-hinh');
+                duLieuMoHinh = await phanHoi.json();
+                
+                const thanBang = document.getElementById('than-so-lieu-mo-hinh');
+                thanBang.innerHTML = '';
+                
+                duLieuMoHinh.so_lieu.forEach(dong => {
+                    const tr = document.createElement('tr');
+                    tr.className = `border-b border-gray-200 hover:bg-gray-50 transition text-xs ${dong.duoc_chon ? 'bg-blue-50/40 font-bold' : ''}`;
+                    
+                    tr.innerHTML = `
+                        <td class="py-4.5 px-4 text-[#1f1f1f] font-bold flex items-center gap-2">
+                            ${dong.duoc_chon ? '<span class="bong-tron-co bg-[#0b57d0] text-white">RF</span>' : ''}
+                            <span>${dong.mo_hinh}</span>
+                        </td>
+                        <td class="py-4.5 px-2 text-center font-mono">${dong.train_acc.toFixed(4)}</td>
+                        <td class="py-4.5 px-2 text-center font-mono ${dong.duoc_chon ? 'text-[#137333] font-bold' : ''}">${dong.test_acc.toFixed(4)}</td>
+                        <td class="py-4.5 px-2 text-center font-mono ${dong.duoc_chon ? 'text-[#137333] font-bold' : ''}">${dong.macro_f1.toFixed(4)}</td>
+                        <td class="py-4.5 px-2 text-center font-mono">${dong.weighted_f1.toFixed(4)}</td>
+                        <td class="py-4.5 px-2 text-center font-mono ${dong.duoc_chon ? 'text-[#0b57d0]' : 'text-red-600'}">${dong.overfit_gap.toFixed(4)}</td>
+                    `;
+                    thanBang.appendChild(tr);
+                });
+            } catch (loi) {
+                console.error("Lỗi khi tải dữ liệu mô hình:", loi);
+            }
+        };
+
+        // Chuyển tab
+        function chuyenTab(tenTab) {
+            const cacTab = ['gia-lap', 'lich-thi-dau', 'photobooth', 'vong-bang', 'knockout', 'mo-hinh'];
+            
+            cacTab.forEach(tab => {
+                const nut = document.getElementById(`tab-${tab}`);
+                const khung = document.getElementById(`khung-${tab}`);
+                
+                if (tab === tenTab) {
+                    nut.classList.add('kich-hoat');
+                    khung.classList.remove('hidden');
+                } else {
+                    nut.classList.remove('kich-hoat');
+                    khung.classList.add('hidden');
+                }
+            });
+            
+            if (tenTab === 'lich-thi-dau') {
+                taiDuLieuLichThiDau();
+            } else if (tenTab === 'photobooth') {
+                taiKhungPhotobooth();
+            } else if (tenTab === 'vong-bang') {
+                taiDuLieuVongBang();
+            } else if (tenTab === 'knockout') {
+                taiDuLieuKnockout();
+            } else if (tenTab === 'mo-hinh') {
+                taiDuLieuMoHinh();
+            }
+        }
+
+        // Mở trình giả lập và tự động dự đoán cho cặp đấu cụ thể
+        function moGiaLapDoi(doiA, doiB, ngayDau = null) {
+            chuyenTab('gia-lap');
+            
+            const chonA = document.getElementById('chon-doi-a');
+            const chonB = document.getElementById('chon-doi-b');
+            
+            chonA.value = doiA;
+            capNhatGiaoDienDoi('a');
+            
+            chonB.value = doiB;
+            capNhatGiaoDienDoi('b');
+
+            if (ngayDau) {
+                document.getElementById('ngay-dau').value = ngayDau;
+            }
+            
+            chayGiaLapTranDau();
+        }
+
+        // Khởi động
+        window.addEventListener('DOMContentLoaded', () => {
+            chayManMoDau();
+            capNhatNutTheme();
+            taiDanhSachDoiBong();
+            taiDanhSachThuatToan();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.vercel/
+.env
+.env.*
+
+DATA_RAW/
+figures/
+*.ipynb
+
+models/random_forest_baseline.pkl
+models/random_forest_tuned.pkl

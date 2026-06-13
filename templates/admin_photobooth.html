@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý khung Photobooth</title>
+    <link rel="stylesheet" href="/static/style.css?v=5">
+</head>
+<body>
+    <main class="trang-admin">
+        <div class="admin-header">
+            <div>
+                <span class="admin-eyebrow">Admin ẩn</span>
+                <h1>Quản lý khung Photobooth</h1>
+                <p>Tải khung PNG, WEBP hoặc SVG trong suốt. Kích thước đề xuất 1080 x 1350.</p>
+            </div>
+            <a href="/" class="nut-hanh-dong-card primary">Về trang chính</a>
+        </div>
+
+        <form id="form-khung-anh" class="md3-card admin-form">
+            <label>
+                <span>Mật khẩu quản trị</span>
+                <input id="mat-khau-admin" type="password" required autocomplete="current-password">
+            </label>
+            <label>
+                <span>Tên khung</span>
+                <input id="ten-hien-thi" type="text" required placeholder="Ví dụ: Chung kết 2026">
+            </label>
+            <label>
+                <span>Tệp khung ảnh</span>
+                <input id="tep-khung-anh" type="file" accept=".png,.webp,.svg" required>
+            </label>
+            <button class="nut-bam-chinh" type="submit">Tải khung mới</button>
+            <p id="thong-bao-admin" class="admin-message"></p>
+        </form>
+
+        <section>
+            <h2>Khung đang có</h2>
+            <div id="danh-sach-khung-admin" class="luoi-khung-admin"></div>
+        </section>
+    </main>
+
+    <script>
+        const matKhauInput = document.getElementById('mat-khau-admin');
+        const thongBao = document.getElementById('thong-bao-admin');
+
+        async function taiDanhSachKhung() {
+            const khung = await fetch('/api/khung-anh').then(phanHoi => phanHoi.json());
+            const danhSach = document.getElementById('danh-sach-khung-admin');
+            danhSach.innerHTML = '';
+            khung.forEach(item => {
+                const card = document.createElement('article');
+                card.className = 'md3-card the-khung-admin';
+                card.innerHTML = `
+                    <img src="${item.url}" alt="${item.ten}">
+                    <div><strong>${item.ten}</strong><button type="button">Xóa</button></div>
+                `;
+                card.querySelector('button').onclick = () => xoaKhung(item.id);
+                danhSach.appendChild(card);
+            });
+        }
+
+        async function xoaKhung(id) {
+            const phanHoi = await fetch(`/api/admin/khung-anh/${id}`, {
+                method: 'DELETE',
+                headers: {'X-Admin-Password': matKhauInput.value}
+            });
+            const duLieu = await phanHoi.json();
+            thongBao.textContent = duLieu.loi || 'Đã xóa khung ảnh.';
+            thongBao.dataset.loai = phanHoi.ok ? 'thanh-cong' : 'loi';
+            if (phanHoi.ok) taiDanhSachKhung();
+        }
+
+        document.getElementById('form-khung-anh').addEventListener('submit', async suKien => {
+            suKien.preventDefault();
+            const form = new FormData();
+            form.append('mat_khau', matKhauInput.value);
+            form.append('ten_hien_thi', document.getElementById('ten-hien-thi').value);
+            form.append('khung_anh', document.getElementById('tep-khung-anh').files[0]);
+            const phanHoi = await fetch('/api/admin/khung-anh', {method: 'POST', body: form});
+            const duLieu = await phanHoi.json();
+            thongBao.textContent = duLieu.loi || 'Đã tải khung ảnh mới.';
+            thongBao.dataset.loai = phanHoi.ok ? 'thanh-cong' : 'loi';
+            if (phanHoi.ok) taiDanhSachKhung();
+        });
+
+        taiDanhSachKhung();
+    </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+﻿rf_champion,xgb_champion,champion_match,champion_match_value,top4_overlap_count,top4_overlap_rate,top4_common_teams,podium_chart_path,top4_overlap_chart_path
+Spain,Spain,True,1,3,75.0,"Argentina, France, Spain",/content/gdrive/MyDrive/WC2026_FINAL/figures/top4_podium_mirror_rf_vs_xgb.png,/content/gdrive/MyDrive/WC2026_FINAL/figures/top4_overlap_rf_vs_xgb.png
