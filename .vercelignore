@@ -5,6 +5,7 @@ models/random_forest_baseline.pkl
 models/random_forest_tuned.pkl
 models/xgboost_baseline.pkl
 models/xgboost_tuned.pkl
+hf_space/
 .git/
 .venv/
 venv/

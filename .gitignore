@@ -12,5 +12,6 @@ figures/
 
 models/random_forest_baseline.pkl
 models/random_forest_tuned.pkl
+hf_space/models/*.pkl
 
 .vercel

@@ -1,5 +1,7 @@
 import os
 import json
+import urllib.error
+import urllib.request
 import joblib
 import pandas as pd
 import numpy as np
@@ -24,6 +26,8 @@ duong_dan_cau_hinh_khung = os.path.join(duong_dan_khung_anh, "frames.json")
 MAT_KHAU_ADMIN = os.environ.get("ADMIN_PASSWORD", "24022941")
 DUONG_DAN_ADMIN_AN = os.environ.get("ADMIN_PATH", "quan-tri-khung-anh-24022941")
 DINH_DANG_KHUNG_CHO_PHEP = {".png", ".webp", ".svg"}
+INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "").rstrip("/")
+INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "")
 
 # Dữ liệu kết quả đã mô phỏng sẵn trong thư mục outputs
 duong_dan_kq_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_stage_predictions_with_scores.csv")
@@ -125,6 +129,34 @@ def tai_mo_hinh(ten_thuat_toan):
             raise FileNotFoundError("Model chưa được triển khai trên máy chủ")
         BO_NHO_MO_HINH[ten_thuat_toan] = joblib.load(duong_dan)
     return BO_NHO_MO_HINH[ten_thuat_toan]
+
+
+def goi_inference_tu_xa(ten_thuat_toan, X_match):
+    if not INFERENCE_API_URL:
+        raise RuntimeError("Chưa cấu hình inference API từ xa")
+
+    du_lieu_gui = json.dumps({
+        "model": ten_thuat_toan,
+        "features": {cot: float(X_match.iloc[0][cot]) for cot in danh_sach_cot_dac_trung}
+    }).encode("utf-8")
+    headers = {"Content-Type": "application/json"}
+    if INFERENCE_API_TOKEN:
+        headers["Authorization"] = f"Bearer {INFERENCE_API_TOKEN}"
+
+    yeu_cau = urllib.request.Request(
+        f"{INFERENCE_API_URL}/predict",
+        data=du_lieu_gui,
+        headers=headers,
+        method="POST"
+    )
+    try:
+        with urllib.request.urlopen(yeu_cau, timeout=90) as phan_hoi:
+            return json.loads(phan_hoi.read().decode("utf-8"))
+    except urllib.error.HTTPError as loi:
+        chi_tiet = loi.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Inference API trả lỗi {loi.code}: {chi_tiet}") from loi
+    except urllib.error.URLError as loi:
+        raise RuntimeError("Không thể kết nối máy chủ model từ xa") from loi
 
 # Danh sách 12 cột đặc trưng đầu vào cho mô hình
 danh_sach_cot_dac_trung = [
@@ -564,9 +596,10 @@ def api_danh_sach_doi():
 def api_thuat_toan():
     danh_sach = []
     for ma, cau_hinh in CAU_HINH_THUAT_TOAN.items():
-        kha_dung = cau_hinh.get("loai") == "heuristic" or os.path.exists(cau_hinh.get("duong_dan", ""))
+        la_model_tu_xa = bool(INFERENCE_API_URL) and cau_hinh.get("loai") != "heuristic"
+        kha_dung = la_model_tu_xa or cau_hinh.get("loai") == "heuristic" or os.path.exists(cau_hinh.get("duong_dan", ""))
         ly_do = ""
-        if kha_dung and ma.startswith("xgboost"):
+        if kha_dung and ma.startswith("xgboost") and not la_model_tu_xa:
             try:
                 import xgboost  # noqa: F401
             except ImportError:
@@ -580,7 +613,8 @@ def api_thuat_toan():
             "ten": cau_hinh["ten"],
             "mo_ta": cau_hinh["mo_ta"],
             "kha_dung": kha_dung,
-            "ly_do": ly_do
+            "ly_do": ly_do,
+            "nguon": "Hugging Face inference" if la_model_tu_xa else "Máy chủ hiện tại"
         })
     return jsonify(danh_sach)
 
@@ -605,7 +639,6 @@ def api_du_doan_tran_dau():
         return jsonify({"loi": "Hai doi bong phai khac nhau!"}), 400
         
     try:
-        mo_hinh_da_chon = tai_mo_hinh(ten_thuat_toan)
         X_tran_dau, chi_tiet_dac_trung = tao_dac_trung_tran_dau(
             doi_a=doi_a,
             doi_b=doi_b,
@@ -613,9 +646,22 @@ def api_du_doan_tran_dau():
             san_trung_lap=san_trung_lap
         )
         
-        nhan_du_doan = int(mo_hinh_da_chon.predict(X_tran_dau)[0])
+        cau_hinh_thuat_toan = CAU_HINH_THUAT_TOAN.get(ten_thuat_toan)
+        if not cau_hinh_thuat_toan:
+            return jsonify({"loi": "Thuật toán không hợp lệ"}), 400
+
+        if INFERENCE_API_URL and cau_hinh_thuat_toan.get("loai") != "heuristic":
+            ket_qua_tu_xa = goi_inference_tu_xa(ten_thuat_toan, X_tran_dau)
+            nhan_du_doan = int(ket_qua_tu_xa["nhan_du_doan"])
+            xac_suat_ti_le = ket_qua_tu_xa["ti_le"]
+            nguon_inference = "Hugging Face inference"
+        else:
+            mo_hinh_da_chon = tai_mo_hinh(ten_thuat_toan)
+            nhan_du_doan = int(mo_hinh_da_chon.predict(X_tran_dau)[0])
+            xac_suat_ti_le = lay_xac_suat_ket_qua(mo_hinh_da_chon, X_tran_dau)
+            nguon_inference = "Máy chủ hiện tại"
+
         ket_qua_du_doan = giai_ma_nhan_du_doan(nhan_du_doan)
-        xac_suat_ti_le = lay_xac_suat_ket_qua(mo_hinh_da_chon, X_tran_dau)
         
         ban_thang_a, ban_thang_b = gia_lap_ty_so_tran_dau(nhan_du_doan, xac_suat_ti_le)
         
@@ -642,6 +688,7 @@ def api_du_doan_tran_dau():
             "doi_b": doi_b,
             "thuat_toan": ten_thuat_toan,
             "ten_thuat_toan": CAU_HINH_THUAT_TOAN[ten_thuat_toan]["ten"],
+            "nguon_inference": nguon_inference,
             "nhan_du_doan": nhan_du_doan,
             "ket_qua_du_doan": ket_qua_du_doan,
             "doi_thang": doi_thang,
