@@ -262,6 +262,244 @@ body.intro-dang-chay {
     to { background-position: 80px 0; }
 }
 
+/* Uiverse-inspired astronaut intro, adapted for World Cup AI */
+.man-mo-dau {
+    color: #f5f8ff;
+    background:
+        radial-gradient(circle at 50% 32%, rgba(42, 115, 255, .22), transparent 30%),
+        radial-gradient(circle at 78% 70%, rgba(22, 193, 169, .1), transparent 25%),
+        linear-gradient(145deg, #0b1425 0%, #060913 58%, #020307 100%);
+}
+
+.man-mo-dau::after {
+    opacity: .2;
+    background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.025) 3px 4px);
+}
+
+.sao-nen {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: .58;
+    animation: sao-troi 7s ease-in-out infinite alternate;
+}
+
+.sao-1 {
+    top: 16%;
+    left: 15%;
+    box-shadow: 28vw 4vh #fff, 63vw 7vh #8bb8ff, 73vw 36vh #fff, 18vw 66vh #5eead4, 46vw 77vh #fff;
+}
+
+.sao-2 {
+    top: 36%;
+    left: 8%;
+    width: 2px;
+    height: 2px;
+    animation-delay: -2.5s;
+    box-shadow: 19vw -21vh #fff, 38vw 16vh #8bb8ff, 81vw -22vh #fff, 84vw 42vh #fff, 22vw 50vh #8bb8ff;
+}
+
+.sao-3 {
+    top: 72%;
+    left: 24%;
+    width: 4px;
+    height: 4px;
+    opacity: .32;
+    animation-delay: -4s;
+    box-shadow: 51vw -55vh #fff, 68vw -19vh #5eead4, -13vw -29vh #8bb8ff, 26vw 15vh #fff;
+}
+
+.quy-dao-ai {
+    position: absolute;
+    width: min(680px, 86vw);
+    aspect-ratio: 1;
+    border: 1px solid rgba(139, 184, 255, .12);
+    border-radius: 50%;
+    transform: rotate(-15deg);
+}
+
+.quy-dao-ai::before,
+.quy-dao-ai::after {
+    content: "";
+    position: absolute;
+    border: 1px solid rgba(139, 184, 255, .07);
+    border-radius: inherit;
+}
+
+.quy-dao-ai::before { inset: 14%; }
+.quy-dao-ai::after { inset: -20%; }
+
+.noi-dung-mo-dau {
+    width: min(700px, calc(100% - 36px));
+    padding: 24px clamp(12px, 5vw, 52px);
+    border: 0;
+    border-radius: 0;
+    text-align: center;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.phi-hanh-gia-ai {
+    position: relative;
+    width: 104px;
+    height: 150px;
+    margin: 0 auto 24px;
+    filter: drop-shadow(0 20px 26px rgba(0, 0, 0, .42));
+    animation: phi-hanh-gia-bay 4.2s ease-in-out infinite;
+}
+
+.mu-phi-hanh {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 17px;
+    width: 70px;
+    height: 62px;
+    border: 5px solid #dce6f6;
+    border-radius: 48% 48% 42% 42%;
+    background: #f5f8ff;
+    box-shadow: inset -9px -7px 0 #c7d4e8;
+}
+
+.kinh-mu {
+    position: absolute;
+    inset: 11px 9px 12px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 2px solid #9eb2ce;
+    border-radius: 45% 45% 38% 38%;
+    color: #88b7ff;
+    font-size: 22px;
+    background: linear-gradient(145deg, #1e4e87, #071528 65%);
+    box-shadow: inset 7px 5px 10px rgba(126, 191, 255, .25);
+}
+
+.kinh-mu::after {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    width: 22px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.32);
+    transform: rotate(-18deg);
+}
+
+.than-phi-hanh {
+    position: absolute;
+    z-index: 2;
+    top: 53px;
+    left: 20px;
+    width: 65px;
+    height: 67px;
+    border: 4px solid #dce6f6;
+    border-radius: 22px 22px 17px 17px;
+    color: #0b57d0;
+    background: #f5f8ff;
+    box-shadow: inset -9px -8px 0 #c7d4e8;
+}
+
+.than-phi-hanh span {
+    position: absolute;
+    top: 14px;
+    left: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.than-phi-hanh i {
+    position: absolute;
+    right: 9px;
+    bottom: 12px;
+    font-size: 16px;
+}
+
+.tay-phi-hanh,
+.chan-phi-hanh {
+    position: absolute;
+    border: 4px solid #dce6f6;
+    background: #f5f8ff;
+    box-shadow: inset -6px -5px 0 #c7d4e8;
+}
+
+.tay-phi-hanh {
+    z-index: 1;
+    top: 61px;
+    width: 24px;
+    height: 61px;
+    border-radius: 15px;
+    transform-origin: 50% 10%;
+}
+
+.tay-trai { left: 5px; transform: rotate(24deg); }
+.tay-phai { right: 4px; transform: rotate(-28deg); }
+
+.chan-phi-hanh {
+    top: 108px;
+    width: 27px;
+    height: 42px;
+    border-radius: 10px 10px 14px 14px;
+}
+
+.chan-trai { left: 25px; transform: rotate(8deg); }
+.chan-phai { right: 24px; transform: rotate(-8deg); }
+
+.nhan-mo-dau {
+    display: inline-block;
+    margin-bottom: 13px;
+    color: #8bb8ff;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.noi-dung-mo-dau h1 {
+    font-size: clamp(32px, 5.2vw, 58px);
+    line-height: 1.04;
+}
+
+.noi-dung-mo-dau h1 em { color: #91bcff; }
+
+.trang-thai-ai {
+    margin-top: 30px;
+    color: #aab7ca;
+}
+
+.trang-thai-ai strong { color: #8bb8ff; }
+
+.xung-ai {
+    background: #5eead4;
+    box-shadow: 0 0 0 0 rgba(94,234,212,.35);
+}
+
+.thanh-tien-trinh-mo-dau { background: rgba(255,255,255,.12); }
+
+.thanh-tien-trinh-mo-dau span {
+    background: linear-gradient(90deg, #4e8eff, #5eead4);
+    box-shadow: 0 0 16px rgba(78,142,255,.38);
+}
+
+.bo-qua-mo-dau { color: #aab7ca; }
+.bo-qua-mo-dau:hover { color: #fff; }
+
+@keyframes phi-hanh-gia-bay {
+    0%, 100% { transform: translateY(0) rotate(-4deg); }
+    50% { transform: translateY(-14px) rotate(4deg); }
+}
+
+@keyframes sao-troi {
+    from { transform: translate3d(-6px, 3px, 0); opacity: .32; }
+    to { transform: translate3d(8px, -6px, 0); opacity: .8; }
+}
+
 .font-mono,
 .thong-tin-tran-phai,
 .ken-ty-so,
