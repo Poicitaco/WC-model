@@ -27,27 +27,27 @@
         })();
     </script>
     <!-- Nhúng CSS tùy chỉnh -->
-    <link rel="stylesheet" href="/static/style.css?v=6">
+    <link rel="stylesheet" href="/static/style.css?v=7">
     <!-- Tabler Icons: bộ icon nét mảnh, đồng nhất cho dashboard -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
 </head>
 <body class="bg-[#f8f9fa] text-[#1f1f1f] intro-dang-chay">
 
     <div id="man-mo-dau" class="man-mo-dau" role="status" aria-live="polite">
-        <div class="rem-rap rem-trai"></div>
-        <div class="rem-rap rem-phai"></div>
-        <div class="anh-sang-san-khau"></div>
+        <div class="duong-san duong-san-trai"></div>
+        <div class="duong-san duong-san-phai"></div>
         <div class="noi-dung-mo-dau">
-            <div class="bieu-tuong-mo-dau"><i class="ti ti-ball-football"></i></div>
-            <span class="nhan-mo-dau">World Cup 2026</span>
-            <h1>Dự đoán World Cup<br><em>cùng AI</em></h1>
-            <p id="trang-thai-mo-dau">Đang khởi động sân khấu dữ liệu...</p>
-            <div class="thanh-tien-trinh-mo-dau"><span id="tien-trinh-mo-dau"></span></div>
-            <div class="chi-so-mo-dau">
-                <span>48 đội tuyển</span>
-                <span>104 trận đấu</span>
-                <span>4 thuật toán</span>
+            <div class="thuong-hieu-mo-dau">
+                <span class="bieu-tuong-mo-dau"><i class="ti ti-ball-football"></i></span>
+                <span>WORLD CUP 2026 · AI PREDICTOR</span>
             </div>
+            <h1>Phân tích trận đấu<br><em>trước tiếng còi khai cuộc</em></h1>
+            <div class="trang-thai-ai">
+                <span class="xung-ai"></span>
+                <p id="trang-thai-mo-dau">Đang kết nối dữ liệu giải đấu...</p>
+                <strong id="phan-tram-mo-dau">06%</strong>
+            </div>
+            <div class="thanh-tien-trinh-mo-dau"><span id="tien-trinh-mo-dau"></span></div>
         </div>
         <button type="button" id="bo-qua-mo-dau" class="bo-qua-mo-dau">Bỏ qua <i class="ti ti-arrow-right"></i></button>
     </div>
@@ -74,9 +74,6 @@
                     </div>
                     <div onclick="chuyenTab('lich-thi-dau')" id="tab-lich-thi-dau" class="nut-tab text-sm py-2">
                         <i class="ti ti-calendar-event mr-1"></i> Lịch Thi Đấu
-                    </div>
-                    <div onclick="chuyenTab('photobooth')" id="tab-photobooth" class="nut-tab text-sm py-2">
-                        <i class="ti ti-camera mr-1"></i> Photobooth
                     </div>
                     <div onclick="chuyenTab('vong-bang')" id="tab-vong-bang" class="nut-tab text-sm py-2">
                         <i class="ti ti-trophy mr-1"></i> Vòng Bảng
@@ -288,51 +285,7 @@
             </div>
         </section>
 
-        <!-- 3. TAB PHOTOBOOTH -->
-        <section id="khung-photobooth" class="hidden space-y-6">
-            <div class="text-center max-w-2xl mx-auto mb-6">
-                <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Kỷ niệm World Cup</span>
-                <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Photobooth Cổ Động Viên</h2>
-                <p class="text-[#5f6368] text-sm">Chụp ảnh bằng camera, chọn khung yêu thích và tải ảnh về ngay.</p>
-            </div>
-
-            <div class="photobooth-layout">
-                <div class="photobooth-stage md3-card">
-                    <video id="camera-photobooth" autoplay playsinline muted></video>
-                    <canvas id="canvas-photobooth" width="1080" height="1350"></canvas>
-                    <img id="khung-overlay-photobooth" class="khung-overlay-photobooth" alt="">
-                    <div id="photobooth-placeholder" class="photobooth-placeholder">
-                        <i class="ti ti-camera"></i>
-                        <strong>Sẵn sàng chụp ảnh</strong>
-                        <span>Bật camera hoặc tải ảnh từ thiết bị</span>
-                    </div>
-                </div>
-
-                <aside class="photobooth-controls md3-card">
-                    <div>
-                        <span class="nhan-dieu-khien">1. Nguồn ảnh</span>
-                        <div class="photobooth-actions">
-                            <button type="button" onclick="batCamera()" class="nut-bam-chinh"><i class="ti ti-video"></i> Bật camera</button>
-                            <label class="nut-hanh-dong-card primary photobooth-upload">
-                                <i class="ti ti-photo-up"></i> Tải ảnh
-                                <input id="tai-anh-photobooth" type="file" accept="image/*" hidden>
-                            </label>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="nhan-dieu-khien">2. Chọn khung ảnh</span>
-                        <div id="danh-sach-khung-photobooth" class="danh-sach-khung-photobooth"></div>
-                    </div>
-                    <div class="photobooth-actions">
-                        <button type="button" onclick="chupAnhPhotobooth()" class="nut-bam-chinh"><i class="ti ti-camera"></i> Chụp ảnh</button>
-                        <button type="button" onclick="taiAnhPhotobooth()" class="nut-hanh-dong-card primary"><i class="ti ti-download"></i> Tải xuống</button>
-                    </div>
-                    <p id="thong-bao-photobooth" class="text-xs text-[#5f6368]"></p>
-                </aside>
-            </div>
-        </section>
-
-        <!-- 4. TAB VÒNG BẢNG & XẾP HẠNG -->
+        <!-- 3. TAB VÒNG BẢNG & XẾP HẠNG -->
         <section id="khung-vong-bang" class="hidden space-y-8">
             <div class="text-center max-w-2xl mx-auto mb-8">
                 <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Kết quả chi tiết</span>
@@ -461,6 +414,53 @@
             </div>
         </section>
 
+        <!-- PHOTOBOOTH Ở CUỐI TRANG -->
+        <section id="khung-photobooth" class="photobooth-cuoi-trang space-y-6">
+            <div class="photobooth-heading">
+                <div>
+                    <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Kỷ niệm World Cup</span>
+                    <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Photobooth Cổ Động Viên</h2>
+                    <p class="text-[#5f6368] text-sm">Chụp ảnh dọc chuẩn 4 × 6 inch, chọn khung và tải ảnh về ngay.</p>
+                </div>
+                <span class="kich-thuoc-anh"><i class="ti ti-ruler-2"></i> Khung chuẩn 4 × 6 in</span>
+            </div>
+
+            <div class="photobooth-layout">
+                <div class="photobooth-stage md3-card">
+                    <video id="camera-photobooth" autoplay playsinline muted></video>
+                    <canvas id="canvas-photobooth" width="1200" height="1800"></canvas>
+                    <img id="khung-overlay-photobooth" class="khung-overlay-photobooth" alt="">
+                    <div id="photobooth-placeholder" class="photobooth-placeholder">
+                        <i class="ti ti-camera"></i>
+                        <strong>Sẵn sàng chụp ảnh 4 × 6</strong>
+                        <span>Bật camera hoặc tải ảnh từ thiết bị</span>
+                    </div>
+                </div>
+
+                <aside class="photobooth-controls md3-card">
+                    <div>
+                        <span class="nhan-dieu-khien">1. Nguồn ảnh</span>
+                        <div class="photobooth-actions">
+                            <button type="button" onclick="batCamera()" class="nut-bam-chinh"><i class="ti ti-video"></i> Bật camera</button>
+                            <label class="nut-hanh-dong-card primary photobooth-upload">
+                                <i class="ti ti-photo-up"></i> Tải ảnh
+                                <input id="tai-anh-photobooth" type="file" accept="image/*" hidden>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="nhan-dieu-khien">2. Chọn khung ảnh 4 × 6</span>
+                        <div id="danh-sach-khung-photobooth" class="danh-sach-khung-photobooth"></div>
+                    </div>
+                    <div class="photobooth-actions">
+                        <button type="button" onclick="chupAnhPhotobooth()" class="nut-bam-chinh"><i class="ti ti-camera"></i> Chụp ảnh</button>
+                        <button type="button" onclick="taiAnhPhotobooth()" class="nut-hanh-dong-card primary"><i class="ti ti-download"></i> Tải xuống</button>
+                    </div>
+                    <p id="thong-bao-photobooth" class="text-xs text-[#5f6368]"></p>
+                </aside>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -530,6 +530,7 @@
             const manMoDau = document.getElementById('man-mo-dau');
             const trangThai = document.getElementById('trang-thai-mo-dau');
             const tienTrinh = document.getElementById('tien-trinh-mo-dau');
+            const phanTram = document.getElementById('phan-tram-mo-dau');
             const giamChuyenDong = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             let daDong = false;
 
@@ -538,9 +539,10 @@
                 daDong = true;
                 sessionStorage.setItem('wc2026-intro-da-xem', 'true');
                 tienTrinh.style.width = '100%';
-                trangThai.textContent = 'Sân khấu đã sẵn sàng';
+                phanTram.textContent = '100%';
+                trangThai.textContent = 'Phân tích đã sẵn sàng';
                 setTimeout(() => {
-                    manMoDau.classList.add('mo-rem');
+                    manMoDau.classList.add('da-hoan-tat');
                     document.body.classList.remove('intro-dang-chay');
                 }, giamChuyenDong ? 50 : 350);
                 setTimeout(() => manMoDau.remove(), giamChuyenDong ? 250 : 1500);
@@ -568,6 +570,7 @@
             for (const [noiDung, phanTram] of cacBuoc) {
                 trangThai.textContent = noiDung;
                 tienTrinh.style.width = `${phanTram}%`;
+                document.getElementById('phan-tram-mo-dau').textContent = `${phanTram}%`;
                 await new Promise(resolve => setTimeout(resolve, giamChuyenDong ? 40 : 520));
             }
             await taiNgam;
@@ -1313,7 +1316,7 @@
 
         // Chuyển tab
         function chuyenTab(tenTab) {
-            const cacTab = ['gia-lap', 'lich-thi-dau', 'photobooth', 'vong-bang', 'knockout', 'mo-hinh'];
+            const cacTab = ['gia-lap', 'lich-thi-dau', 'vong-bang', 'knockout', 'mo-hinh'];
             
             cacTab.forEach(tab => {
                 const nut = document.getElementById(`tab-${tab}`);
@@ -1330,8 +1333,6 @@
             
             if (tenTab === 'lich-thi-dau') {
                 taiDuLieuLichThiDau();
-            } else if (tenTab === 'photobooth') {
-                taiKhungPhotobooth();
             } else if (tenTab === 'vong-bang') {
                 taiDuLieuVongBang();
             } else if (tenTab === 'knockout') {
@@ -1367,6 +1368,7 @@
             capNhatNutTheme();
             taiDanhSachDoiBong();
             taiDanhSachThuatToan();
+            taiKhungPhotobooth();
         });
     </script>
 </body>

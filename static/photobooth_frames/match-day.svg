@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
-  <path fill="#101214" fill-rule="evenodd" d="M0 0h1080v1350H0zM42 42h996v1180H42z"/>
-  <path d="M42 160h260V42H42zM778 1222h260v-118H778z" fill="#38bfa0"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1800" viewBox="0 0 1200 1800">
+  <path fill="#101214" fill-rule="evenodd" d="M0 0h1200v1800H0zM46 46h1108v1600H46z"/>
+  <path d="M46 170h280V46H46zM874 1646h280v-124H874z" fill="#38bfa0"/>
   <text x="75" y="112" fill="#fff" font-family="Arial, sans-serif" font-size="42" font-weight="700">MATCH DAY</text>
-  <text x="1005" y="1286" fill="#fff" font-family="Arial, sans-serif" font-size="30" font-weight="700" text-anchor="end">WC 2026</text>
+  <text x="1110" y="1722" fill="#fff" font-family="Arial, sans-serif" font-size="32" font-weight="700" text-anchor="end">WC 2026</text>
 </svg>
