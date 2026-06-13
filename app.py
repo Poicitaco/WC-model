@@ -47,6 +47,34 @@ for cot in ["ban_thang_a", "ban_thang_b"]:
         bo_du_lieu_tran_dau[cot] = pd.to_numeric(bo_du_lieu_tran_dau[cot], errors="coerce").fillna(0)
 
 # Tải mô hình đã được huấn luyện tốt nhất
+class MoHinhHeuristic:
+    classes_ = np.array([0, 1, 2])
+
+    def __init__(self, che_do):
+        self.che_do = che_do
+
+    def predict_proba(self, X_match):
+        dong = X_match.iloc[0]
+        p_elo = float(np.clip(dong["elo_expected_win_prob"], 0.02, 0.98))
+        if self.che_do == "hybrid":
+            diem_bo_sung = (
+                float(dong["chenh_lech_fifa_rank"]) / 160
+                + float(dong["chenh_lech_phong_do"]) / 9
+                + float(dong["chenh_lech_kinh_nghiem_wc"]) / 30
+            )
+            logit = np.log(p_elo / (1 - p_elo)) + diem_bo_sung
+            p_elo = 1 / (1 + np.exp(-logit))
+
+        p_hoa = float(np.clip(0.38 - abs(p_elo - 0.5) * 0.5, 0.16, 0.38))
+        phan_con_lai = 1 - p_hoa
+        p_a_thang = p_elo * phan_con_lai
+        p_a_thua = (1 - p_elo) * phan_con_lai
+        return np.array([[p_a_thua, p_hoa, p_a_thang]])
+
+    def predict(self, X_match):
+        return np.array([int(np.argmax(self.predict_proba(X_match)[0]))])
+
+
 CAU_HINH_THUAT_TOAN = {
     "random_forest_tuned": {
         "ten": "Random Forest Tuned",
@@ -57,6 +85,18 @@ CAU_HINH_THUAT_TOAN = {
         "ten": "Random Forest Baseline",
         "mo_ta": "Mô hình rừng ngẫu nhiên gốc để so sánh.",
         "duong_dan": os.path.join(DUONG_DAN_GOC, "models", "random_forest_baseline.pkl")
+    },
+    "elo_rating": {
+        "ten": "ELO Rating",
+        "mo_ta": "Thuật toán nhẹ dựa trên chênh lệch sức mạnh ELO giữa hai đội.",
+        "loai": "heuristic",
+        "che_do": "elo"
+    },
+    "elo_fifa_hybrid": {
+        "ten": "ELO + FIFA Hybrid",
+        "mo_ta": "Kết hợp ELO, FIFA Rank, phong độ và kinh nghiệm World Cup.",
+        "loai": "heuristic",
+        "che_do": "hybrid"
     },
     "xgboost_baseline": {
         "ten": "XGBoost Baseline",
@@ -76,7 +116,11 @@ def tai_mo_hinh(ten_thuat_toan):
     if ten_thuat_toan not in CAU_HINH_THUAT_TOAN:
         raise ValueError("Thuật toán không hợp lệ")
     if ten_thuat_toan not in BO_NHO_MO_HINH:
-        duong_dan = CAU_HINH_THUAT_TOAN[ten_thuat_toan]["duong_dan"]
+        cau_hinh = CAU_HINH_THUAT_TOAN[ten_thuat_toan]
+        if cau_hinh.get("loai") == "heuristic":
+            BO_NHO_MO_HINH[ten_thuat_toan] = MoHinhHeuristic(cau_hinh["che_do"])
+            return BO_NHO_MO_HINH[ten_thuat_toan]
+        duong_dan = cau_hinh["duong_dan"]
         if not os.path.exists(duong_dan):
             raise FileNotFoundError("Model chưa được triển khai trên máy chủ")
         BO_NHO_MO_HINH[ten_thuat_toan] = joblib.load(duong_dan)
@@ -520,7 +564,7 @@ def api_danh_sach_doi():
 def api_thuat_toan():
     danh_sach = []
     for ma, cau_hinh in CAU_HINH_THUAT_TOAN.items():
-        kha_dung = os.path.exists(cau_hinh["duong_dan"])
+        kha_dung = cau_hinh.get("loai") == "heuristic" or os.path.exists(cau_hinh.get("duong_dan", ""))
         ly_do = ""
         if kha_dung and ma.startswith("xgboost"):
             try:
