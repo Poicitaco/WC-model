@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="football">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dự Đoán World Cup 2026 - AI Analytics</title>
+    <script>
+        if (window.location.protocol === 'file:') {
+            window.location.replace('https://wc-model.vercel.app/');
+        }
+    </script>
     <!-- Nhúng Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -21,15 +26,20 @@
     </script>
     <script>
         (() => {
-            const themeDaLuu = localStorage.getItem('wc2026-theme');
-            const themeMacDinh = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            document.documentElement.dataset.theme = themeDaLuu || themeMacDinh;
+            try {
+                localStorage.removeItem('wc2026-theme');
+            } catch (loi) {
+                // Một số trình duyệt/chế độ riêng tư có thể chặn localStorage.
+            }
+            document.documentElement.dataset.theme = 'football';
         })();
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
     <!-- Nhúng CSS tùy chỉnh -->
-    <link rel="stylesheet" href="/static/style.css?v=8">
-    <!-- Tabler Icons: bộ icon nét mảnh, đồng nhất cho dashboard -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" href="/static/style.css?v=16">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 </head>
 <body class="bg-[#f8f9fa] text-[#1f1f1f] intro-dang-chay">
 
@@ -39,18 +49,18 @@
         <div class="sao-nen sao-3"></div>
         <div class="quy-dao-ai"></div>
         <div class="noi-dung-mo-dau">
-            <div class="phi-hanh-gia-ai" aria-hidden="true">
-                <div class="mu-phi-hanh">
-                    <div class="kinh-mu"><i class="ti ti-ball-football"></i></div>
+            <div class="relative w-64 h-72 mx-auto mb-8">
+                <div data-js="astro" class="astronaut scale-75 md:scale-90" style="top: -10px; left: 0px;">
+                    <div class="head"></div>
+                    <div class="arm arm-left"></div>
+                    <div class="arm arm-right"></div>
+                    <div class="body">
+                        <div class="panel"></div>
+                    </div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                    <div class="schoolbag"></div>
                 </div>
-                <div class="than-phi-hanh">
-                    <span>AI</span>
-                    <i class="ti ti-chart-dots-3"></i>
-                </div>
-                <div class="tay-phi-hanh tay-trai"></div>
-                <div class="tay-phi-hanh tay-phai"></div>
-                <div class="chan-phi-hanh chan-trai"></div>
-                <div class="chan-phi-hanh chan-phai"></div>
             </div>
             <span class="nhan-mo-dau">World Cup 2026 · AI Predictor</span>
             <h1>AI đang bay qua<br><em>vũ trụ dữ liệu bóng đá</em></h1>
@@ -61,7 +71,7 @@
             </div>
             <div class="thanh-tien-trinh-mo-dau"><span id="tien-trinh-mo-dau"></span></div>
         </div>
-        <button type="button" id="bo-qua-mo-dau" class="bo-qua-mo-dau">Bỏ qua <i class="ti ti-arrow-right"></i></button>
+        <button type="button" id="bo-qua-mo-dau" class="bo-qua-mo-dau">Bỏ qua <i class="ph ph-arrow-right"></i></button>
     </div>
 
     <!-- Thanh điều hướng đầu trang phong cách Google -->
@@ -69,9 +79,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0b57d0] to-[#1a73e8] flex items-center justify-center shadow-sm">
-                        <i class="ti ti-ball-football text-2xl text-white"></i>
+                <div class="thuong-hieu-header flex items-center gap-3">
+                    <div class="logo-header">
+                        <i class="ph ph-soccer-ball"></i>
                     </div>
                     <div>
                         <span class="text-base font-bold tracking-tight text-[#1f1f1f] block leading-none mb-1">World Cup 2026</span>
@@ -80,24 +90,34 @@
                 </div>
 
                 <!-- Các Tab Điều Hướng chính -->
-                <div class="thanh-tab-chinh flex space-x-6 md:space-x-8">
+                <div class="thanh-tab-chinh">
                     <div onclick="chuyenTab('gia-lap')" id="tab-gia-lap" class="nut-tab kich-hoat text-sm py-2">
-                        <i class="ti ti-device-desktop-analytics mr-1"></i> Giả Lập Trận Đấu
+                        <i class="ph ph-chart-line-up"></i><span>Giả Lập</span>
                     </div>
                     <div onclick="chuyenTab('lich-thi-dau')" id="tab-lich-thi-dau" class="nut-tab text-sm py-2">
-                        <i class="ti ti-calendar-event mr-1"></i> Lịch Thi Đấu
+                        <i class="ph ph-calendar-dots"></i><span>Lịch Thi Đấu</span>
                     </div>
-                    <div onclick="chuyenTab('vong-bang')" id="tab-vong-bang" class="nut-tab text-sm py-2">
-                        <i class="ti ti-trophy mr-1"></i> Vòng Bảng
+                    <div onclick="chuyenTab('lich-du-doan')" id="tab-lich-du-doan" class="nut-tab text-sm py-2">
+                        <i class="ph ph-magic-wand"></i><span>Lịch Dự Đoán</span>
                     </div>
-                    <div onclick="chuyenTab('knockout')" id="tab-knockout" class="nut-tab text-sm py-2">
-                        <i class="ti ti-git-fork mr-1"></i> Nhánh Knockout
+                    <div class="menu-giai-dau">
+                        <button type="button" class="nut-menu-giai-dau" onclick="batTatMenuGiaiDau(event)">
+                            <i class="ph ph-trophy"></i><span>Giải Đấu</span><i class="ph ph-caret-down"></i>
+                        </button>
+                        <div id="danh-sach-menu-giai-dau" class="danh-sach-menu-giai-dau hidden">
+                            <button type="button" onclick="chuyenTabTuMenu('vong-bang')"><i class="ph ph-ranking"></i> Vòng Bảng</button>
+                            <button type="button" onclick="chuyenTabTuMenu('knockout')"><i class="ph ph-tree-structure"></i> Nhánh Knockout</button>
+                            <button type="button" onclick="chuyenTabTuMenu('mo-hinh')"><i class="ph ph-chart-bar"></i> Phân Tích Mô Hình</button>
+                        </div>
                     </div>
-                    <div onclick="chuyenTab('mo-hinh')" id="tab-mo-hinh" class="nut-tab text-sm py-2">
-                        <i class="ti ti-chart-bar mr-1"></i> Phân Tích Mô Hình
-                    </div>
+                    <a href="/thuyettrinh" class="nut-tab text-sm py-2" aria-label="Mở thuyết trình">
+                        <i class="ph ph-presentation"></i><span>Thuyết Trình</span>
+                    </a>
+                    <a href="/photobooth" class="nut-tab text-sm py-2" aria-label="Mở photobooth">
+                        <i class="ph ph-camera"></i><span>Photobooth</span>
+                    </a>
                     <button type="button" id="nut-doi-theme" onclick="doiTheme()" class="nut-doi-theme" aria-label="Chuyển giao diện sáng tối" title="Chuyển giao diện sáng tối">
-                        <i id="bieu-tuong-theme" class="ti ti-moon"></i>
+                        <i id="bieu-tuong-theme" class="ph ph-moon"></i>
                     </button>
                 </div>
             </div>
@@ -138,28 +158,37 @@
                 <!-- Bộ Điều Khiển Giữa -->
                 <div class="lg:col-span-4 md3-card p-6 flex flex-col justify-between items-center text-center bg-white">
                     <div class="w-full">
-                        <span class="text-xs font-mono text-[#5f6368] tracking-wider uppercase mb-3 block font-bold">CÀI ĐẶT TRẬN ĐẤU</span>
+                        <span class="text-xs font-mono text-[#5f6368] tracking-wider uppercase mb-3 block font-bold">DỰ ĐOÁN NHANH</span>
                         <div class="space-y-4 text-left">
-                            <div>
-                                <label class="text-[10px] font-mono text-[#5f6368] uppercase block mb-1">Ngày thi đấu</label>
-                                <input id="ngay-dau" type="date" value="2026-06-11" class="w-full bg-[#f8f9fa] border border-[#dadce0] text-[#1f1f1f] rounded-lg p-2 text-sm outline-none focus:border-[#0b57d0]">
-                            </div>
                             <div>
                                 <label class="text-[10px] font-mono text-[#5f6368] uppercase block mb-1">Thuật toán dự đoán</label>
                                 <select id="chon-thuat-toan" class="w-full bg-[#f8f9fa] border border-[#dadce0] text-[#1f1f1f] rounded-lg p-2 text-sm outline-none focus:border-[#0b57d0]">
                                     <option value="random_forest_tuned">Đang tải thuật toán...</option>
                                 </select>
                             </div>
-                            <div class="flex items-center justify-between border-t border-gray-100 pt-3">
-                                <label class="text-xs text-[#1f1f1f] font-medium">Sân trung lập</label>
-                                <input id="san-trung-lap" type="checkbox" checked class="w-5 h-5 rounded accent-[#0b57d0]">
-                            </div>
+                            <details class="cai-dat-nang-cao">
+                                <summary>
+                                    <span>Cài đặt nâng cao</span>
+                                    <i class="ph ph-caret-down"></i>
+                                </summary>
+                                <div class="noi-dung-cai-dat-nang-cao">
+                                    <p class="goi-y-nang-cao">Mặc định phù hợp cho World Cup. Chỉ mở phần này khi cần chỉnh ngữ cảnh dự đoán.</p>
+                                    <div>
+                                        <label class="text-[10px] font-mono text-[#5f6368] uppercase block mb-1">Ngày thi đấu</label>
+                                        <input id="ngay-dau" type="date" value="2026-06-11" class="w-full bg-[#f8f9fa] border border-[#dadce0] text-[#1f1f1f] rounded-lg p-2 text-sm outline-none focus:border-[#0b57d0]">
+                                    </div>
+                                    <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+                                        <label class="text-xs text-[#1f1f1f] font-medium">Sân trung lập</label>
+                                        <input id="san-trung-lap" type="checkbox" checked class="w-5 h-5 rounded accent-[#0b57d0]">
+                                    </div>
+                                </div>
+                            </details>
                         </div>
                     </div>
 
                     <div class="w-full my-6">
                         <button onclick="chayGiaLapTranDau()" class="w-full py-3.5 px-6 rounded-full nut-bam-chinh font-bold text-sm flex items-center justify-center gap-2">
-                            <i class="ti ti-bolt text-lg"></i> GIẢ LẬP TRẬN ĐẤU
+                            <i class="ph ph-lightning text-lg"></i> GIẢ LẬP TRẬN ĐẤU
                         </button>
                     </div>
 
@@ -191,7 +220,7 @@
             <div id="khung-ket-qua" class="hidden">
                 <div class="md3-card p-6 bg-white space-y-6">
                     <h3 class="text-sm font-bold text-[#1f1f1f] border-b border-gray-150 pb-2 flex items-center gap-2">
-                        <i class="ti ti-presentation-analytics text-[#0b57d0]"></i> KẾT QUẢ GIẢ LẬP AI
+                        <i class="ph ph-presentation-chart text-[#0b57d0]"></i> KẾT QUẢ GIẢ LẬP AI
                     </h3>
 
                     <!-- Bố cục nằm ngang như người dùng mong muốn -->
@@ -241,7 +270,7 @@
 
                     <!-- Các chỉ số đặc trưng (Features) -->
                     <div class="border-t border-gray-150 pt-4">
-                        <h4 class="text-xs font-bold text-gray-700 mb-3"><i class="ti ti-scale"></i> Phân Tích Thông Số Đặc Trưng (Features)</h4>
+                        <h4 class="text-xs font-bold text-gray-700 mb-3"><i class="ph ph-scales"></i> Phân Tích Thông Số Đặc Trưng (Features)</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="khung-so-sanh-dac-trung">
                             <!-- Chèn bằng JS -->
                         </div>
@@ -250,11 +279,55 @@
             </div>
 
             <!-- Loading Skeleton -->
-            <div id="khung-dang-tai" class="hidden">
-                <div class="md3-card p-6 bg-white space-y-4">
-                    <div class="h-4 w-40 bo-xuong-tai"></div>
-                    <div class="h-16 w-full bo-xuong-tai"></div>
+            <div id="khung-dang-tai" class="hidden relative w-full h-[450px] overflow-hidden bg-[#0c0f12] rounded-2xl shadow-inner border border-gray-800">
+                <div class="box-of-star1">
+                    <div class="star star-position1"></div>
+                    <div class="star star-position2"></div>
+                    <div class="star star-position3"></div>
+                    <div class="star star-position4"></div>
+                    <div class="star star-position5"></div>
+                    <div class="star star-position6"></div>
+                    <div class="star star-position7"></div>
                 </div>
+                <div class="box-of-star2">
+                    <div class="star star-position1"></div>
+                    <div class="star star-position2"></div>
+                    <div class="star star-position3"></div>
+                    <div class="star star-position4"></div>
+                    <div class="star star-position5"></div>
+                    <div class="star star-position6"></div>
+                    <div class="star star-position7"></div>
+                </div>
+                <div class="box-of-star3">
+                    <div class="star star-position1"></div>
+                    <div class="star star-position2"></div>
+                    <div class="star star-position3"></div>
+                    <div class="star star-position4"></div>
+                    <div class="star star-position5"></div>
+                    <div class="star star-position6"></div>
+                    <div class="star star-position7"></div>
+                </div>
+                <div class="box-of-star4">
+                    <div class="star star-position1"></div>
+                    <div class="star star-position2"></div>
+                    <div class="star star-position3"></div>
+                    <div class="star star-position4"></div>
+                    <div class="star star-position5"></div>
+                    <div class="star star-position6"></div>
+                    <div class="star star-position7"></div>
+                </div>
+                <div data-js="astro" class="astronaut scale-75 md:scale-90">
+                    <div class="head"></div>
+                    <div class="arm arm-left"></div>
+                    <div class="arm arm-right"></div>
+                    <div class="body">
+                        <div class="panel"></div>
+                    </div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                    <div class="schoolbag"></div>
+                </div>
+                <div class="absolute bottom-6 w-full text-center text-white text-xs md:text-sm font-mono tracking-[0.2em] animate-pulse z-20">ĐANG KHỞI TẠO DỮ LIỆU...</div>
             </div>
         </section>
 
@@ -263,18 +336,18 @@
             <div class="text-center max-w-2xl mx-auto mb-6">
                 <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Toàn bộ giải đấu</span>
                 <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Lịch Thi Đấu Theo Ngày</h2>
-                <p class="text-[#5f6368] text-sm">Theo dõi từng ngày thi đấu từ vòng bảng đến chung kết, cùng tỷ số và xác suất dự đoán của mô hình.</p>
+                <p class="text-[#5f6368] text-sm">Theo dõi lịch thi đấu chính thức từ vòng bảng đến chung kết. Lịch này không hiển thị tỷ số dự đoán.</p>
             </div>
 
             <div class="khung-thanh-ngay md3-card bg-white p-3">
                 <div class="flex justify-end items-center gap-2 mb-3">
                     <div class="flex items-center gap-2">
                         <button type="button" onclick="chuyenNgayLich(-1)" id="nut-ngay-truoc" class="nut-dieu-huong-ngay" aria-label="Ngày thi đấu trước">
-                            <i class="ti ti-chevron-left"></i>
+                            <i class="ph ph-caret-left"></i>
                         </button>
                         <input id="chon-ngay-lich" type="date" onchange="chonNgayTuLich(this.value)" class="o-chon-ngay">
                         <button type="button" onclick="chuyenNgayLich(1)" id="nut-ngay-sau" class="nut-dieu-huong-ngay" aria-label="Ngày thi đấu tiếp theo">
-                            <i class="ti ti-chevron-right"></i>
+                            <i class="ph ph-caret-right"></i>
                         </button>
                     </div>
                 </div>
@@ -291,10 +364,25 @@
             <div id="danh-sach-lich-theo-ngay" class="space-y-3 max-w-4xl mx-auto"></div>
 
             <div id="lich-trong" class="hidden md3-card bg-white p-10 text-center max-w-2xl mx-auto">
-                <i class="ti ti-calendar-off text-4xl text-[#0b57d0]"></i>
+                <i class="ph ph-calendar-x text-4xl text-[#0b57d0]"></i>
                 <h3 class="font-bold text-[#1f1f1f] mt-3">Không có trận đấu trong ngày này</h3>
                 <p class="text-sm text-[#5f6368] mt-1">Hãy chọn ngày thi đấu gần nhất trên thanh lịch.</p>
             </div>
+        </section>
+
+        <section id="khung-lich-du-doan" class="hidden space-y-6">
+            <div class="text-center max-w-2xl mx-auto mb-6">
+                <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Mô hình World Cup 2026</span>
+                <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Lịch Thi Đấu Dự Đoán</h2>
+                <p class="text-[#5f6368] text-sm">Lịch thi đấu kèm tỷ số giả lập và xác suất dự đoán của mô hình AI.</p>
+            </div>
+            <div class="khung-thanh-ngay md3-card bg-white p-3">
+                <div id="thanh-ngay-du-doan" class="thanh-ngay-thi-dau" aria-label="Chọn ngày dự đoán"></div>
+            </div>
+            <div class="tieu-de-lich-ngay">
+                <h3 id="tieu-de-ngay-du-doan" class="text-2xl font-bold text-[#1f1f1f]">Đang tải lịch dự đoán...</h3>
+            </div>
+            <div id="danh-sach-lich-du-doan" class="space-y-3 max-w-4xl mx-auto"></div>
         </section>
 
         <!-- 3. TAB VÒNG BẢNG & XẾP HẠNG -->
@@ -338,7 +426,7 @@
 
                 <!-- Danh sách trận đấu nằm ngang (Cột phải) -->
                 <div class="xl:col-span-7 space-y-4">
-                    <h3 class="text-sm font-bold text-[#1f1f1f] px-1"><i class="ti ti-calendar-event"></i> Trận đấu & Tỷ lệ dự đoán</h3>
+                    <h3 class="text-sm font-bold text-[#1f1f1f] px-1"><i class="ph ph-calendar-dots"></i> Trận đấu & Tỷ lệ dự đoán</h3>
                     <div id="danh-sach-tran-bang" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
                         <!-- Chèn bằng JS dưới dạng card nằm ngang -->
                     </div>
@@ -379,7 +467,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <!-- Bảng số liệu mô hình -->
                 <div class="lg:col-span-7 md3-card p-6 bg-white">
-                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-4 border-b border-gray-100 pb-2"><i class="ti ti-file-analytics"></i> Bảng So Sánh Các Mô Hình</h3>
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-4 border-b border-gray-100 pb-2"><i class="ph ph-file-chart"></i> Bảng So Sánh Các Mô Hình</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs text-left">
                             <thead class="bg-[#f8f9fa] border-b border-gray-200 text-gray-500 font-mono">
@@ -401,7 +489,7 @@
 
                 <!-- Thẻ Tầm quan trọng Đặc trưng -->
                 <div class="lg:col-span-5 md3-card p-6 bg-white flex flex-col justify-between min-h-[300px]">
-                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-4 border-b border-gray-100 pb-2"><i class="ti ti-key"></i> Tầm Quan Trọng Đặc Trưng</h3>
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-4 border-b border-gray-100 pb-2"><i class="ph ph-key"></i> Tầm Quan Trọng Đặc Trưng</h3>
                     <div class="flex-grow flex items-center justify-center bg-[#f8f9fa] rounded-xl p-3 border border-gray-200">
                         <img id="anh-feature-importance" class="max-h-60 w-auto rounded object-contain" src="/static/anh/feature_importance_best_model.png" alt="Feature Importance">
                     </div>
@@ -412,64 +500,17 @@
             <!-- Các biểu đồ phụ -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div class="md3-card p-6 bg-white">
-                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-3"><i class="ti ti-chart-dots"></i> Phân Bố Mô Phỏng (Bubble Chart)</h3>
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-3"><i class="ph ph-chart-scatter"></i> Phân Bố Mô Phỏng (Bubble Chart)</h3>
                     <div class="bg-[#f8f9fa] rounded-xl p-3 border border-gray-200 flex items-center justify-center">
                         <img id="anh-bubble-chart" class="max-h-60 w-auto rounded object-contain" src="/static/anh/bubble_chart_mo_phong_4_mo_hinh.png" alt="Bubble Chart">
                     </div>
                 </div>
                 <div class="md3-card p-6 bg-white">
-                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-3"><i class="ti ti-layout-grid"></i> Heatmap Chỉ Số Đánh Giá</h3>
+                    <h3 class="text-sm font-bold text-[#1f1f1f] mb-3"><i class="ph ph-grid-four"></i> Heatmap Chỉ Số Đánh Giá</h3>
                     <div class="bg-[#f8f9fa] rounded-xl p-3 border border-gray-200 flex items-center justify-center">
                         <img id="anh-metrics-heatmap" class="max-h-60 w-auto rounded object-contain" src="/static/anh/model_metrics_heatmap_soft_purple_yellow.png" alt="Heatmap">
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- PHOTOBOOTH Ở CUỐI TRANG -->
-        <section id="khung-photobooth" class="photobooth-cuoi-trang space-y-6">
-            <div class="photobooth-heading">
-                <div>
-                    <span class="text-[#0b57d0] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">Kỷ niệm World Cup</span>
-                    <h2 class="text-3xl font-bold tracking-tight text-[#1f1f1f] mb-2">Photobooth Cổ Động Viên</h2>
-                    <p class="text-[#5f6368] text-sm">Chụp ảnh dọc chuẩn 4 × 6 inch, chọn khung và tải ảnh về ngay.</p>
-                </div>
-                <span class="kich-thuoc-anh"><i class="ti ti-ruler-2"></i> Khung chuẩn 4 × 6 in</span>
-            </div>
-
-            <div class="photobooth-layout">
-                <div class="photobooth-stage md3-card">
-                    <video id="camera-photobooth" autoplay playsinline muted></video>
-                    <canvas id="canvas-photobooth" width="1200" height="1800"></canvas>
-                    <img id="khung-overlay-photobooth" class="khung-overlay-photobooth" alt="">
-                    <div id="photobooth-placeholder" class="photobooth-placeholder">
-                        <i class="ti ti-camera"></i>
-                        <strong>Sẵn sàng chụp ảnh 4 × 6</strong>
-                        <span>Bật camera hoặc tải ảnh từ thiết bị</span>
-                    </div>
-                </div>
-
-                <aside class="photobooth-controls md3-card">
-                    <div>
-                        <span class="nhan-dieu-khien">1. Nguồn ảnh</span>
-                        <div class="photobooth-actions">
-                            <button type="button" onclick="batCamera()" class="nut-bam-chinh"><i class="ti ti-video"></i> Bật camera</button>
-                            <label class="nut-hanh-dong-card primary photobooth-upload">
-                                <i class="ti ti-photo-up"></i> Tải ảnh
-                                <input id="tai-anh-photobooth" type="file" accept="image/*" hidden>
-                            </label>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="nhan-dieu-khien">2. Chọn khung ảnh 4 × 6</span>
-                        <div id="danh-sach-khung-photobooth" class="danh-sach-khung-photobooth"></div>
-                    </div>
-                    <div class="photobooth-actions">
-                        <button type="button" onclick="chupAnhPhotobooth()" class="nut-bam-chinh"><i class="ti ti-camera"></i> Chụp ảnh</button>
-                        <button type="button" onclick="taiAnhPhotobooth()" class="nut-hanh-dong-card primary"><i class="ti ti-download"></i> Tải xuống</button>
-                    </div>
-                    <p id="thong-bao-photobooth" class="text-xs text-[#5f6368]"></p>
-                </aside>
             </div>
         </section>
 
@@ -503,15 +544,14 @@
         // Biến toàn cục lưu trữ dữ liệu
         let danhSachDoiBong = [];
         let duLieuLichThiDau = null;
+        let duLieuLichDuDoan = null;
         let duLieuVongBang = null;
         let duLieuKnockout = null;
         let duLieuMoHinh = null;
         let ngayLichHienTai = null;
+        let ngayDuDoanHienTai = null;
         let bangHienTai = 'A';
         let vongKnockoutHienTai = 'vong-32';
-        let cameraStream = null;
-        let anhNguonPhotobooth = null;
-        let khungPhotoboothHienTai = null;
 
         // Trả về cờ
         function layDuongDanCo(tenDoi) {
@@ -522,21 +562,49 @@
             return `https://flagcdn.com/w80/${ma}.png`;
         }
 
+        const THEMES = ['football', 'dark', 'light'];
+
         function capNhatNutTheme() {
-            const laDark = document.documentElement.dataset.theme === 'dark';
+            const themeHienTai = document.documentElement.dataset.theme || 'football';
             const bieuTuong = document.getElementById('bieu-tuong-theme');
             const nutTheme = document.getElementById('nut-doi-theme');
-            bieuTuong.className = laDark ? 'ti ti-sun' : 'ti ti-moon';
-            nutTheme.title = laDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối';
+
+            if (themeHienTai === 'dark') {
+                bieuTuong.className = 'ph ph-sun';
+                nutTheme.title = 'Chuyển sang giao diện sáng';
+            } else if (themeHienTai === 'light') {
+                bieuTuong.className = 'ph ph-soccer-ball';
+                nutTheme.title = 'Chuyển sang giao diện bóng đá';
+            } else {
+                bieuTuong.className = 'ph ph-moon';
+                nutTheme.title = 'Chuyển sang giao diện tối';
+            }
             nutTheme.setAttribute('aria-label', nutTheme.title);
         }
 
         function doiTheme() {
-            const themeMoi = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            const themeHienTai = document.documentElement.dataset.theme || 'football';
+            let viTri = THEMES.indexOf(themeHienTai);
+            if (viTri === -1) viTri = 0;
+
+            const themeMoi = THEMES[(viTri + 1) % THEMES.length];
             document.documentElement.dataset.theme = themeMoi;
-            localStorage.setItem('wc2026-theme', themeMoi);
             capNhatNutTheme();
         }
+
+        function batTatMenuGiaiDau(suKien) {
+            suKien.stopPropagation();
+            document.getElementById('danh-sach-menu-giai-dau').classList.toggle('hidden');
+        }
+
+        function chuyenTabTuMenu(tenTab) {
+            document.getElementById('danh-sach-menu-giai-dau').classList.add('hidden');
+            chuyenTab(tenTab);
+        }
+
+        document.addEventListener('click', () => {
+            document.getElementById('danh-sach-menu-giai-dau')?.classList.add('hidden');
+        });
 
         async function chayManMoDau() {
             const manMoDau = document.getElementById('man-mo-dau');
@@ -575,8 +643,7 @@
             const taiNgam = Promise.allSettled([
                 fetch('/api/danh-sach-doi'),
                 fetch('/api/lich-thi-dau'),
-                fetch('/api/thuat-toan'),
-                fetch('/api/khung-anh')
+                fetch('/api/thuat-toan')
             ]);
 
             for (const [noiDung, phanTram] of cacBuoc) {
@@ -621,13 +688,13 @@
             try {
                 const phanHoi = await fetch('/api/danh-sach-doi');
                 danhSachDoiBong = await phanHoi.json();
-                
+
                 const chonDoiA = document.getElementById('chon-doi-a');
                 const chonDoiB = document.getElementById('chon-doi-b');
-                
+
                 chonDoiA.innerHTML = '';
                 chonDoiB.innerHTML = '';
-                
+
                 danhSachDoiBong.forEach(doi => {
                     const luaChonA = document.createElement('option');
                     luaChonA.value = doi.ten;
@@ -642,10 +709,10 @@
                     }
                     chonDoiB.appendChild(luaChonB);
                 });
-                
+
                 capNhatGiaoDienDoi('a');
                 capNhatGiaoDienDoi('b');
-                
+
                 khoiTaoBoLocVongBang();
             } catch (loi) {
                 console.error("Lỗi khi tải danh sách đội bóng:", loi);
@@ -658,9 +725,9 @@
             const tenDoi = chon.value;
             const anhCo = document.getElementById(`co-doi-${loai}`);
             const khungThongTin = document.getElementById(`thong-tin-doi-${loai}`);
-            
+
             anhCo.src = layDuongDanCo(tenDoi);
-            
+
             const thongTinDoi = danhSachDoiBong.find(d => d.ten === tenDoi);
             if (thongTinDoi) {
                 khungThongTin.innerHTML = `
@@ -687,15 +754,15 @@
             const ngayGio = document.getElementById('ngay-dau').value;
             const sanTrungLap = document.getElementById('san-trung-lap').checked ? 1 : 0;
             const thuatToan = document.getElementById('chon-thuat-toan').value;
-            
+
             if (doiA === doiB) {
                 alert("Vui lòng chọn hai đội bóng khác nhau để giả lập!");
                 return;
             }
-            
+
             document.getElementById('khung-ket-qua').classList.add('hidden');
             document.getElementById('khung-dang-tai').classList.remove('hidden');
-            
+
             try {
                 const phanHoi = await fetch('/api/du-doan-tran-dau', {
                     method: 'POST',
@@ -708,17 +775,17 @@
                         thuat_toan: thuatToan
                     })
                 });
-                
+
                 const duLieu = await phanHoi.json();
                 if (!phanHoi.ok || duLieu.loi) {
                     throw new Error(duLieu.loi || 'Không thể chạy dự đoán');
                 }
-                
+
                 setTimeout(() => {
                     document.getElementById('khung-dang-tai').classList.add('hidden');
                     hienThiKetQuaDuDoan(duLieu);
                 }, 800);
-                
+
             } catch (loi) {
                 console.error("Lỗi khi chạy giả lập:", loi);
                 document.getElementById('khung-dang-tai').classList.add('hidden');
@@ -732,29 +799,29 @@
             document.getElementById('ket-qua-ten-doi-b').textContent = duLieu.doi_b;
             document.getElementById('ket-qua-co-doi-a').src = layDuongDanCo(duLieu.doi_a);
             document.getElementById('ket-qua-co-doi-b').src = layDuongDanCo(duLieu.doi_b);
-            
+
             // Format ngày giờ
             const dateObj = new Date(duLieu.ngay_gio || "2026-06-11");
             const ngayGioFormat = dateObj.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
             const gioFormat = dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
             document.getElementById('ket-qua-ngay-gio').textContent = `${ngayGioFormat} ${gioFormat}`;
-            
+
             // Lấy xác suất
             const pA = Math.round(duLieu.ti_le.p_a_thang * 100);
             const pH = Math.round(duLieu.ti_le.p_hoa * 100);
             const pB = Math.round(duLieu.ti_le.p_a_thua * 100);
-            
+
             document.getElementById('ti-le-a-text').textContent = `${pA}%`;
             document.getElementById('ti-le-h-text').textContent = `${pH}%`;
             document.getElementById('ti-le-b-text').textContent = `${pB}%`;
-            
+
             // Giữa cờ sẽ là tỷ số ở trên và phần trăm ở dưới
             const kenTySo = document.getElementById('ket-qua-ken-ty-so');
             kenTySo.textContent = duLieu.ty_so;
-            
+
             const kenPhanTram = document.getElementById('ket-qua-ken-phan-tram');
             kenPhanTram.textContent = `${pA}% - ${pB}%`;
-            
+
             // Đội thắng
             const thongBaoDoiThang = document.getElementById('ket-qua-doi-thang');
             if (duLieu.doi_thang === 'Hòa') {
@@ -764,11 +831,11 @@
                 thongBaoDoiThang.textContent = `${duLieu.doi_thang} thắng cuộc`;
                 thongBaoDoiThang.className = "text-[#137333] font-bold";
             }
-            
+
             // Đặc trưng
             const khungDacTrung = document.getElementById('khung-so-sanh-dac-trung');
             khungDacTrung.innerHTML = '';
-            
+
             const dt = duLieu.dac_trung;
             const nhanDacTrung = {
                 "chenh_lech_elo": "Chênh lệch Elo",
@@ -778,17 +845,17 @@
                 "elo_expected_win_prob": "Cơ hội thắng theo ELO",
                 "chenh_lech_kinh_nghiem_wc": "Chênh lệch số trận WC"
             };
-            
+
             Object.keys(nhanDacTrung).forEach(khoa => {
                 const giaTri = dt[khoa];
                 let giaTriHienThi = typeof giaTri === 'number' ? giaTri.toFixed(1) : giaTri;
-                
+
                 if (khoa === 'elo_expected_win_prob') {
                     giaTriHienThi = `${(giaTri * 100).toFixed(0)}%`;
                 } else if (giaTri > 0) {
                     giaTriHienThi = `+${giaTriHienThi}`;
                 }
-                
+
                 const card = document.createElement('div');
                 card.className = "bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center text-xs";
                 card.innerHTML = `
@@ -797,7 +864,7 @@
                 `;
                 khungDacTrung.appendChild(card);
             });
-            
+
             document.getElementById('khung-ket-qua').classList.remove('hidden');
         }
 
@@ -818,7 +885,7 @@
             `;
 
             try {
-                const phanHoi = await fetch('/api/lich-thi-dau');
+                const phanHoi = await fetch('/api/lich-thi-dau-chinh-thuc');
                 duLieuLichThiDau = await phanHoi.json();
                 if (!phanHoi.ok || duLieuLichThiDau.loi) {
                     throw new Error(duLieuLichThiDau.loi || 'Không thể tải lịch thi đấu');
@@ -909,9 +976,9 @@
             const soTranVongBang = tranTrongNgay.filter(tran => tran.vong === 'Vòng bảng').length;
             const soTranKnockout = tranTrongNgay.length - soTranVongBang;
             tomTat.innerHTML = `
-                <div class="the-tom-tat-lich"><i class="ti ti-ball-football"></i><div><strong>${tranTrongNgay.length}</strong><span>Tổng số trận</span></div></div>
-                <div class="the-tom-tat-lich"><i class="ti ti-users-group"></i><div><strong>${soTranVongBang}</strong><span>Trận vòng bảng</span></div></div>
-                <div class="the-tom-tat-lich"><i class="ti ti-git-fork"></i><div><strong>${soTranKnockout}</strong><span>Trận knockout</span></div></div>
+                <div class="the-tom-tat-lich"><i class="ph ph-soccer-ball"></i><div><strong>${tranTrongNgay.length}</strong><span>Tổng số trận</span></div></div>
+                <div class="the-tom-tat-lich"><i class="ph ph-users-three"></i><div><strong>${soTranVongBang}</strong><span>Trận vòng bảng</span></div></div>
+                <div class="the-tom-tat-lich"><i class="ph ph-tree-structure"></i><div><strong>${soTranKnockout}</strong><span>Trận knockout</span></div></div>
             `;
 
             const khungDanhSach = document.getElementById('danh-sach-lich-theo-ngay');
@@ -925,9 +992,23 @@
                 card.className = `the-tran-dau the-tran-lich ${laChungKet ? 'chung-ket' : ''}`;
 
                 const gioFormat = new Date(tran.ngay_gio.replace(' ', 'T')).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
-                const pA = Math.round(tran.p_a_thang * 100);
-                const pB = Math.round(tran.p_a_thua * 100);
                 const nhanVong = tran.bang ? `Bảng ${tran.bang}` : tran.vong;
+                const batDau = new Date(tran.ngay_gio.replace(' ', 'T'));
+                const ketThucDuKien = new Date(batDau.getTime() + 2 * 60 * 60 * 1000);
+                const hienTai = new Date();
+                
+                let trangThai = hienTai < batDau
+                    ? {lop: 'sap-toi', nhan: 'SẮP TỚI'}
+                    : hienTai <= ketThucDuKien
+                        ? {lop: 'dang-dien-ra', nhan: 'ĐANG DIỄN RA'}
+                        : {lop: 'da-ket-thuc', nhan: 'ĐÃ KẾT THÚC'};
+
+                if (tran.trang_thai === 'FINISHED') trangThai = {lop: 'da-ket-thuc', nhan: 'ĐÃ KẾT THÚC'};
+                else if (tran.trang_thai === 'IN_PLAY' || tran.trang_thai === 'PAUSED') trangThai = {lop: 'dang-dien-ra', nhan: 'ĐANG DIỄN RA'};
+
+                const tySoHienThi = (trangThai.nhan === 'ĐÃ KẾT THÚC' || trangThai.nhan === 'ĐANG DIỄN RA')
+                    ? `<div class="ken-ty-so">${tran.ban_thang_a} - ${tran.ban_thang_b}</div>`
+                    : `<div class="nhan-trang-thai-tran ${trangThai.lop}">${trangThai.nhan}</div>`;
 
                 card.innerHTML = `
                     <div class="cot-gio-lich">
@@ -945,8 +1026,7 @@
                                 <img class="co-quoc-gia" src="${layDuongDanCo(tran.doi_a)}" alt="Cờ ${tran.doi_a}">
                             </div>
                             <div class="khung-ty-so-giua">
-                                <div class="ken-ty-so">${tran.ban_thang_a} - ${tran.ban_thang_b}</div>
-                                <div class="dong-phan-tram">${pA}% - ${pB}%</div>
+                                ${tySoHienThi}
                             </div>
                             <div class="doi-b-khung">
                                 <img class="co-quoc-gia" src="${layDuongDanCo(tran.doi_b)}" alt="Cờ ${tran.doi_b}">
@@ -964,11 +1044,61 @@
             });
         }
 
+        async function taiDuLieuLichDuDoan() {
+            if (!duLieuLichDuDoan) {
+                const phanHoi = await fetch('/api/lich-thi-dau');
+                duLieuLichDuDoan = await phanHoi.json();
+                ngayDuDoanHienTai = duLieuLichDuDoan.cac_ngay[0];
+            }
+            hienThiLichDuDoan();
+        }
+
+        function hienThiLichDuDoan() {
+            if (!duLieuLichDuDoan || !ngayDuDoanHienTai) return;
+            const thanhNgay = document.getElementById('thanh-ngay-du-doan');
+            thanhNgay.innerHTML = '';
+            duLieuLichDuDoan.cac_ngay.forEach(ngay => {
+                const nut = document.createElement('button');
+                nut.type = 'button';
+                nut.className = `nut-ngay-lich ${ngay === ngayDuDoanHienTai ? 'kich-hoat' : ''}`;
+                nut.textContent = dinhDangNgayLich(ngay);
+                nut.onclick = () => {
+                    ngayDuDoanHienTai = ngay;
+                    hienThiLichDuDoan();
+                };
+                thanhNgay.appendChild(nut);
+            });
+
+            document.getElementById('tieu-de-ngay-du-doan').textContent = dinhDangNgayLich(ngayDuDoanHienTai, true);
+            const danhSach = document.getElementById('danh-sach-lich-du-doan');
+            danhSach.innerHTML = '';
+            duLieuLichDuDoan.danh_sach_tran
+                .filter(tran => tran.ngay_gio.slice(0, 10) === ngayDuDoanHienTai)
+                .forEach(tran => {
+                    const pA = Math.round(tran.p_a_thang * 100);
+                    const pB = Math.round(tran.p_a_thua * 100);
+                    const gio = new Date(tran.ngay_gio.replace(' ', 'T')).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+                    const card = document.createElement('article');
+                    card.className = 'the-tran-dau the-tran-lich the-tran-du-doan';
+                    card.innerHTML = `
+                        <div class="cot-gio-lich"><strong>${gio}</strong><span>Trận ${tran.ma_tran}</span></div>
+                        <div class="noi-dung-tran-lich">
+                            <div class="dong-thong-tin-dau"><span class="nhan-bang-badge">${tran.bang ? `Bảng ${tran.bang}` : tran.vong}</span><span class="nhan-du-doan-ai">AI PREDICTION</span></div>
+                            <div class="dong-thi-dau-chinh">
+                                <div class="doi-a-khung"><span>${tran.doi_a}</span><img class="co-quoc-gia" src="${layDuongDanCo(tran.doi_a)}" alt="Cờ ${tran.doi_a}"></div>
+                                <div class="khung-ty-so-giua"><div class="ken-ty-so">${tran.ban_thang_a} - ${tran.ban_thang_b}</div><div class="dong-phan-tram">${pA}% - ${pB}%</div></div>
+                                <div class="doi-b-khung"><img class="co-quoc-gia" src="${layDuongDanCo(tran.doi_b)}" alt="Cờ ${tran.doi_b}"><span>${tran.doi_b}</span></div>
+                            </div>
+                        </div>`;
+                    danhSach.appendChild(card);
+                });
+        }
+
         // Khởi tạo bộ lọc bảng đấu
         function khoiTaoBoLocVongBang() {
             const khungBoLoc = document.getElementById('bo-loc-bang-dau');
             khungBoLoc.innerHTML = '';
-            
+
             const mangBang = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
             mangBang.forEach(b => {
                 const nut = document.createElement('button');
@@ -1004,18 +1134,18 @@
         // Hiển thị vòng bảng
         function hienThiBangXepHang() {
             if (!duLieuVongBang) return;
-            
+
             document.getElementById('tieu-de-bxh-bang').textContent = `Bảng ${bangHienTai} - Điểm Số`;
-            
+
             const thanBang = document.getElementById('than-bang-xep-hang');
             thanBang.innerHTML = '';
-            
+
             const bxhBang = duLieuVongBang.bxh_theo_bang[bangHienTai] || [];
             bxhBang.forEach(doi => {
                 const dong = document.createElement('tr');
                 dong.className = "border-b border-gray-100 hover:bg-gray-50/50 transition text-xs";
                 const hangLop = doi.hang <= 2 ? 'text-[#137333] font-bold' : 'text-gray-500';
-                
+
                 dong.innerHTML = `
                     <td class="py-3 px-2 text-center font-mono ${hangLop}">${doi.hang}</td>
                     <td class="py-3 px-3 font-bold flex items-center gap-2">
@@ -1034,22 +1164,22 @@
             // Lịch thi đấu nằm ngang
             const khungDanhSachTran = document.getElementById('danh-sach-tran-bang');
             khungDanhSachTran.innerHTML = '';
-            
+
             const tranBang = duLieuVongBang.danh_sach_tran.filter(t => t.bang === bangHienTai) || [];
             tranBang.forEach(t => {
                 const card = document.createElement('div');
                 card.className = "the-tran-dau";
-                
+
                 const ngayGioFormat = new Date(t.ngay_gio).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
                 const gioFormat = new Date(t.ngay_gio).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
-                
+
                 const pA = Math.round(t.p_a_thang * 100);
                 const pB = Math.round(t.p_a_thua * 100);
-                
+
                 let lopKenh = "ken-phan-tram hoa";
                 if (pA > pB + 10) lopKenh = "ken-phan-tram thang-a";
                 else if (pB > pA + 10) lopKenh = "ken-phan-tram";
-                
+
                 card.innerHTML = `
                     <div class="dong-thong-tin-dau">
                         <span class="nhan-bang-badge">Bảng ${t.bang}</span>
@@ -1090,7 +1220,7 @@
         function chuyenVongKnockout(tenVong) {
             vongKnockoutHienTai = tenVong;
             const cacNut = ['32', '16', 'tuket', 'banket'];
-            
+
             cacNut.forEach(n => {
                 const nut = document.getElementById(`nut-ko-${n}`);
                 if (`vong-${n}` === tenVong) {
@@ -1117,45 +1247,45 @@
         // Hiển thị Knockout nằm ngang
         function hienThiKnockout() {
             if (!duLieuKnockout) return;
-            
+
             const khungDanhSachKo = document.getElementById('khung-danh-sach-knockout');
             khungDanhSachKo.innerHTML = '';
-            
+
             let boLocTen = '';
             if (vongKnockoutHienTai === 'vong-32') boLocTen = 'Vòng 1/16';
             else if (vongKnockoutHienTai === 'vong-16') boLocTen = 'Vòng 1/8';
             else if (vongKnockoutHienTai === 'vong-tuket') boLocTen = 'Tứ kết';
-            
+
             let tranKnockout = [];
             if (vongKnockoutHienTai === 'vong-banket') {
                 tranKnockout = duLieuKnockout.filter(t => t.vong === 'Bán kết' || t.vong === 'Chung kết' || t.vong === 'Tranh hạng ba');
             } else {
                 tranKnockout = duLieuKnockout.filter(t => t.vong === boLocTen);
             }
-            
+
             tranKnockout.forEach(t => {
                 const card = document.createElement('div');
                 card.className = "the-tran-dau md3-card bg-white";
-                
+
                 if (t.vong === 'Chung kết') {
                     card.style.borderColor = 'var(--vang-nhe)';
                     card.style.backgroundColor = 'var(--vang-nhe-mo)';
                 }
-                
+
                 const dateObj = new Date(t.ngay_gio);
                 const ngayGioFormat = dateObj.toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
                 const gioFormat = dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
-                
+
                 const pA = Math.round(t.p_a_thang * 100);
                 const pB = Math.round(t.p_a_thua * 100);
-                
+
                 let lopKenh = "ken-phan-tram hoa";
                 if (pA > pB + 10) lopKenh = "ken-phan-tram thang-a";
                 else if (pB > pA + 10) lopKenh = "ken-phan-tram";
-                
+
                 const lopAWin = t.doi_thang === t.doi_a ? 'text-[#137333] font-bold' : 'text-gray-700';
                 const lopBWin = t.doi_thang === t.doi_b ? 'text-[#137333] font-bold' : 'text-gray-700';
-                
+
                 card.innerHTML = `
                     <div class="dong-thong-tin-dau">
                         <span class="nhan-bang-badge ${t.vong === 'Chung kết' ? 'bg-amber-100 text-amber-800' : ''}">${t.vong}</span>
@@ -1192,122 +1322,20 @@
             });
         }
 
-        function veAnhCover(context, nguon, rong, cao) {
-            const tiLe = Math.max(rong / nguon.videoWidth || rong / nguon.naturalWidth, cao / nguon.videoHeight || cao / nguon.naturalHeight);
-            const rongVe = (nguon.videoWidth || nguon.naturalWidth) * tiLe;
-            const caoVe = (nguon.videoHeight || nguon.naturalHeight) * tiLe;
-            context.drawImage(nguon, (rong - rongVe) / 2, (cao - caoVe) / 2, rongVe, caoVe);
-        }
-
-        async function taiKhungPhotobooth() {
-            const danhSach = document.getElementById('danh-sach-khung-photobooth');
-            if (danhSach.children.length) return;
-            try {
-                const cacKhung = await fetch('/api/khung-anh').then(phanHoi => phanHoi.json());
-                cacKhung.forEach((khung, viTri) => {
-                    const nut = document.createElement('button');
-                    nut.type = 'button';
-                    nut.className = `lua-chon-khung ${viTri === 0 ? 'kich-hoat' : ''}`;
-                    nut.innerHTML = `<img src="${khung.url}" alt="${khung.ten}"><span>${khung.ten}</span>`;
-                    nut.onclick = () => {
-                        document.querySelectorAll('.lua-chon-khung').forEach(item => item.classList.remove('kich-hoat'));
-                        nut.classList.add('kich-hoat');
-                        khungPhotoboothHienTai = khung;
-                        document.getElementById('khung-overlay-photobooth').src = khung.url;
-                        if (anhNguonPhotobooth) vePhotobooth(anhNguonPhotobooth);
-                    };
-                    danhSach.appendChild(nut);
-                });
-                if (cacKhung.length) {
-                    khungPhotoboothHienTai = cacKhung[0];
-                    document.getElementById('khung-overlay-photobooth').src = cacKhung[0].url;
-                }
-            } catch (loi) {
-                document.getElementById('thong-bao-photobooth').textContent = 'Không thể tải danh sách khung ảnh.';
-            }
-        }
-
-        async function batCamera() {
-            const thongBao = document.getElementById('thong-bao-photobooth');
-            try {
-                if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}, audio: false});
-                const video = document.getElementById('camera-photobooth');
-                video.srcObject = cameraStream;
-                video.classList.add('hien-thi');
-                document.getElementById('canvas-photobooth').classList.remove('hien-thi');
-                document.getElementById('photobooth-placeholder').classList.add('hidden');
-                thongBao.textContent = 'Camera đã sẵn sàng.';
-            } catch (loi) {
-                thongBao.textContent = 'Không thể mở camera. Hãy cấp quyền camera hoặc tải ảnh từ thiết bị.';
-            }
-        }
-
-        async function vePhotobooth(nguon) {
-            const canvas = document.getElementById('canvas-photobooth');
-            const context = canvas.getContext('2d');
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            veAnhCover(context, nguon, canvas.width, canvas.height);
-            if (khungPhotoboothHienTai) {
-                const khung = new Image();
-                khung.onload = () => context.drawImage(khung, 0, 0, canvas.width, canvas.height);
-                khung.src = khungPhotoboothHienTai.url;
-            }
-            canvas.classList.add('hien-thi');
-            document.getElementById('camera-photobooth').classList.remove('hien-thi');
-            document.getElementById('photobooth-placeholder').classList.add('hidden');
-        }
-
-        function chupAnhPhotobooth() {
-            const video = document.getElementById('camera-photobooth');
-            if (video.srcObject && video.readyState >= 2) {
-                anhNguonPhotobooth = video;
-                vePhotobooth(video);
-                document.getElementById('thong-bao-photobooth').textContent = 'Đã chụp ảnh. Bạn có thể đổi khung hoặc tải xuống.';
-            } else if (anhNguonPhotobooth) {
-                vePhotobooth(anhNguonPhotobooth);
-            } else {
-                document.getElementById('thong-bao-photobooth').textContent = 'Hãy bật camera hoặc tải ảnh trước.';
-            }
-        }
-
-        function taiAnhPhotobooth() {
-            const canvas = document.getElementById('canvas-photobooth');
-            if (!canvas.classList.contains('hien-thi')) {
-                document.getElementById('thong-bao-photobooth').textContent = 'Hãy chụp hoặc tải ảnh trước.';
-                return;
-            }
-            const lienKet = document.createElement('a');
-            lienKet.download = `world-cup-photobooth-${Date.now()}.png`;
-            lienKet.href = canvas.toDataURL('image/png');
-            lienKet.click();
-        }
-
-        document.getElementById('tai-anh-photobooth').addEventListener('change', suKien => {
-            const tep = suKien.target.files[0];
-            if (!tep) return;
-            const anh = new Image();
-            anh.onload = () => {
-                anhNguonPhotobooth = anh;
-                vePhotobooth(anh);
-            };
-            anh.src = URL.createObjectURL(tep);
-        });
-
         // Tải dữ liệu mô hình
         const taiDuLieuMoHinh = async () => {
             if (duLieuMoHinh) return;
             try {
                 const phanHoi = await fetch('/api/so-lieu-mo-hinh');
                 duLieuMoHinh = await phanHoi.json();
-                
+
                 const thanBang = document.getElementById('than-so-lieu-mo-hinh');
                 thanBang.innerHTML = '';
-                
+
                 duLieuMoHinh.so_lieu.forEach(dong => {
                     const tr = document.createElement('tr');
                     tr.className = `border-b border-gray-200 hover:bg-gray-50 transition text-xs ${dong.duoc_chon ? 'bg-blue-50/40 font-bold' : ''}`;
-                    
+
                     tr.innerHTML = `
                         <td class="py-4.5 px-4 text-[#1f1f1f] font-bold flex items-center gap-2">
                             ${dong.duoc_chon ? '<span class="bong-tron-co bg-[#0b57d0] text-white">RF</span>' : ''}
@@ -1328,23 +1356,29 @@
 
         // Chuyển tab
         function chuyenTab(tenTab) {
-            const cacTab = ['gia-lap', 'lich-thi-dau', 'vong-bang', 'knockout', 'mo-hinh'];
-            
+            const cacTab = ['gia-lap', 'lich-thi-dau', 'lich-du-doan', 'vong-bang', 'knockout', 'mo-hinh'];
+
             cacTab.forEach(tab => {
                 const nut = document.getElementById(`tab-${tab}`);
                 const khung = document.getElementById(`khung-${tab}`);
-                
+
                 if (tab === tenTab) {
-                    nut.classList.add('kich-hoat');
+                    nut?.classList.add('kich-hoat');
                     khung.classList.remove('hidden');
                 } else {
-                    nut.classList.remove('kich-hoat');
+                    nut?.classList.remove('kich-hoat');
                     khung.classList.add('hidden');
                 }
             });
-            
+            document.querySelector('.nut-menu-giai-dau')?.classList.toggle(
+                'kich-hoat',
+                ['vong-bang', 'knockout', 'mo-hinh'].includes(tenTab)
+            );
+
             if (tenTab === 'lich-thi-dau') {
                 taiDuLieuLichThiDau();
+            } else if (tenTab === 'lich-du-doan') {
+                taiDuLieuLichDuDoan();
             } else if (tenTab === 'vong-bang') {
                 taiDuLieuVongBang();
             } else if (tenTab === 'knockout') {
@@ -1357,20 +1391,20 @@
         // Mở trình giả lập và tự động dự đoán cho cặp đấu cụ thể
         function moGiaLapDoi(doiA, doiB, ngayDau = null) {
             chuyenTab('gia-lap');
-            
+
             const chonA = document.getElementById('chon-doi-a');
             const chonB = document.getElementById('chon-doi-b');
-            
+
             chonA.value = doiA;
             capNhatGiaoDienDoi('a');
-            
+
             chonB.value = doiB;
             capNhatGiaoDienDoi('b');
 
             if (ngayDau) {
                 document.getElementById('ngay-dau').value = ngayDau;
             }
-            
+
             chayGiaLapTranDau();
         }
 
@@ -1380,7 +1414,6 @@
             capNhatNutTheme();
             taiDanhSachDoiBong();
             taiDanhSachThuatToan();
-            taiKhungPhotobooth();
         });
     </script>
 </body>

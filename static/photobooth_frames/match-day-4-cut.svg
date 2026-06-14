@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1800" viewBox="0 0 1200 1800">
+  <path fill="#0d2c1b" fill-rule="evenodd" d="M0 0h1200v1800H0zM320 100h560v330H320zM320 450h560v330H320zM320 800h560v330H320zM320 1150h560v330H320z"/>
+  <rect x="270" y="45" width="660" height="1710" rx="20" fill="none" stroke="#1b3b52" stroke-width="5"/>
+  <path fill="#08131d" fill-rule="evenodd" d="M270 45h660v1710H270zM320 100h560v330H320zM320 450h560v330H320zM320 800h560v330H320zM320 1150h560v330H320z"/>
+  <path d="M270 1495h660v260H270z" fill="#0b1e2b"/>
+  <path d="M270 1495h660" stroke="#f5b914" stroke-width="6"/>
+  <text x="320" y="84" fill="#f1f5f2" font-family="Arial, sans-serif" font-size="22" font-weight="900" letter-spacing="4">MATCH DAY / 2026</text>
+  <text x="600" y="1588" fill="#f1f5f2" font-family="Arial, sans-serif" font-size="68" font-weight="900" text-anchor="middle">WORLD CUP</text>
+  <text x="600" y="1648" fill="#f5b914" font-family="Arial, sans-serif" font-size="45" font-weight="900" text-anchor="middle">FOUR CUTS</text>
+  <text x="600" y="1690" fill="#8fa99a" font-family="Arial, sans-serif" font-size="17" font-weight="700" letter-spacing="4" text-anchor="middle">AI PREDICTOR · MATCHDAY MEMORY</text>
+</svg>

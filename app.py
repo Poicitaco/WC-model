@@ -28,11 +28,63 @@ DUONG_DAN_ADMIN_AN = os.environ.get("ADMIN_PATH", "quan-tri-khung-anh-24022941")
 DINH_DANG_KHUNG_CHO_PHEP = {".png", ".webp", ".svg"}
 INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "").rstrip("/")
 INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "")
+FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "c20d6c506f214513ac824b7432783fc8")
 
 # Dữ liệu kết quả đã mô phỏng sẵn trong thư mục outputs
 duong_dan_kq_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_stage_predictions_with_scores.csv")
 duong_dan_bxh_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_standings_best_model.csv")
 duong_dan_kq_knockout = os.path.join(DUONG_DAN_GOC, "outputs", "knockout_predictions_best_model.csv")
+
+BO_NHO_LICH_API = {"du_lieu": None, "thoi_gian": 0}
+
+
+def lay_lich_thi_dau_tu_api():
+    if not FOOTBALL_API_TOKEN:
+        return None
+
+    # URL API Football-Data.org (World Cup: WC)
+    url = "https://api.football-data.org/v4/competitions/WC/matches"
+    headers = {"X-Auth-Token": FOOTBALL_API_TOKEN}
+    yeu_cau = urllib.request.Request(url, headers=headers)
+
+    try:
+        with urllib.request.urlopen(yeu_cau, timeout=15) as phan_hoi:
+            # Kiểm tra headers để theo dõi giới hạn (Rate Limiting)
+            gioi_han_con_lai = phan_hoi.getheader("X-Requests-Available-Minute")
+            if gioi_han_con_lai:
+                print(f"API Football - Số lượt gọi còn lại trong phút: {gioi_han_con_lai}")
+
+            du_lieu = json.loads(phan_hoi.read().decode("utf-8"))
+            danh_sach_tran = []
+            for tran in du_lieu.get("matches", []):
+                doi_a = tran["homeTeam"]["name"]
+                doi_b = tran["awayTeam"]["name"]
+
+                bt_a = tran.get("score", {}).get("fullTime", {}).get("home")
+                bt_b = tran.get("score", {}).get("fullTime", {}).get("away")
+
+                danh_sach_tran.append({
+                    "vong": str(tran.get("stage", "")).replace("_", " ").title(),
+                    "ma_tran": tran.get("id"),
+                    "bang": str(tran.get("group", "")).replace("GROUP_", ""),
+                    "ngay_gio": str(tran.get("utcDate", "")).replace("T", " ").replace("Z", "")[:16],
+                    "doi_a": chuan_hoa_ten_doi(doi_a),
+                    "doi_b": chuan_hoa_ten_doi(doi_b),
+                    "ban_thang_a": int(bt_a) if bt_a is not None else 0,
+                    "ban_thang_b": int(bt_b) if bt_b is not None else 0,
+                    "trang_thai": tran.get("status")
+                })
+            return danh_sach_tran
+    except urllib.error.HTTPError as e:
+        if e.code == 429:
+            print("API Football - Đang bị giới hạn lượt gọi (Rate Limit). Đợi 1 phút.")
+        else:
+            print(f"Lỗi HTTP từ Football API: {e.code}")
+        return None
+    except Exception as e:
+        print(f"Lỗi hệ thống khi gọi Football API: {e}")
+        return None
+
 
 # Đọc các bảng dữ liệu
 bo_du_lieu_tran_dau = pd.read_csv(duong_dan_lich_su, encoding="utf-8-sig")
@@ -202,16 +254,53 @@ def chuan_hoa_ten_doi(ten_doi_goc):
 
 
 def doc_danh_sach_khung_anh():
+    danh_sach = []
     if os.path.exists(duong_dan_cau_hinh_khung):
         with open(duong_dan_cau_hinh_khung, "r", encoding="utf-8") as tep:
-            return json.load(tep)
-    return []
+            danh_sach = json.load(tep)
+
+    # Đọc thêm từ Vercel Blob nếu có
+    token = os.environ.get("BLOB_READ_WRITE_TOKEN", "vercel_blob_rw_JMlmEp15tU60RKY0_F7PIXsiCGUvnzW9ecumhMHX0eRsc2f")
+    if token:
+        try:
+            req = urllib.request.Request("https://blob.vercel-storage.com/")
+            req.add_header("Authorization", f"Bearer {token}")
+            with urllib.request.urlopen(req, timeout=5) as res:
+                blobs = json.loads(res.read()).get("blobs", [])
+                for b in blobs:
+                    pn = b.get("pathname", "")
+                    if pn.startswith("frames/"):
+                        ten_file = pn[7:]
+                        cuts = 2
+                        cac_phan = ten_file.split("__", 2)
+                        if len(cac_phan) == 3 and cac_phan[0] in {"2cut", "4cut"}:
+                            cuts = int(cac_phan[0][0])
+                            ten_hien_thi, ten_goc = cac_phan[1], cac_phan[2]
+                        elif "__" in ten_file:
+                            ten_hien_thi, ten_goc = ten_file.split("__", 1)
+                        else:
+                            ten_hien_thi = os.path.splitext(ten_file)[0]
+                            ten_goc = ten_file
+
+                        danh_sach.append({
+                            "id": b.get("url"),
+                            "ten": ten_hien_thi.replace("_", " "),
+                            "tep": ten_goc,
+                            "url": b.get("url"),
+                            "cuts": cuts
+                        })
+        except Exception as e:
+            print("Lỗi đọc Vercel Blob:", e)
+
+    return danh_sach
 
 
 def luu_danh_sach_khung_anh(danh_sach):
+    # Cập nhật mảng local
+    danh_sach_local = [k for k in danh_sach if not str(k.get("url", "")).startswith("http")]
     os.makedirs(duong_dan_khung_anh, exist_ok=True)
     with open(duong_dan_cau_hinh_khung, "w", encoding="utf-8") as tep:
-        json.dump(danh_sach, tep, ensure_ascii=False, indent=2)
+        json.dump(danh_sach_local, tep, ensure_ascii=False, indent=2)
 
 
 def admin_hop_le():
@@ -239,23 +328,23 @@ if "doi" in bo_du_lieu_wc_groups.columns:
 def lay_thong_ke_phong_do_doi_bong(doi, ngay_dau, so_tran=5):
     doi = chuan_hoa_ten_doi(doi)
     ngay_dau = pd.to_datetime(ngay_dau)
-    
+
     lich_su = bo_du_lieu_tran_dau[
         ((bo_du_lieu_tran_dau["doi_a"] == doi) | (bo_du_lieu_tran_dau["doi_b"] == doi)) &
         (bo_du_lieu_tran_dau["date"] < ngay_dau)
     ].sort_values("date").tail(so_tran)
-    
+
     if lich_su.empty:
         return {
             "phong_do_5": 0.0,
             "ban_thang_tb_5": 0.0,
             "ban_thua_tb_5": 0.0
         }
-    
+
     diem_phong_do = []
     so_ban_thang = []
     so_ban_thua = []
-    
+
     for _, dong in lich_su.iterrows():
         if dong["doi_a"] == doi:
             bt = float(dong["ban_thang_a"])
@@ -263,17 +352,17 @@ def lay_thong_ke_phong_do_doi_bong(doi, ngay_dau, so_tran=5):
         else:
             bt = float(dong["ban_thang_b"])
             bb = float(dong["ban_thang_a"])
-            
+
         if bt > bb:
             diem_phong_do.append(3)
         elif bt == bb:
             diem_phong_do.append(1)
         else:
             diem_phong_do.append(0)
-            
+
         so_ban_thang.append(bt)
         so_ban_thua.append(bb)
-        
+
     return {
         "phong_do_5": float(np.mean(diem_phong_do)),
         "ban_thang_tb_5": float(np.mean(so_ban_thang)),
@@ -285,16 +374,16 @@ def lay_diem_doi_dau(doi_a, doi_b, ngay_dau, so_tran=5):
     doi_a = chuan_hoa_ten_doi(doi_a)
     doi_b = chuan_hoa_ten_doi(doi_b)
     ngay_dau = pd.to_datetime(ngay_dau)
-    
+
     doi_dau = bo_du_lieu_tran_dau[
         (((bo_du_lieu_tran_dau["doi_a"] == doi_a) & (bo_du_lieu_tran_dau["doi_b"] == doi_b)) |
          ((bo_du_lieu_tran_dau["doi_a"] == doi_b) & (bo_du_lieu_tran_dau["doi_b"] == doi_a))) &
         (bo_du_lieu_tran_dau["date"] < ngay_dau)
     ].sort_values("date").tail(so_tran)
-    
+
     if doi_dau.empty:
         return 0.0
-        
+
     diem_doi_dau = []
     for _, dong in doi_dau.iterrows():
         if dong["doi_a"] == doi_a:
@@ -303,44 +392,44 @@ def lay_diem_doi_dau(doi_a, doi_b, ngay_dau, so_tran=5):
         else:
             bt_a = float(dong["ban_thang_b"])
             bt_b = float(dong["ban_thang_a"])
-            
+
         if bt_a > bt_b:
             diem_doi_dau.append(3)
         elif bt_a == bt_b:
             diem_doi_dau.append(1)
         else:
             diem_doi_dau.append(0)
-            
+
     return float(np.mean(diem_doi_dau))
 
 
 def lay_hang_fifa_moi_nhat(doi, ngay_dau):
     doi = chuan_hoa_ten_doi(doi)
     ngay_dau = pd.to_datetime(ngay_dau)
-    
+
     if "team" not in bo_du_lieu_fifa.columns:
         return 210.0
-        
+
     cot_hang = None
     for ten_cot in ["rank", "ranking", "fifa_rank"]:
         if ten_cot in bo_du_lieu_fifa.columns:
             cot_hang = ten_cot
             break
-            
+
     if cot_hang is None:
         return 210.0
-        
+
     lich_su_hang = bo_du_lieu_fifa[
         (bo_du_lieu_fifa["team"] == doi) &
         (bo_du_lieu_fifa["date"] <= ngay_dau)
     ].sort_values("date")
-    
+
     if lich_su_hang.empty:
         lich_su_tat_ca = bo_du_lieu_fifa[bo_du_lieu_fifa["team"] == doi].sort_values("date")
         if lich_su_tat_ca.empty:
             return 210.0
         return float(lich_su_tat_ca.iloc[-1][cot_hang])
-        
+
     return float(lich_su_hang.iloc[-1][cot_hang])
 
 
@@ -348,15 +437,15 @@ def lay_elo_hien_tai(doi):
     doi = chuan_hoa_ten_doi(doi)
     if "team" not in bo_du_lieu_elo.columns:
         return 1500.0
-        
+
     thong_tin_elo = bo_du_lieu_elo[bo_du_lieu_elo["team"] == doi]
     if thong_tin_elo.empty:
         return 1500.0
-        
+
     for ten_cot in ["elo_rating", "rating", "elo"]:
         if ten_cot in thong_tin_elo.columns:
             return float(thong_tin_elo.iloc[0][ten_cot])
-            
+
     return 1500.0
 
 
@@ -372,7 +461,7 @@ def lay_kinh_nghiem_wc(doi):
             "so_tran_wc": 0.0,
             "so_tran_thang_wc": 0.0
         }
-        
+
     thong_tin_kinh_nghiem = bo_du_lieu_wc_exp[bo_du_lieu_wc_exp["team"] == doi]
     if thong_tin_kinh_nghiem.empty:
         return {
@@ -380,7 +469,7 @@ def lay_kinh_nghiem_wc(doi):
             "so_tran_wc": 0.0,
             "so_tran_thang_wc": 0.0
         }
-        
+
     dong_tin = thong_tin_kinh_nghiem.iloc[0]
     return {
         "so_lan_du_wc": float(dong_tin.get("so_lan_du_wc", dong_tin.get("wc_appearances", 0))),
@@ -398,22 +487,22 @@ def tao_dac_trung_tran_dau(doi_a, doi_b, ngay_dau, san_trung_lap=1):
     doi_a = chuan_hoa_ten_doi(doi_a)
     doi_b = chuan_hoa_ten_doi(doi_b)
     ngay_dau = pd.to_datetime(ngay_dau)
-    
+
     phong_do_a = lay_thong_ke_phong_do_doi_bong(doi_a, ngay_dau)
     phong_do_b = lay_thong_ke_phong_do_doi_bong(doi_b, ngay_dau)
-    
+
     doi_dau_a = lay_diem_doi_dau(doi_a, doi_b, ngay_dau)
     doi_dau_b = lay_diem_doi_dau(doi_b, doi_a, ngay_dau)
-    
+
     hang_a = lay_hang_fifa_moi_nhat(doi_a, ngay_dau)
     hang_b = lay_hang_fifa_moi_nhat(doi_b, ngay_dau)
-    
+
     elo_a = lay_elo_hien_tai(doi_a)
     elo_b = lay_elo_hien_tai(doi_b)
-    
+
     wc_a = lay_kinh_nghiem_wc(doi_a)
     wc_b = lay_kinh_nghiem_wc(doi_b)
-    
+
     dong_dac_trung = {
         "chenh_lech_phong_do": phong_do_a["phong_do_5"] - phong_do_b["phong_do_5"],
         "chenh_lech_ban_thang_tb": phong_do_a["ban_thang_tb_5"] - phong_do_b["ban_thang_tb_5"],
@@ -428,7 +517,7 @@ def tao_dac_trung_tran_dau(doi_a, doi_b, ngay_dau, san_trung_lap=1):
         "is_host_team_A": la_doi_chu_nha(doi_a),
         "is_host_team_B": la_doi_chu_nha(doi_b)
     }
-    
+
     df_dac_trung = pd.DataFrame([dong_dac_trung])
     df_dac_trung = df_dac_trung[danh_sach_cot_dac_trung].copy()
     return df_dac_trung, dong_dac_trung
@@ -437,13 +526,13 @@ def tao_dac_trung_tran_dau(doi_a, doi_b, ngay_dau, san_trung_lap=1):
 def lay_xac_suat_ket_qua(model, X_match):
     xac_suat_tho = model.predict_proba(X_match)[0]
     cac_lop = list(model.classes_)
-    
+
     ti_le = {
         "p_a_thua": 0.0,
         "p_hoa": 0.0,
         "p_a_thang": 0.0
     }
-    
+
     for lop, p in zip(cac_lop, xac_suat_tho):
         if lop == 0:
             ti_le["p_a_thua"] = float(p)
@@ -451,7 +540,7 @@ def lay_xac_suat_ket_qua(model, X_match):
             ti_le["p_hoa"] = float(p)
         elif lop == 2:
             ti_le["p_a_thang"] = float(p)
-            
+
     return ti_le
 
 
@@ -469,7 +558,7 @@ def gia_lap_ty_so_tran_dau(nhan, ti_le_dict):
     p_a_thua = ti_le_dict["p_a_thua"]
     p_hoa = ti_le_dict["p_hoa"]
     p_a_thang = ti_le_dict["p_a_thang"]
-    
+
     if nhan == 2:  # Đội A thắng
         if p_a_thang >= 0.75:
             return 3, 1
@@ -500,6 +589,17 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/photobooth")
+def trang_photobooth():
+    return render_template("photobooth.html")
+
+
+@app.route("/thuyettrinh")
+def thuyet_trinh():
+    from flask import redirect
+    return redirect("/static/presentation/index.html")
+
+
 @app.route(f"/{DUONG_DAN_ADMIN_AN}")
 def trang_admin_khung_anh():
     return render_template("admin_photobooth.html")
@@ -517,6 +617,9 @@ def api_them_khung_anh():
 
     tep = request.files.get("khung_anh")
     ten_hien_thi = request.form.get("ten_hien_thi", "").strip()
+    so_cut = request.form.get("so_cut", "2").strip()
+    if so_cut not in {"2", "4"}:
+        return jsonify({"loi": "Số cut chỉ có thể là 2 hoặc 4"}), 400
     if not tep or not tep.filename:
         return jsonify({"loi": "Chưa chọn tệp khung ảnh"}), 400
 
@@ -525,26 +628,55 @@ def api_them_khung_anh():
     if phan_mo_rong not in DINH_DANG_KHUNG_CHO_PHEP:
         return jsonify({"loi": "Chỉ hỗ trợ PNG, WEBP hoặc SVG"}), 400
 
-    try:
-        os.makedirs(duong_dan_khung_anh, exist_ok=True)
-        tep.save(os.path.join(duong_dan_khung_anh, ten_tep))
-        danh_sach = [khung for khung in doc_danh_sach_khung_anh() if khung["tep"] != ten_tep]
-        danh_sach.append({
-            "id": os.path.splitext(ten_tep)[0],
-            "ten": ten_hien_thi or os.path.splitext(ten_tep)[0].replace("-", " ").title(),
-            "tep": ten_tep,
-            "url": f"/static/photobooth_frames/{ten_tep}"
-        })
-        luu_danh_sach_khung_anh(danh_sach)
-        return jsonify({"thanh_cong": True, "khung_anh": danh_sach[-1]})
-    except OSError:
-        return jsonify({
-            "loi": "Máy chủ hiện không cho phép ghi tệp. Với Vercel, hãy dùng kho lưu trữ ngoài như Cloudinary hoặc Blob."
-        }), 503
+    token = os.environ.get("BLOB_READ_WRITE_TOKEN", "vercel_blob_rw_JMlmEp15tU60RKY0_F7PIXsiCGUvnzW9ecumhMHX0eRsc2f")
+    if token:
+        # Nếu có token thì upload lên Vercel Blob
+        try:
+            ten_hien_thi_blob = ten_hien_thi.replace(" ", "_") if ten_hien_thi else os.path.splitext(ten_tep)[0].replace("-", "_")
+            pathname = f"frames/{so_cut}cut__{ten_hien_thi_blob}__{ten_tep}"
+            url = f"https://blob.vercel-storage.com/{urllib.parse.quote(pathname)}"
+
+            req = urllib.request.Request(url, data=tep.read(), method="PUT")
+            req.add_header("Authorization", f"Bearer {token}")
+            req.add_header("Content-Type", tep.content_type)
+            with urllib.request.urlopen(req) as res:
+                blob_info = json.loads(res.read())
+
+            return jsonify({"thanh_cong": True, "khung_anh": {
+                "id": blob_info.get("url"),
+                "ten": ten_hien_thi or os.path.splitext(ten_tep)[0].replace("-", " ").title(),
+                "tep": ten_tep,
+                "url": blob_info.get("url"),
+                "cuts": int(so_cut)
+            }})
+        except Exception as e:
+            return jsonify({"loi": f"Lỗi upload Vercel Blob: {str(e)}"}), 503
+    else:
+        # Fallback lưu vào ổ đĩa khi chạy local không có token
+        try:
+            os.makedirs(duong_dan_khung_anh, exist_ok=True)
+            tep.save(os.path.join(duong_dan_khung_anh, ten_tep))
+            danh_sach = [khung for khung in doc_danh_sach_khung_anh() if khung["tep"] != ten_tep]
+            danh_sach.append({
+                "id": os.path.splitext(ten_tep)[0],
+                "ten": ten_hien_thi or os.path.splitext(ten_tep)[0].replace("-", " ").title(),
+                "tep": ten_tep,
+                "url": f"/static/photobooth_frames/{ten_tep}",
+                "cuts": int(so_cut)
+            })
+            luu_danh_sach_khung_anh(danh_sach)
+            return jsonify({"thanh_cong": True, "khung_anh": danh_sach[-1]})
+        except OSError:
+            return jsonify({
+                "loi": "Máy chủ hiện không cho phép ghi tệp. Với Vercel, hãy cấu hình biến môi trường BLOB_READ_WRITE_TOKEN."
+            }), 503
 
 
-@app.route("/api/admin/khung-anh/<khung_id>", methods=["DELETE"])
-def api_xoa_khung_anh(khung_id):
+@app.route("/api/admin/khung-anh", methods=["DELETE"])
+def api_xoa_khung_anh():
+    khung_id = request.json.get("id") if request.is_json else None
+    if not khung_id:
+        return jsonify({"loi": "Thiếu ID khung ảnh"}), 400
     if not admin_hop_le():
         return jsonify({"loi": "Sai mật khẩu quản trị"}), 401
 
@@ -553,14 +685,27 @@ def api_xoa_khung_anh(khung_id):
     if not khung_can_xoa:
         return jsonify({"loi": "Không tìm thấy khung ảnh"}), 404
 
-    try:
-        duong_dan_tep = os.path.join(duong_dan_khung_anh, khung_can_xoa["tep"])
-        if os.path.exists(duong_dan_tep):
-            os.remove(duong_dan_tep)
-        luu_danh_sach_khung_anh([khung for khung in danh_sach if khung["id"] != khung_id])
-        return jsonify({"thanh_cong": True})
-    except OSError:
-        return jsonify({"loi": "Máy chủ hiện không cho phép xóa tệp"}), 503
+    token = os.environ.get("BLOB_READ_WRITE_TOKEN", "vercel_blob_rw_JMlmEp15tU60RKY0_F7PIXsiCGUvnzW9ecumhMHX0eRsc2f")
+    if khung_id.startswith("http") and token:
+        try:
+            req = urllib.request.Request("https://blob.vercel-storage.com/delete", method="POST")
+            req.add_header("Authorization", f"Bearer {token}")
+            req.add_header("Content-Type", "application/json")
+            data = json.dumps({"urls": [khung_id]}).encode("utf-8")
+            with urllib.request.urlopen(req, data=data) as res:
+                pass
+            return jsonify({"thanh_cong": True})
+        except Exception as e:
+            return jsonify({"loi": f"Lỗi xóa Vercel Blob: {str(e)}"}), 503
+    else:
+        try:
+            duong_dan_tep = os.path.join(duong_dan_khung_anh, khung_can_xoa["tep"])
+            if os.path.exists(duong_dan_tep):
+                os.remove(duong_dan_tep)
+            luu_danh_sach_khung_anh([khung for khung in danh_sach if khung["id"] != khung_id])
+            return jsonify({"thanh_cong": True})
+        except OSError:
+            return jsonify({"loi": "Máy chủ hiện không cho phép xóa tệp"}), 503
 
 
 # API 1: Trả về danh sách tất cả các đội tuyển và bảng đấu
@@ -571,11 +716,11 @@ def api_danh_sach_doi():
         ten_doi = dong["doi"]
         chuan_ten = chuan_hoa_ten_doi(ten_doi)
         bang = dong["bang"]
-        
+
         hang_fifa = lay_hang_fifa_moi_nhat(chuan_ten, "2026-06-01")
         elo = lay_elo_hien_tai(chuan_ten)
         wc_exp = lay_kinh_nghiem_wc(chuan_ten)
-        
+
         danh_sach_doi.append({
             "ten": chuan_ten,
             "bang": bang,
@@ -586,7 +731,7 @@ def api_danh_sach_doi():
             "so_tran_thang_wc": wc_exp["so_tran_thang_wc"],
             "la_chu_nha": la_doi_chu_nha(chuan_ten)
         })
-        
+
     # Sắp xếp theo bảng đấu
     danh_sach_doi.sort(key=lambda x: (x["bang"], x["ten"]))
     return jsonify(danh_sach_doi)
@@ -625,19 +770,19 @@ def api_du_doan_tran_dau():
     du_lieu_nhan = request.json
     if not du_lieu_nhan:
         return jsonify({"loi": "Du lieu yeu cau khong hop le!"}), 400
-        
+
     doi_a = du_lieu_nhan.get("doi_a")
     doi_b = du_lieu_nhan.get("doi_b")
     ngay_dau = du_lieu_nhan.get("ngay_gio", "2026-06-11")
     san_trung_lap = du_lieu_nhan.get("san_trung_lap", 1)
     ten_thuat_toan = du_lieu_nhan.get("thuat_toan", "random_forest_tuned")
-    
+
     if not doi_a or not doi_b:
         return jsonify({"loi": "Thieu ten doi bong!"}), 400
-        
+
     if doi_a == doi_b:
         return jsonify({"loi": "Hai doi bong phai khac nhau!"}), 400
-        
+
     try:
         X_tran_dau, chi_tiet_dac_trung = tao_dac_trung_tran_dau(
             doi_a=doi_a,
@@ -645,7 +790,7 @@ def api_du_doan_tran_dau():
             ngay_dau=ngay_dau,
             san_trung_lap=san_trung_lap
         )
-        
+
         cau_hinh_thuat_toan = CAU_HINH_THUAT_TOAN.get(ten_thuat_toan)
         if not cau_hinh_thuat_toan:
             return jsonify({"loi": "Thuật toán không hợp lệ"}), 400
@@ -662,11 +807,11 @@ def api_du_doan_tran_dau():
             nguon_inference = "Máy chủ hiện tại"
 
         ket_qua_du_doan = giai_ma_nhan_du_doan(nhan_du_doan)
-        
+
         ban_thang_a, ban_thang_b = gia_lap_ty_so_tran_dau(nhan_du_doan, xac_suat_ti_le)
-        
+
         doi_thang = doi_a if nhan_du_doan == 2 else (doi_b if nhan_du_doan == 0 else "Hòa")
-        
+
         # Thống kê bổ sung cho giao diện
         thong_tin_doi_a = {
             "ten": doi_a,
@@ -682,7 +827,7 @@ def api_du_doan_tran_dau():
             "wc_exp": lay_kinh_nghiem_wc(doi_b),
             "phong_do": lay_thong_ke_phong_do_doi_bong(doi_b, ngay_dau)
         }
-        
+
         ket_qua_tra_ve = {
             "doi_a": doi_a,
             "doi_b": doi_b,
@@ -701,7 +846,7 @@ def api_du_doan_tran_dau():
             "thong_tin_doi_b": thong_tin_doi_b
         }
         return jsonify(ket_qua_tra_ve)
-        
+
     except Exception as e:
         return jsonify({"loi": f"Co loi xay ra: {str(e)}"}), 500
 
@@ -712,10 +857,10 @@ def api_du_doan_vong_bang():
     try:
         df_du_doan = pd.read_csv(duong_dan_kq_vong_bang, encoding="utf-8-sig").fillna("")
         df_bxh = pd.read_csv(duong_dan_bxh_vong_bang, encoding="utf-8-sig").fillna("")
-        
+
         danh_sach_tran = df_du_doan.to_dict(orient="records")
         danh_sach_bxh = df_bxh.to_dict(orient="records")
-        
+
         # Gom nhóm BXH theo bảng đấu
         bxh_theo_bang = {}
         for dong in danh_sach_bxh:
@@ -723,11 +868,11 @@ def api_du_doan_vong_bang():
             if bang_dau not in bxh_theo_bang:
                 bxh_theo_bang[bang_dau] = []
             bxh_theo_bang[bang_dau].append(dong)
-            
+
         # Sắp xếp mỗi bảng theo thứ hạng
         for bang_dau in bxh_theo_bang:
             bxh_theo_bang[bang_dau].sort(key=lambda x: x["hang"])
-            
+
         return jsonify({
             "danh_sach_tran": danh_sach_tran,
             "bxh_theo_bang": bxh_theo_bang
@@ -800,6 +945,54 @@ def api_lich_thi_dau():
 
 
 # API 6: Trả về số liệu đánh giá mô hình
+@app.route("/api/lich-thi-dau-chinh-thuc", methods=["GET"])
+def api_lich_thi_dau_chinh_thuc():
+    import time
+    bay_gio = time.time()
+
+    # Thử lấy từ cache API trước
+    danh_sach_tran = None
+    if BO_NHO_LICH_API["du_lieu"] and (bay_gio - BO_NHO_LICH_API["thoi_gian"] < 600):
+        danh_sach_tran = BO_NHO_LICH_API["du_lieu"]
+    else:
+        du_lieu_api = lay_lich_thi_dau_tu_api()
+        if du_lieu_api:
+            BO_NHO_LICH_API["du_lieu"] = du_lieu_api
+            BO_NHO_LICH_API["thoi_gian"] = bay_gio
+            danh_sach_tran = du_lieu_api
+
+    if not danh_sach_tran:
+        try:
+            cac_tep = [
+                os.path.join(DUONG_DAN_GOC, "data_processed", "wc2026_schedule_group_clean.csv"),
+                os.path.join(DUONG_DAN_GOC, "data_processed", "wc2026_schedule_knockout_clean.csv")
+            ]
+            danh_sach_tran = []
+            for duong_dan in cac_tep:
+                if not os.path.exists(duong_dan): continue
+                for _, tran in pd.read_csv(duong_dan, encoding="utf-8-sig").fillna("").iterrows():
+                    danh_sach_tran.append({
+                        "vong": tran["vong"],
+                        "ma_tran": int(tran["ma_tran"]),
+                        "bang": "" if str(tran["bang"]).lower() == "nan" else tran["bang"],
+                        "ngay_gio": tran["ngay_gio"],
+                        "doi_a": tran["doi_a"],
+                        "doi_b": tran["doi_b"],
+                        "ban_thang_a": 0,
+                        "ban_thang_b": 0,
+                        "trang_thai": "TIMED"
+                    })
+        except Exception as e:
+            return jsonify({"loi": f"Khong thể đọc lịch thi đấu: {str(e)}"}), 500
+
+    danh_sach_tran.sort(key=lambda tran: tran["ngay_gio"])
+    return jsonify({
+        "cac_ngay": sorted({tran["ngay_gio"][:10] for tran in danh_sach_tran}),
+        "danh_sach_tran": danh_sach_tran,
+        "tong_so_tran": len(danh_sach_tran)
+    })
+
+
 @app.route("/api/so-lieu-mo-hinh", methods=["GET"])
 def api_so_lieu_mo_hinh():
     # Cung cấp tên hình ảnh phân tích đã được lưu
@@ -813,7 +1006,7 @@ def api_so_lieu_mo_hinh():
         "bump_chart": "/static/anh/model_ranking_bump_chart.png",
         "podium_compare": "/static/anh/top4_podium_mirror_rf_vs_xgb.png"
     }
-    
+
     # Số liệu chi tiết của Random Forest Tuned so với các mô hình khác
     so_lieu_so_sanh = [
         {
@@ -850,7 +1043,7 @@ def api_so_lieu_mo_hinh():
             "overfit_gap": 0.0943
         }
     ]
-    
+
     return jsonify({
         "hinh_anh": cac_anh,
         "so_lieu": so_lieu_so_sanh

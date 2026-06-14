@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="football">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Cup Photobooth</title>
+    <script>
+        if (window.location.protocol === 'file:') {
+            window.location.replace('https://wc-model.vercel.app/photobooth');
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=16">
+</head>
+<body class="trang-photobooth-doc-lap">
+    <a href="/quan-tri-khung-anh-24022941" class="nut-admin-an" aria-label="Mở trang quản lý khung" title="Quản lý khung">
+        <i class="ph ph-soccer-ball"></i>
+    </a>
+    <header class="photobooth-topbar">
+        <a href="/" class="thuong-hieu-photobooth">
+            <span class="logo-header"><i class="ph ph-soccer-ball"></i></span>
+            <span><strong>World Cup Photobooth</strong><small>AI Predictor 2026</small></span>
+        </a>
+        <a href="/" class="nut-hanh-dong-card"><i class="ph ph-arrow-left"></i> Về dashboard</a>
+    </header>
+
+    <main class="photobooth-page">
+        <section class="photobooth-page-heading">
+            <span class="admin-eyebrow">Kỷ niệm World Cup</span>
+            <h1>Tạo photostrip của bạn</h1>
+            <p>Chọn bố cục, chọn khung, sau đó chụp hoặc tải ảnh lên.</p>
+        </section>
+
+        <div class="photobooth-workspace">
+            <section class="photobooth-preview-panel">
+                <div class="photobooth-stage md3-card relative">
+                    <video id="camera-photobooth" autoplay playsinline muted></video>
+                    <canvas id="canvas-photobooth" width="1200" height="1800"></canvas>
+                    <div id="dem-nguoc-photobooth" class="dem-nguoc-photobooth hidden"></div>
+                    <div id="photobooth-placeholder" class="photobooth-placeholder">
+                        <i class="ph ph-camera"></i>
+                        <strong>Chưa có ảnh</strong>
+                        <span>Bật camera hoặc tải ảnh từ thiết bị</span>
+                    </div>
+                </div>
+                <div class="tien-do-cut">
+                    <span id="tien-do-cut-text">0/2 cut</span>
+                    <div><i id="tien-do-cut-bar"></i></div>
+                </div>
+            </section>
+
+            <aside class="photobooth-sidebar">
+                <section class="buoc-photobooth md3-card">
+                    <div class="tieu-de-buoc"><b>01</b><span><strong>Chọn bố cục</strong><small>Số ảnh trong photostrip</small></span></div>
+                    <div class="chon-so-cut-photobooth">
+                        <button type="button" class="lua-chon-so-cut kich-hoat" data-so-cut="2" onclick="chonSoCutPhotobooth(2)">2 cut</button>
+                        <button type="button" class="lua-chon-so-cut" data-so-cut="4" onclick="chonSoCutPhotobooth(4)">4 cut</button>
+                    </div>
+                </section>
+
+                <section class="buoc-photobooth md3-card">
+                    <div class="tieu-de-buoc"><b>02</b><span><strong>Chọn khung</strong><small>Chỉ hiện khung phù hợp</small></span></div>
+                    <div id="danh-sach-khung-photobooth" class="danh-sach-khung-photobooth"></div>
+                </section>
+
+                <section class="buoc-photobooth md3-card">
+                    <div class="tieu-de-buoc"><b>03</b><span><strong>Thêm ảnh</strong><small>Chụp hoặc tải lần lượt từng cut</small></span></div>
+                    <div class="photobooth-actions">
+                        <button type="button" onclick="batCamera()" class="nut-bam-chinh"><i class="ph ph-video-camera"></i> Bật camera</button>
+                        <label class="nut-hanh-dong-card primary photobooth-upload"><i class="ph ph-image-square"></i> Tải ảnh<input id="tai-anh-photobooth" type="file" accept="image/*" hidden></label>
+                        <button type="button" onclick="chupAnhPhotobooth()" class="nut-hanh-dong-card primary"><i class="ph ph-camera"></i> Chụp cut</button>
+                    </div>
+                </section>
+
+                <section class="photobooth-final-actions">
+                    <button type="button" onclick="chupLaiPhotobooth()" class="nut-hanh-dong-card"><i class="ph ph-arrow-clockwise"></i> Làm lại</button>
+                    <button type="button" onclick="taiAnhPhotobooth()" class="nut-bam-chinh"><i class="ph ph-download-simple"></i> Tải photostrip</button>
+                </section>
+                <p id="thong-bao-photobooth" class="photobooth-message">Chọn bố cục để bắt đầu.</p>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        let cameraStream = null;
+        let cacAnhChup = [];
+        let cacKhungPhotobooth = [];
+        let khungPhotoboothHienTai = null;
+        let soCutPhotobooth = 2;
+        let photoboothRAF = null;
+        const CAC_VUNG_CUT = {
+            2: [{x: 60, y: 60, rong: 1080, cao: 680}, {x: 60, y: 760, rong: 1080, cao: 680}],
+            4: [{x: 320, y: 100, rong: 560, cao: 330}, {x: 320, y: 450, rong: 560, cao: 330}, {x: 320, y: 800, rong: 560, cao: 330}, {x: 320, y: 1150, rong: 560, cao: 330}]
+        };
+
+        function bao(noiDung) {
+            document.getElementById('thong-bao-photobooth').textContent = noiDung;
+        }
+
+        function capNhatTienDo() {
+            document.getElementById('tien-do-cut-text').textContent = `${cacAnhChup.length}/${soCutPhotobooth} cut`;
+            document.getElementById('tien-do-cut-bar').style.width = `${cacAnhChup.length / soCutPhotobooth * 100}%`;
+        }
+
+        function hienThiKhung() {
+            const danhSach = document.getElementById('danh-sach-khung-photobooth');
+            const phuHop = cacKhungPhotobooth.filter(khung => Number(khung.cuts || 2) === soCutPhotobooth);
+            danhSach.innerHTML = '';
+            phuHop.forEach((khung, viTri) => {
+                const nut = document.createElement('button');
+                nut.type = 'button';
+                nut.className = `lua-chon-khung ${viTri === 0 ? 'kich-hoat' : ''}`;
+                nut.innerHTML = `<img src="${khung.url}" alt="${khung.ten}"><span>${khung.ten}</span>`;
+                nut.onclick = () => {
+                    document.querySelectorAll('.lua-chon-khung').forEach(item => item.classList.remove('kich-hoat'));
+                    nut.classList.add('kich-hoat');
+                    khungPhotoboothHienTai = khung;
+                    vePhotobooth();
+                };
+                danhSach.appendChild(nut);
+            });
+            khungPhotoboothHienTai = phuHop[0] || null;
+            vePhotobooth();
+        }
+
+        function chonSoCutPhotobooth(soCut) {
+            soCutPhotobooth = soCut;
+            cacAnhChup = [];
+            document.querySelectorAll('.lua-chon-so-cut').forEach(nut => nut.classList.toggle('kich-hoat', Number(nut.dataset.soCut) === soCut));
+            hienThiKhung();
+            capNhatTienDo();
+            bao(`Đã chọn bố cục ${soCut} cut.`);
+        }
+
+        function veAnhVaoVung(context, anh, vung, laVideo) {
+            if (!anh) return;
+            const srcW = anh.videoWidth || anh.naturalWidth || anh.width;
+            const srcH = anh.videoHeight || anh.naturalHeight || anh.height;
+            if (!srcW || !srcH) return;
+            const tiLe = Math.max(vung.rong / srcW, vung.cao / srcH);
+            const rongVe = srcW * tiLe;
+            const caoVe = srcH * tiLe;
+            context.save();
+            context.beginPath();
+            context.rect(vung.x, vung.y, vung.rong, vung.cao);
+            context.clip();
+            if (laVideo) {
+                context.translate(vung.x + vung.rong / 2, vung.y + vung.cao / 2);
+                context.scale(-1, 1);
+                context.translate(-(vung.x + vung.rong / 2), -(vung.y + vung.cao / 2));
+            }
+            context.drawImage(anh, vung.x + (vung.rong - rongVe) / 2, vung.y + (vung.cao - caoVe) / 2, rongVe, caoVe);
+            context.restore();
+        }
+
+        function vePhotobooth() {
+            if (photoboothRAF) cancelAnimationFrame(photoboothRAF);
+            const canvas = document.getElementById('canvas-photobooth');
+            const context = canvas.getContext('2d');
+            const video = document.getElementById('camera-photobooth');
+            const coVideo = video.readyState >= 2 && !video.paused;
+            context.fillStyle = '#071a10';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            CAC_VUNG_CUT[soCutPhotobooth].forEach((vung, viTri) => {
+                context.fillStyle = '#dce4df';
+                context.fillRect(vung.x, vung.y, vung.rong, vung.cao);
+                if (cacAnhChup[viTri]) veAnhVaoVung(context, cacAnhChup[viTri], vung, false);
+                else if (viTri === cacAnhChup.length && coVideo) veAnhVaoVung(context, video, vung, true);
+            });
+            if (khungPhotoboothHienTai) {
+                if (!window.khungCache || window.khungCacheUrl !== khungPhotoboothHienTai.url) {
+                    window.khungCache = new Image();
+                    window.khungCache.onload = vePhotobooth;
+                    window.khungCache.src = khungPhotoboothHienTai.url;
+                    window.khungCacheUrl = khungPhotoboothHienTai.url;
+                }
+                if (window.khungCache.complete) context.drawImage(window.khungCache, 0, 0, canvas.width, canvas.height);
+            }
+            canvas.classList.add('hien-thi');
+            document.getElementById('photobooth-placeholder').classList.add('hidden');
+            if (cacAnhChup.length < soCutPhotobooth && coVideo) photoboothRAF = requestAnimationFrame(vePhotobooth);
+        }
+
+        async function batCamera() {
+            try {
+                if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}, audio: false});
+                const video = document.getElementById('camera-photobooth');
+                video.srcObject = cameraStream;
+                video.onloadedmetadata = () => { video.play(); vePhotobooth(); };
+                bao('Camera đã sẵn sàng.');
+            } catch {
+                bao('Không thể mở camera. Hãy cấp quyền camera hoặc tải ảnh từ thiết bị.');
+            }
+        }
+
+        function themAnh(anh) {
+            if (cacAnhChup.length >= soCutPhotobooth) cacAnhChup = [];
+            cacAnhChup.push(anh);
+            capNhatTienDo();
+            vePhotobooth();
+            bao(cacAnhChup.length === soCutPhotobooth ? 'Photostrip đã đủ ảnh. Bạn có thể tải xuống.' : `Đã thêm cut ${cacAnhChup.length}/${soCutPhotobooth}.`);
+        }
+
+        function chupAnhPhotobooth() {
+            const video = document.getElementById('camera-photobooth');
+            if (!video.srcObject || video.readyState < 2) return bao('Hãy bật camera trước.');
+            const demNguoc = document.getElementById('dem-nguoc-photobooth');
+            let dem = 3;
+            demNguoc.textContent = dem;
+            demNguoc.classList.remove('hidden');
+            const interval = setInterval(() => {
+                dem--;
+                if (dem > 0) return demNguoc.textContent = dem;
+                clearInterval(interval);
+                demNguoc.classList.add('hidden');
+                const tam = document.createElement('canvas');
+                tam.width = video.videoWidth;
+                tam.height = video.videoHeight;
+                const ctx = tam.getContext('2d');
+                ctx.translate(tam.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(video, 0, 0);
+                const anh = new Image();
+                anh.onload = () => themAnh(anh);
+                anh.src = tam.toDataURL('image/png');
+            }, 1000);
+        }
+
+        function chupLaiPhotobooth() {
+            cacAnhChup = [];
+            capNhatTienDo();
+            vePhotobooth();
+            bao('Đã xóa các cut. Bạn có thể bắt đầu lại.');
+        }
+
+        function taiAnhPhotobooth() {
+            if (cacAnhChup.length !== soCutPhotobooth) return bao(`Hãy thêm đủ ${soCutPhotobooth} cut trước khi tải.`);
+            const lienKet = document.createElement('a');
+            lienKet.download = `world-cup-photobooth-${Date.now()}.png`;
+            lienKet.href = document.getElementById('canvas-photobooth').toDataURL('image/png');
+            lienKet.click();
+        }
+
+        document.getElementById('tai-anh-photobooth').addEventListener('change', suKien => {
+            const tep = suKien.target.files[0];
+            if (!tep) return;
+            const anh = new Image();
+            anh.onload = () => themAnh(anh);
+            anh.src = URL.createObjectURL(tep);
+            suKien.target.value = '';
+        });
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            cacKhungPhotobooth = await fetch('/api/khung-anh').then(phanHoi => phanHoi.json());
+            hienThiKhung();
+            capNhatTienDo();
+        });
+    </script>
+</body>
+</html>

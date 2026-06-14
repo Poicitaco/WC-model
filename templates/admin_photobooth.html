@@ -1,69 +1,174 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="football">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý khung Photobooth</title>
-    <link rel="stylesheet" href="/static/style.css?v=5">
+    <script>
+        if (window.location.protocol === 'file:') {
+            window.location.replace('https://wc-model.vercel.app/quan-tri-khung-anh-24022941');
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=16">
 </head>
 <body>
-    <main class="trang-admin">
-        <div class="admin-header">
-            <div>
-                <span class="admin-eyebrow">Admin ẩn</span>
-                <h1>Quản lý khung Photobooth</h1>
-                <p>Tải khung PNG, WEBP hoặc SVG trong suốt theo tỷ lệ dọc 4 × 6 inch. Kích thước đề xuất 1200 × 1800 px.</p>
-            </div>
-            <a href="/" class="nut-hanh-dong-card primary">Về trang chính</a>
+    <header class="admin-topbar">
+        <a href="/photobooth" class="thuong-hieu-photobooth">
+            <span class="logo-header"><i class="ph ph-frame-corners"></i></span>
+            <span><strong>Quản lý khung</strong><small>Photobooth Admin</small></span>
+        </a>
+        <div class="photobooth-actions">
+            <a href="/photobooth" class="nut-hanh-dong-card"><i class="ph ph-camera"></i> Mở photobooth</a>
+            <a href="/" class="nut-hanh-dong-card"><i class="ph ph-chart-line-up"></i> Dashboard</a>
+        </div>
+    </header>
+
+    <main class="trang-admin admin-moi">
+        <section class="admin-intro">
+            <span class="admin-eyebrow">Thư viện khung ảnh</span>
+            <h1>Quản lý khung Photobooth</h1>
+            <p>Tải khung đúng bố cục và quản lý riêng từng nhóm 2 cut hoặc 4 cut.</p>
+        </section>
+
+        <div class="admin-workspace">
+            <section class="admin-upload-panel md3-card">
+                <div class="admin-section-title">
+                    <b>01</b>
+                    <span><strong>Tải khung mới</strong><small>PNG, WEBP hoặc SVG trong suốt · 1200 × 1800 px</small></span>
+                </div>
+
+                <form id="form-khung-anh" class="admin-form-moi">
+                    <label><span>Tên hiển thị</span><input id="ten-hien-thi" type="text" required placeholder="Ví dụ: Chung kết 2026"></label>
+                    <label><span>Loại bố cục</span><select id="so-cut-khung" required onchange="capNhatQuyCach()"><option value="2">2 cut</option><option value="4">4 cut</option></select></label>
+                    <label class="admin-file-field"><span>Tệp khung ảnh</span><input id="tep-khung-anh" type="file" accept=".png,.webp,.svg" required></label>
+                    <div id="quy-cach-khung" class="quy-cach-khung"></div>
+                    <button class="nut-bam-chinh" type="submit"><i class="ph ph-upload-simple"></i> Tải khung lên</button>
+                    <p id="thong-bao-admin" class="admin-message"></p>
+                </form>
+            </section>
+
+            <aside class="admin-preview-panel md3-card">
+                <div class="admin-section-title"><b>02</b><span><strong>Xem trước</strong><small>Kiểm tra nền trong suốt trước khi tải</small></span></div>
+                <div id="xem-truoc-khung" class="xem-truoc-khung"><i class="ph ph-image"></i><span>Chưa chọn tệp</span></div>
+            </aside>
         </div>
 
-        <form id="form-khung-anh" class="md3-card admin-form">
-            <label>
-                <span>Mật khẩu quản trị</span>
-                <input id="mat-khau-admin" type="password" required autocomplete="current-password">
-            </label>
-            <label>
-                <span>Tên khung</span>
-                <input id="ten-hien-thi" type="text" required placeholder="Ví dụ: Chung kết 2026">
-            </label>
-            <label>
-                <span>Tệp khung ảnh</span>
-                <input id="tep-khung-anh" type="file" accept=".png,.webp,.svg" required>
-            </label>
-            <button class="nut-bam-chinh" type="submit">Tải khung mới</button>
-            <p id="thong-bao-admin" class="admin-message"></p>
-        </form>
-
-        <section>
-            <h2>Khung đang có</h2>
+        <section class="admin-library">
+            <div class="admin-library-header">
+                <div><span class="admin-eyebrow">Thư viện</span><h2>Khung đang sử dụng</h2></div>
+                <div class="admin-filters">
+                    <button type="button" class="kich-hoat" data-filter="all" onclick="locKhung('all', this)">Tất cả <span id="dem-all">0</span></button>
+                    <button type="button" data-filter="2" onclick="locKhung('2', this)">2 cut <span id="dem-2">0</span></button>
+                    <button type="button" data-filter="4" onclick="locKhung('4', this)">4 cut <span id="dem-4">0</span></button>
+                </div>
+            </div>
             <div id="danh-sach-khung-admin" class="luoi-khung-admin"></div>
+            <div id="admin-empty" class="admin-empty hidden"><i class="ph ph-frame-corners"></i><strong>Chưa có khung trong nhóm này</strong></div>
         </section>
     </main>
 
-    <script>
-        const matKhauInput = document.getElementById('mat-khau-admin');
-        const thongBao = document.getElementById('thong-bao-admin');
+    <div id="hop-thoai-mat-khau" class="hop-thoai-mat-khau hidden" role="dialog" aria-modal="true" aria-labelledby="tieu-de-hop-mat-khau">
+        <div class="hop-thoai-mat-khau-card">
+            <button type="button" class="dong-hop-thoai" onclick="dongHopMatKhau()" aria-label="Đóng"><i class="ph ph-x"></i></button>
+            <span class="logo-header"><i class="ph ph-lock-key"></i></span>
+            <h2 id="tieu-de-hop-mat-khau">Xác nhận quản trị</h2>
+            <p id="mo-ta-hop-mat-khau">Nhập mật khẩu để tiếp tục.</p>
+            <label><span>Mật khẩu quản trị</span><input id="mat-khau-hop-thoai" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu"></label>
+            <p id="loi-hop-mat-khau" class="loi-hop-mat-khau"></p>
+            <div class="photobooth-actions">
+                <button type="button" class="nut-hanh-dong-card" onclick="dongHopMatKhau()">Hủy</button>
+                <button type="button" class="nut-bam-chinh" onclick="xacNhanMatKhau()"><i class="ph ph-check"></i> Xác nhận</button>
+            </div>
+        </div>
+    </div>
 
-        async function taiDanhSachKhung() {
-            const khung = await fetch('/api/khung-anh').then(phanHoi => phanHoi.json());
+    <script>
+        const thongBao = document.getElementById('thong-bao-admin');
+        let danhSachKhung = [];
+        let boLocHienTai = 'all';
+        let hanhDongChoXacNhan = null;
+
+        function yeuCauMatKhau(tieuDe, moTa, hanhDong) {
+            hanhDongChoXacNhan = hanhDong;
+            document.getElementById('tieu-de-hop-mat-khau').textContent = tieuDe;
+            document.getElementById('mo-ta-hop-mat-khau').textContent = moTa;
+            document.getElementById('mat-khau-hop-thoai').value = '';
+            document.getElementById('loi-hop-mat-khau').textContent = '';
+            document.getElementById('hop-thoai-mat-khau').classList.remove('hidden');
+            setTimeout(() => document.getElementById('mat-khau-hop-thoai').focus(), 50);
+        }
+
+        function dongHopMatKhau() {
+            hanhDongChoXacNhan = null;
+            document.getElementById('hop-thoai-mat-khau').classList.add('hidden');
+        }
+
+        async function xacNhanMatKhau() {
+            const matKhau = document.getElementById('mat-khau-hop-thoai').value;
+            if (!matKhau) {
+                document.getElementById('loi-hop-mat-khau').textContent = 'Vui lòng nhập mật khẩu quản trị.';
+                return;
+            }
+            const hanhDong = hanhDongChoXacNhan;
+            document.getElementById('hop-thoai-mat-khau').classList.add('hidden');
+            hanhDongChoXacNhan = null;
+            if (hanhDong) await hanhDong(matKhau);
+        }
+
+        document.getElementById('mat-khau-hop-thoai').addEventListener('keydown', suKien => {
+            if (suKien.key === 'Enter') xacNhanMatKhau();
+            if (suKien.key === 'Escape') dongHopMatKhau();
+        });
+
+        function capNhatQuyCach() {
+            const soCut = document.getElementById('so-cut-khung').value;
+            document.getElementById('quy-cach-khung').innerHTML = soCut === '2'
+                ? '<strong>Quy cách 2 cut</strong><span>Hai vùng ảnh trong suốt: 1080 × 680 px.</span>'
+                : '<strong>Quy cách 4 cut</strong><span>Bốn vùng ảnh trong suốt: 560 × 330 px, nằm giữa photostrip.</span>';
+        }
+
+        function locKhung(boLoc, nut) {
+            boLocHienTai = boLoc;
+            document.querySelectorAll('.admin-filters button').forEach(item => item.classList.remove('kich-hoat'));
+            nut.classList.add('kich-hoat');
+            hienThiDanhSach();
+        }
+
+        function hienThiDanhSach() {
+            const khungLoc = danhSachKhung.filter(item => boLocHienTai === 'all' || String(item.cuts || 2) === boLocHienTai);
             const danhSach = document.getElementById('danh-sach-khung-admin');
             danhSach.innerHTML = '';
-            khung.forEach(item => {
+            document.getElementById('admin-empty').classList.toggle('hidden', khungLoc.length > 0);
+            khungLoc.forEach(item => {
                 const card = document.createElement('article');
-                card.className = 'md3-card the-khung-admin';
+                card.className = 'md3-card the-khung-admin-moi';
                 card.innerHTML = `
-                    <img src="${item.url}" alt="${item.ten}">
-                    <div><strong>${item.ten}</strong><button type="button">Xóa</button></div>
-                `;
-                card.querySelector('button').onclick = () => xoaKhung(item.id);
+                    <div class="admin-frame-preview"><img src="${item.url}" alt="${item.ten}"><span>${item.cuts || 2} cut</span></div>
+                    <div class="admin-frame-info"><strong>${item.ten}</strong><small>${item.tep}</small>
+                    <div><a href="${item.url}" target="_blank" rel="noopener"><i class="ph ph-arrow-square-out"></i> Xem tệp</a><button type="button"><i class="ph ph-trash"></i> Xóa</button></div></div>`;
+                card.querySelector('button').onclick = () => xoaKhung(item);
                 danhSach.appendChild(card);
             });
         }
 
-        async function xoaKhung(id) {
-            const phanHoi = await fetch(`/api/admin/khung-anh/${id}`, {
+        async function taiDanhSachKhung() {
+            danhSachKhung = await fetch('/api/khung-anh').then(phanHoi => phanHoi.json());
+            document.getElementById('dem-all').textContent = danhSachKhung.length;
+            document.getElementById('dem-2').textContent = danhSachKhung.filter(item => Number(item.cuts || 2) === 2).length;
+            document.getElementById('dem-4').textContent = danhSachKhung.filter(item => Number(item.cuts || 2) === 4).length;
+            hienThiDanhSach();
+        }
+
+        async function thucHienXoaKhung(item, matKhau) {
+            if (!confirm(`Xóa khung "${item.ten}"? Hành động này không thể hoàn tác.`)) return;
+            const phanHoi = await fetch('/api/admin/khung-anh', {
                 method: 'DELETE',
-                headers: {'X-Admin-Password': matKhauInput.value}
+                headers: {'X-Admin-Password': matKhau, 'Content-Type': 'application/json'},
+                body: JSON.stringify({id: item.id})
             });
             const duLieu = await phanHoi.json();
             thongBao.textContent = duLieu.loi || 'Đã xóa khung ảnh.';
@@ -71,19 +176,42 @@
             if (phanHoi.ok) taiDanhSachKhung();
         }
 
-        document.getElementById('form-khung-anh').addEventListener('submit', async suKien => {
-            suKien.preventDefault();
-            const form = new FormData();
-            form.append('mat_khau', matKhauInput.value);
-            form.append('ten_hien_thi', document.getElementById('ten-hien-thi').value);
-            form.append('khung_anh', document.getElementById('tep-khung-anh').files[0]);
-            const phanHoi = await fetch('/api/admin/khung-anh', {method: 'POST', body: form});
-            const duLieu = await phanHoi.json();
-            thongBao.textContent = duLieu.loi || 'Đã tải khung ảnh mới.';
-            thongBao.dataset.loai = phanHoi.ok ? 'thanh-cong' : 'loi';
-            if (phanHoi.ok) taiDanhSachKhung();
+        function xoaKhung(item) {
+            yeuCauMatKhau('Xóa khung ảnh', `Nhập mật khẩu quản trị để xóa "${item.ten}".`, matKhau => thucHienXoaKhung(item, matKhau));
+        }
+
+        document.getElementById('tep-khung-anh').addEventListener('change', suKien => {
+            const tep = suKien.target.files[0];
+            const xemTruoc = document.getElementById('xem-truoc-khung');
+            if (!tep) return xemTruoc.innerHTML = '<i class="ph ph-image"></i><span>Chưa chọn tệp</span>';
+            xemTruoc.innerHTML = `<img src="${URL.createObjectURL(tep)}" alt="Xem trước khung"><span>${tep.name}</span>`;
         });
 
+        async function thucHienTaiKhung(matKhau) {
+            const form = new FormData();
+            form.append('mat_khau', matKhau);
+            form.append('ten_hien_thi', document.getElementById('ten-hien-thi').value);
+            form.append('so_cut', document.getElementById('so-cut-khung').value);
+            form.append('khung_anh', document.getElementById('tep-khung-anh').files[0]);
+            thongBao.textContent = 'Đang tải khung lên...';
+            const phanHoi = await fetch('/api/admin/khung-anh', {method: 'POST', body: form});
+            const duLieu = await phanHoi.json();
+            thongBao.textContent = duLieu.loi || 'Đã tải khung mới.';
+            thongBao.dataset.loai = phanHoi.ok ? 'thanh-cong' : 'loi';
+            if (phanHoi.ok) {
+                document.getElementById('ten-hien-thi').value = '';
+                document.getElementById('tep-khung-anh').value = '';
+                document.getElementById('xem-truoc-khung').innerHTML = '<i class="ph ph-image"></i><span>Chưa chọn tệp</span>';
+                taiDanhSachKhung();
+            }
+        }
+
+        document.getElementById('form-khung-anh').addEventListener('submit', suKien => {
+            suKien.preventDefault();
+            yeuCauMatKhau('Tải khung mới', 'Nhập mật khẩu quản trị để tải khung này lên.', thucHienTaiKhung);
+        });
+
+        capNhatQuyCach();
         taiDanhSachKhung();
     </script>
 </body>
