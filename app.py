@@ -1000,24 +1000,32 @@ def api_lich_thi_dau_chinh_thuc():
 
     if not danh_sach_tran:
         try:
+            from datetime import datetime, timedelta
+            now = datetime.now()
             cac_tep = [
-                os.path.join(DUONG_DAN_GOC, "data_processed", "wc2026_schedule_group_clean.csv"),
-                os.path.join(DUONG_DAN_GOC, "data_processed", "wc2026_schedule_knockout_clean.csv")
+                os.path.join(DUONG_DAN_GOC, "data_processed", "ket_qua_vong_bang.csv"),
+                os.path.join(DUONG_DAN_GOC, "data_processed", "ket_qua_knockout.csv")
             ]
             danh_sach_tran = []
             for duong_dan in cac_tep:
                 if not os.path.exists(duong_dan): continue
                 for _, tran in pd.read_csv(duong_dan, encoding="utf-8-sig").fillna("").iterrows():
+                    dt = datetime.fromisoformat(tran["ngay_gio"].replace(" ", "T"))
+                    end_dt = dt + timedelta(hours=2)
+                    if now > end_dt: tt = "FINISHED"
+                    elif now >= dt: tt = "IN_PLAY"
+                    else: tt = "TIMED"
+                    
                     danh_sach_tran.append({
                         "vong": tran["vong"],
                         "ma_tran": int(tran["ma_tran"]),
-                        "bang": "" if str(tran["bang"]).lower() == "nan" else tran["bang"],
+                        "bang": "" if str(tran.get("bang", "")).lower() == "nan" else tran.get("bang", ""),
                         "ngay_gio": tran["ngay_gio"],
                         "doi_a": tran["doi_a"],
                         "doi_b": tran["doi_b"],
-                        "ban_thang_a": 0,
-                        "ban_thang_b": 0,
-                        "trang_thai": "TIMED"
+                        "ban_thang_a": int(tran.get("ban_thang_a", 0)),
+                        "ban_thang_b": int(tran.get("ban_thang_b", 0)),
+                        "trang_thai": tt
                     })
         except Exception as e:
             return jsonify({"loi": f"Khong thể đọc lịch thi đấu: {str(e)}"}), 500
