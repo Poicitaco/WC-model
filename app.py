@@ -28,7 +28,7 @@ DUONG_DAN_ADMIN_AN = os.environ.get("ADMIN_PATH", "quan-tri-khung-anh-24022941")
 DINH_DANG_KHUNG_CHO_PHEP = {".png", ".webp", ".svg"}
 INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "https://itentad-wc-2026-model-inference.hf.space").rstrip("/")
 INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "")
-FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "892cc89cd1c2431b8dbc4c28229d86f1")
+FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "")
 # Dữ liệu kết quả đã mô phỏng sẵn trong thư mục outputs
 duong_dan_kq_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_stage_predictions_with_scores.csv")
 duong_dan_bxh_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_standings_best_model.csv")
