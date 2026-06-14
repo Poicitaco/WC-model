@@ -685,7 +685,7 @@ def api_them_khung_anh():
             return jsonify({"thanh_cong": True, "khung_anh": danh_sach[-1]})
         except OSError:
             return jsonify({
-                "loi": "Máy chủ hiện không cho phép ghi tệp. Với Vercel, hãy cấu hình biến môi trường BLOB_READ_WRITE_TOKEN."
+                "loi": f"Máy chủ hiện không cho phép ghi tệp. Token hiện tại: {'Chưa có (None)' if not token else 'Đã có nhưng lỗi'}. Vui lòng kiểm tra biến môi trường BLOB_READ_WRITE_TOKEN."
             }), 503
 
 
