@@ -709,7 +709,52 @@ body.intro-dang-chay {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Layout tỉ số mới */
+/* Nút tắt Thuyết Trình (Quả bóng vàng nhỏ góc trái) */
+.nut-tat-thuyet-trinh {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 32px;
+    height: 32px;
+    background-color: #f5b914; /* Màu vàng quả bóng */
+    color: #000000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid #ffffff;
+}
+
+.nut-tat-thuyet-trinh i {
+    font-size: 18px;
+}
+
+.nut-tat-thuyet-trinh:hover {
+    transform: scale(1.2) rotate(360deg);
+    background-color: #ffcc00;
+    box-shadow: 0 6px 16px rgba(245, 185, 20, 0.4);
+}
+
+.nut-tat-thuyet-trinh::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #f5b914;
+    opacity: 0.4;
+    z-index: -1;
+    animation: nhip-tho-bong 2s infinite;
+}
+
+@keyframes nhip-tho-bong {
+    0% { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
 .khung-ty-so-moi {
     display: flex;
     flex-direction: column;
