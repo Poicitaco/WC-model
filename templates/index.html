@@ -661,7 +661,7 @@
                 trangThai.textContent = noiDung;
                 tienTrinh.style.width = `${phanTram}%`;
                 document.getElementById('phan-tram-mo-dau').textContent = `${phanTram}%`;
-                await new Promise(resolve => setTimeout(resolve, giamChuyenDong ? 40 : 520));
+                await new Promise(resolve => setTimeout(resolve, giamChuyenDong ? 40 : 2520)); // Tăng thêm 2 giây mỗi bước
             }
             await taiNgam;
             dongManMoDau();
