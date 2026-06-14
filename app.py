@@ -900,36 +900,72 @@ def api_lich_thi_dau():
         df_knockout = pd.read_csv(duong_dan_kq_knockout, encoding="utf-8-sig").fillna("")
         danh_sach_tran = []
 
+        # Lấy dữ liệu live để cập nhật tỉ số thực tế nếu có
+        du_lieu_live = lay_lich_thi_dau_tu_api()
+        map_live = {}
+        if du_lieu_live:
+            for tran_live in du_lieu_live:
+                khoa = f"{tran_live['doi_a']}-{tran_live['doi_b']}"
+                map_live[khoa] = tran_live
+
         for _, tran in df_vong_bang.iterrows():
+            doi_a = tran["doi_a"]
+            doi_b = tran["doi_b"]
+            khoa = f"{doi_a}-{doi_b}"
+            
+            bt_a = int(tran["ban_thang_a"])
+            bt_b = int(tran["ban_thang_b"])
+            trang_thai = "TIMED"
+
+            if khoa in map_live:
+                bt_a = map_live[khoa]["ban_thang_a"]
+                bt_b = map_live[khoa]["ban_thang_b"]
+                trang_thai = map_live[khoa]["trang_thai"]
+
             danh_sach_tran.append({
                 "vong": tran["vong"],
                 "ma_tran": int(tran["ma_tran"]),
                 "bang": tran["bang"],
                 "ngay_gio": tran["ngay_gio"],
-                "doi_a": tran["doi_a"],
-                "doi_b": tran["doi_b"],
+                "doi_a": doi_a,
+                "doi_b": doi_b,
                 "doi_thang": tran["doi_du_doan_thang"],
-                "ban_thang_a": int(tran["ban_thang_a"]),
-                "ban_thang_b": int(tran["ban_thang_b"]),
+                "ban_thang_a": bt_a,
+                "ban_thang_b": bt_b,
                 "p_a_thang": float(tran["p_a_thang"]),
                 "p_hoa": float(tran["p_hoa"]),
-                "p_a_thua": float(tran["p_a_thua"])
+                "p_a_thua": float(tran["p_a_thua"]),
+                "trang_thai": trang_thai
             })
 
         for _, tran in df_knockout.iterrows():
+            doi_a = tran["doi_a"]
+            doi_b = tran["doi_b"]
+            khoa = f"{doi_a}-{doi_b}"
+            
+            bt_a = int(tran["ban_thang_a"])
+            bt_b = int(tran["ban_thang_b"])
+            trang_thai = "TIMED"
+
+            if khoa in map_live:
+                bt_a = map_live[khoa]["ban_thang_a"]
+                bt_b = map_live[khoa]["ban_thang_b"]
+                trang_thai = map_live[khoa]["trang_thai"]
+
             danh_sach_tran.append({
                 "vong": tran["vong"],
                 "ma_tran": int(tran["ma_tran"]),
                 "bang": "",
                 "ngay_gio": tran["ngay_gio"],
-                "doi_a": tran["doi_a"],
-                "doi_b": tran["doi_b"],
+                "doi_a": doi_a,
+                "doi_b": doi_b,
                 "doi_thang": tran["doi_thang"],
-                "ban_thang_a": int(tran["ban_thang_a"]),
-                "ban_thang_b": int(tran["ban_thang_b"]),
+                "ban_thang_a": bt_a,
+                "ban_thang_b": bt_b,
                 "p_a_thang": float(tran["p_a_thang"]),
                 "p_hoa": float(tran["p_hoa"]),
-                "p_a_thua": float(tran["p_a_thua"])
+                "p_a_thua": float(tran["p_a_thua"]),
+                "trang_thai": trang_thai
             })
 
         danh_sach_tran.sort(key=lambda tran: tran["ngay_gio"])
