@@ -1,0 +1,23 @@
+[
+  {
+    "id": "match-day",
+    "ten": "Match Day",
+    "tep": "match-day.svg",
+    "url": "/static/photobooth_frames/match-day.svg",
+    "cuts": 2
+  },
+  {
+    "id": "world-cup-blue-4-cut",
+    "ten": "Pitch Gold - 4 Cut",
+    "tep": "world-cup-blue-4-cut.svg",
+    "url": "/static/photobooth_frames/world-cup-blue-4-cut.svg",
+    "cuts": 4
+  },
+  {
+    "id": "match-day-4-cut",
+    "ten": "Match Day Field - 4 Cut",
+    "tep": "match-day-4-cut.svg",
+    "url": "/static/photobooth_frames/match-day-4-cut.svg",
+    "cuts": 4
+  }
+]

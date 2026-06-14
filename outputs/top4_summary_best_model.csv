@@ -1,0 +1,2 @@
+﻿champion,runner_up,third_place,fourth_place,num_knockout_matches,num_unresolved_slots,best_model,knockout_rule
+Spain,Argentina,France,England,32,0,Random Forest Tuned,Bidirectional Strength Score = 0.40 model two-way + 0.45 Elo + 0.15 FIFA rank

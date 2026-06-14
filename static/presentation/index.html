@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dự đoán Kết quả World Cup 2026 bằng Machine Learning</title>
+<link rel="stylesheet" href="../ppt-assets/fonts.css?v=4">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../ppt-assets/base.css?v=4">
+<link rel="stylesheet" href="../ppt-assets/animations/animations.css?v=4">
+<link rel="stylesheet" id="theme-link" href="../ppt-assets/themes/bauhaus.css?v=4">
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+/* ===== Override Font tiếng Việt ===== */
+:root {
+  --font-sans: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif !important;
+  --font-display: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif !important;
+}
+
+/* ===== Layout cơ bản ===== */
+.slide { padding: 44px 64px; overflow: hidden; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; height: 100%; }
+
+/* ===== Lightbox ===== */
+#hop-anh { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:9999; align-items:center; justify-content:center; cursor:zoom-out; backdrop-filter:blur(6px); }
+#hop-anh.hien { display:flex; }
+#hop-anh img { max-width:90vw; max-height:88vh; object-fit:contain; border-radius:12px; box-shadow:0 30px 80px rgba(0,0,0,.7); }
+#hop-anh .dong { position:absolute; top:18px; right:24px; font-size:2rem; color:#fff; cursor:pointer; line-height:1; opacity:.7; }
+#hop-anh .dong:hover { opacity:1; }
+
+/* ===== Ảnh có thể click ===== */
+.anh-click { cursor: zoom-in; transition: opacity .2s, transform .2s; }
+.anh-click:hover { opacity: .88; transform: scale(1.01); }
+
+/* ===== Asymmetrical Bento Grid (Story Dashboard) ===== */
+.bento-container { display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(2, 1fr); gap: 16px; width: 100%; height: 460px; margin-top: 12px; }
+.bento-item { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; box-shadow: var(--shadow); overflow: hidden; }
+.bento-item h5 { font-size: 0.8rem; text-transform: uppercase; color: var(--accent); margin: 0 0 12px 0; letter-spacing: 0.1em; border-left: 3px solid var(--accent); padding-left: 12px; flex-shrink: 0; }
+.bento-item img { width: 100%; flex: 1; min-height: 0; object-fit: contain; }
+
+/* Bento Layouts */
+.bento-main { grid-column: span 7; grid-row: span 2; }
+.bento-side-top { grid-column: span 5; grid-row: span 1; }
+.bento-side-bottom { grid-column: span 5; grid-row: span 1; }
+
+/* Dashboard Titles */
+.dash-title { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+.dash-title .num { font-family: var(--font-mono); color: var(--accent-3); font-weight: 800; font-size: 1.2rem; }
+.dash-subtitle { font-size: 0.8rem; color: var(--text-3); margin-bottom: 12px; }
+
+/* ===== Khung ảnh cố định chiều cao (Legacy/Utility) ===== */
+.khung-anh { overflow: hidden; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); max-height: 320px; margin: 0 auto; width: 100%; display: flex; align-items: center; justify-content: center; padding: 12px; box-shadow: var(--shadow); }
+.khung-anh img { max-width: 100%; max-height: 296px; object-fit: contain; display: block; }
+
+/* ===== Bảng học thuật ===== */
+.bang-du-lieu { width:100%; border-collapse:collapse; font-size:.82rem; }
+.bang-du-lieu th { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); padding:7px 11px; text-align:left; font-weight:700; font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; border-bottom:2px solid var(--accent); }
+.bang-du-lieu td { padding:7px 11px; border-bottom:1px solid var(--border); color:var(--text-2); }
+.bang-du-lieu tr.noi-bat td { background: color-mix(in srgb, var(--accent) 8%, transparent); color:var(--text-1); font-weight:700; }
+.bang-du-lieu .tot { color:var(--good); font-weight:700; }
+.bang-du-lieu .xau { color:var(--bad); font-weight:700; }
+
+/* ===== Huy hiệu ===== */
+.huy-hieu { display:inline-block; font-size:.68rem; font-weight:800; padding:2px 9px; border-radius:40px; text-transform:uppercase; letter-spacing:.06em; margin-left:8px; }
+.huy-hieu-tot { background: color-mix(in srgb, var(--good) 18%, transparent); color:var(--good); border:1px solid var(--good); }
+.huy-hieu-xau { background: color-mix(in srgb, var(--bad) 15%, transparent); color:var(--bad); border:1px solid var(--bad); }
+
+/* ===== Công thức ===== */
+.cong-thuc { background:rgba(255,255,255,.05); border-left:3px solid var(--accent); padding:12px 18px; font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--text-1); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+
+/* ===== Card mục lục ===== */
+.danh-muc { list-style:none; padding:0; counter-reset:mc; }
+.danh-muc li { counter-increment:mc; display:flex; align-items:center; gap:14px; padding:9px 0; border-bottom:1px solid var(--border); font-size:.95rem; }
+.danh-muc li::before { content:counter(mc,decimal-leading-zero); font-weight:800; color:var(--accent); font-size:.85rem; font-family:monospace; }
+.danh-muc li .thoi-gian { margin-left:auto; color:var(--text-3); font-size:.8rem; white-space:nowrap; }
+
+/* ===== Đặc trưng lưới ===== */
+.luoi-dac-trung { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.item-dac-trung { background:var(--surface); border:1px solid var(--border); padding:9px 12px; border-radius:var(--radius-sm); font-size:.8rem; }
+.item-dac-trung .nhan { font-weight:700; color:var(--accent); font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px; display:block; }
+
+/* ===== Bìa ===== */
+.divider-grad { height:2px; background:var(--grad); border-radius:2px; }
+
+/* ===== Caption ===== */
+.chu-thich { text-align:center; color:var(--text-3); font-style:italic; font-size:.75rem; margin-top:5px; }
+
+/* ===== Card kết quả ===== */
+.card-ket-qua { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 16px; }
+.card-ket-qua .so { font-size:1.8rem; font-weight:800; color:var(--accent); line-height:1; }
+.card-ket-qua .mo-ta { font-size:.78rem; color:var(--text-3); margin-top:3px; }
+
+/* ===== Pipeline ===== */
+.pipeline { display:flex; gap:0; align-items:stretch; }
+.buoc-pipeline { flex:1; background:var(--surface); border:1px solid var(--border); padding:12px 10px; text-align:center; font-size:.75rem; position:relative; border-radius:0; }
+.buoc-pipeline:first-child { border-radius:var(--radius-sm) 0 0 var(--radius-sm); }
+.buoc-pipeline:last-child { border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+.buoc-pipeline:not(:last-child)::after { content:"→"; position:absolute; right:-10px; top:50%; transform:translateY(-50%); color:var(--accent); font-size:1rem; z-index:2; background:var(--bg); padding:0 2px; }
+.buoc-pipeline .so { font-size:1.2rem; font-weight:800; color:var(--accent); display:block; margin-bottom:4px; }
+
+/* ===== Chú thích cuối trang ===== */
+.ghi-chu { font-size:.72rem; color:var(--text-3); border-top:1px solid var(--border); margin-top:14px; padding-top:8px; font-style:italic; }
+</style>
+</head>
+<body data-themes="bauhaus,tokyo-night,academic-paper,arctic-cool,aurora,blueprint,catppuccin-latte,catppuccin-mocha,corporate-clean,cyberpunk-neon,dracula,editorial-serif,engineering-whiteprint,glassmorphism,gruvbox-dark,japanese-minimal,magazine-bold,memphis-pop,midcentury,minimal-white,neo-brutalism,news-broadcast,nord,pitch-deck-vc,rainbow-gradient,retro-tv,rose-pine,sharp-mono,soft-pastel,solarized-light,sunset-warm,swiss-grid,terminal-green,vaporwave,xiaohongshu-white,y2k-chrome" data-theme-base="../ppt-assets/themes/">
+<div class="deck">
+
+<!-- ===================== SLIDE 1: BÌA ===================== -->
+<section class="slide center" data-title="Trang bìa" style="text-align: center; position: relative;">
+  <div style="background: var(--grad); width: 600px; height: 600px; border-radius: 50%; filter: blur(120px); opacity: 0.15; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: -1"></div>
+  
+  <p style="color:var(--accent); font-size:.85rem; letter-spacing:.2em; text-transform:uppercase; margin-bottom:24px; font-family:monospace">Đồ Án Môn Học · CTE3103</p>
+  
+  <h1 class="h1 anim-fade-up" style="font-size:3.5rem; line-height:1.1; margin-bottom:24px; font-weight: 900;">
+    Dự đoán Kết quả<br>
+    <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent; font-size: 4.5rem; letter-spacing: -0.02em;">FIFA WC 2026</span>
+  </h1>
+  
+  <p style="font-size:1.2rem; font-weight:400; color:var(--text-2); margin-bottom: 40px; letter-spacing: 0.05em;">ỨNG DỤNG HỌC MÁY CÓ GIÁM SÁT</p>
+  
+  <div class="divider-grad" style="margin:0 auto 32px; opacity:.4; width: 120px;"></div>
+  
+  <div style="font-size:1rem; color:var(--text-2); line-height:2;">
+    <div><span style="color:var(--text-3)">Giảng viên:</span> TS. Phạm Đình Nguyện &nbsp;·&nbsp; KS. Nguyễn Văn Duy</div>
+    <div><span style="color:var(--text-3)">Thực hiện:</span> <strong style="color:var(--text-1)">Nguyễn Thị Lan Anh</strong> (24022941)</div>
+  </div>
+
+  <aside class="notes">
+    <p><strong>1. TỔNG QUAN HỆ THỐNG VÀ KIẾN TRÚC BÀI TOÁN</strong></p>
+    <p>Trang báo cáo này trình bày nền tảng của hệ thống chuyên gia (Expert System) dự đoán kết quả bóng đá áp dụng kỹ thuật Học máy có giám sát (Supervised Machine Learning). Đối tượng nghiên cứu là giải đấu FIFA World Cup 2026, sự kiện đánh dấu sự mở rộng không gian trạng thái (State Space) từ 32 lên 48 tham số đội bóng, làm bùng nổ tổ hợp trận đấu lên con số 104.</p>
+    <p>Sự gia tăng phi mã về không gian mẫu (Sample Space) này vượt quá năng lực ước lượng Heuristic của các chuyên gia con người, đòi hỏi một phương pháp định lượng (Quantitative Approach) dựa trên khai phá dữ liệu lịch sử.</p>
+    <p>Về mặt mô hình hóa toán học (Mathematical Modeling), đây là bài toán phân lớp đa biến rời rạc (Multi-class Classification) với biến mục tiêu (Target Variable) $Y \in \{0, 1, 2\}$, tương ứng với các trạng thái không gian {Đội khách thắng, Hòa, Đội nhà thắng}. Quy trình nghiên cứu bao phủ toàn vẹn kiến trúc MLOps: từ Data Ingestion (dung nạp dữ liệu), Feature Extraction (trích xuất đặc trưng), Dimensionality Reduction (giảm chiều/xử lý đa cộng tuyến), Model Training (huấn luyện), Evaluation (đánh giá XAI), đến Deployment (triển khai API thời gian thực).</p>
+  </aside>
+</section>
+
+<!-- ===================== SLIDE 2: MỤC LỤC ===================== -->
+<section class="slide" data-title="Mục lục">
+  <p style="color:var(--accent); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; font-family:monospace">Nội dung báo cáo</p>
+  <h2 class="h2" style="margin-bottom:6px">Cấu trúc Trình bày</h2>
+  <div class="divider-grad" style="margin-bottom:20px"></div>
+  <ul class="danh-muc">
+    <li>Đặt vấn đề &amp; Mục tiêu nghiên cứu <span class="thoi-gian">~5 phút</span></li>
+    <li>Thu thập &amp; Tiền xử lý dữ liệu <span class="thoi-gian">~5 phút</span></li>
+    <li>Kỹ thuật trích xuất đặc trưng (Feature Engineering) <span class="thoi-gian">~5 phút</span></li>
+    <li>Các mô hình Học Máy được thử nghiệm <span class="thoi-gian">~5 phút</span></li>
+    <li>Kết quả thực nghiệm &amp; Đánh giá mô hình <span class="thoi-gian">~8 phút</span></li>
+    <li>Phân tích Lỗi: Ma trận nhầm lẫn &amp; Feature Importance <span class="thoi-gian">~5 phút</span></li>
+    <li>Ứng dụng: Mô phỏng toàn giải WC2026 <span class="thoi-gian">~4 phút</span></li>
+    <li>Kết luận &amp; Hướng phát triển <span class="thoi-gian">~3 phút</span></li>
+  </ul>
+  <aside class="notes">
+    <p><strong>2. CẤU TRÚC KIẾN TRÚC LUẬN VĂN/BÁO CÁO</strong></p>
+    <p>Cấu trúc báo cáo tuân thủ nghiêm ngặt theo vòng đời chuẩn của luồng xử lý khoa học dữ liệu (Standard Data Science Pipeline):</p>
+    <ul>
+      <li><strong>Phần 1 & 2 (Data Architecture):</strong> Định nghĩa hàm mục tiêu để xử lý nghịch lý Accuracy (Accuracy Paradox) trong phân phối dữ liệu mất cân bằng. Thiết lập chiến lược ETL (Extract, Transform, Load) gộp 5 nguồn dữ liệu để sinh ra 47,000 vector quan sát.</li>
+      <li><strong>Phần 3 (Feature Engineering):</strong> Trình bày các phép biến đổi toán học (Mathematical Transformations) để xử lý tính phi tuyến (Non-linearity) và đưa các tham số lịch sử về dạng độ lệch (Delta Tensors).</li>
+      <li><strong>Phần 4 (Algorithmic Modeling):</strong> Đào sâu vào lý thuyết Ensemble Learning, đối chiếu cơ chế giảm phương sai (Variance Reduction) của Random Forest qua kỹ thuật Bootstrap Aggregating (Bagging) và cơ chế giảm độ lệch (Bias Reduction) của XGBoost thông qua Gradient Descent trên cây quyết định.</li>
+      <li><strong>Phần 5 & 6 (Quantitative Analysis & XAI):</strong> Sử dụng các hàm đo lường khoảng cách phân phối và ma trận nhầm lẫn để bóc tách hiện tượng Nhiễu ngẫu nhiên (Aleatoric Uncertainty) của thể thao. Giải thích mô hình hộp đen thông qua độ suy giảm Entropy (Mean Decrease Impurity).</li>
+      <li><strong>Phần 7 & 8 (Simulation & Conclusion):</strong> Ứng dụng mô hình suy diễn đồ thị (Graph Propagation) kết hợp mô phỏng xác suất để đưa ra phân phối xếp hạng chung cuộc, đồng thời đúc kết giới hạn học thuật hiện tại.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ===================== SLIDE 3: ĐẶT VẤN ĐỀ ===================== -->
+<section class="slide" data-title="Đặt vấn đề">
+  <p style="color:var(--accent); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; font-family:monospace">Chương I · Đặt vấn đề</p>
+  <h2 class="h2" style="margin-bottom:6px">Bài toán Dự đoán WC 2026</h2>
+  <div class="divider-grad" style="margin-bottom:32px"></div>
+  
+  <div class="grid g3" style="gap:24px">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:24px; box-shadow:var(--shadow);">
+      <div style="font-size:1.5rem; font-family:monospace; font-weight:900; color:var(--accent); margin-bottom:12px;">01</div>
+      <h4 style="color:var(--text-1); margin-bottom:12px; font-size:1.1rem; font-weight:800;">Quy mô lịch sử</h4>
+      <p style="font-size:0.9rem; color:var(--text-2); line-height:1.6">Lần đầu tiên World Cup có <strong>48 đội</strong> và <strong>104 trận đấu</strong>. Quy mô chưa từng có tiền lệ đòi hỏi một công cụ phân tích dữ liệu đủ mạnh thay vì phán đoán cảm tính.</p>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:24px; box-shadow:var(--shadow);">
+      <div style="font-size:1.5rem; font-family:monospace; font-weight:900; color:var(--accent); margin-bottom:12px;">02</div>
+      <h4 style="color:var(--text-1); margin-bottom:12px; font-size:1.1rem; font-weight:800;">Mất cân bằng lớp (Imbalance)</h4>
+      <p style="font-size:0.9rem; color:var(--text-2); line-height:1.6">Bài toán phân loại 3 nhãn: Thắng - Hòa - Thua. Lớp "Hòa" luôn có tỷ lệ xuất hiện thấp nhất, dễ làm các mô hình bị "đánh lừa" nếu chỉ dùng Accuracy.</p>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:24px; box-shadow:var(--shadow);">
+      <div style="font-size:1.5rem; font-family:monospace; font-weight:900; color:var(--accent); margin-bottom:12px;">03</div>
+      <h4 style="color:var(--text-1); margin-bottom:12px; font-size:1.1rem; font-weight:800;">Mục tiêu (Macro F1)</h4>
+      <p style="font-size:0.9rem; color:var(--text-2); line-height:1.6">Sử dụng <strong>Macro F1-Score</strong> làm thước đo tối thượng để đảm bảo mô hình phải dự đoán tốt và công bằng cho cả 3 kết quả, đặc biệt là các trận Hòa.</p>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <p><strong>3. ĐỊNH NGHĨA BÀI TOÁN & VẤN ĐỀ MẤT CÂN BẰNG LỚP (CLASS IMBALANCE)</strong></p>
+    <p>Điểm nghẽn học thuật lớn nhất (Academic Bottleneck) của dự đoán bóng đá là hiện tượng Skewed Distribution (Phân phối lệch) của biến mục tiêu.</p>
+    <p>Thống kê tập mẫu cho thấy: Tần suất tiên nghiệm (Prior Probability) của lớp Thắng và Thua chiếm hơn 75-80%, trong khi lớp Hòa chỉ dao động quanh mốc 20-25%. Nếu tối ưu hóa mô hình dựa trên hàm mục tiêu tối đa hóa Accuracy (Độ chính xác tổng thể), các thuật toán Gradient Descent sẽ bị mắc kẹt tại tối ưu cục bộ (Local Optima), sinh ra hiện tượng "Majority Class Bias". Cụ thể, mô hình có thể phớt lờ hoàn toàn lớp Hòa, chỉ dự đoán Thắng/Thua mà vẫn đạt Accuracy bề mặt là ~75%. Đây là dạng "mù lớp thiểu số" cực kỳ nguy hiểm trong Machine Learning.</p>
+    <p>Để triệt tiêu hiện tượng này, hàm mục tiêu (Evaluation Metric) bắt buộc chuyển sang <strong>Macro F1-Score</strong>. Khác với Micro F1 (tính dồn ma trận nhầm lẫn rồi mới chia), Macro F1 tính F1 độc lập cho từng lớp $i$: $F1_i = \frac{2 \times Precision_i \times Recall_i}{Precision_i + Recall_i}$, sau đó lấy trung bình cộng không trọng số: $F1_{macro} = \frac{1}{3} \sum_{i=1}^3 F1_i$. Bằng phép toán này, lớp "Hòa" dù chỉ chiếm 20% dữ liệu (Support size nhỏ) nhưng vẫn tạo ra trọng số trừng phạt (Penalty weight) tương đương 33.3% trong hàm đánh giá. Nó ép các cây quyết định phải vạch ra ranh giới (Decision Boundary) cho lớp Hòa nếu muốn tăng điểm số tổng thể.</p>
+  </aside>
+</section>
+
+<!-- ===================== SLIDE 4: DỮ LIỆU ===================== -->
+<section class="slide" data-title="Dữ liệu">
+  <p style="color:var(--accent); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; font-family:monospace">Chương II · Dữ liệu</p>
+  <h2 class="h2" style="margin-bottom:6px">Thu thập &amp; Tiền xử lý Dữ liệu</h2>
+  <div class="divider-grad" style="margin-bottom:14px"></div>
+  <div class="grid g2" style="align-items:start; gap:24px">
+    <div>
+      <h4 style="color:var(--accent-2); margin-bottom:8px; font-size:.88rem">5 nguồn dữ liệu tích hợp</h4>
+      <table class="bang-du-lieu">
+        <thead><tr><th>Bộ dữ liệu</th><th>Nguồn</th><th>Kích thước</th></tr></thead>
+        <tbody>
+          <tr><td>Kết quả BĐQT 1872–2025</td><td>Kaggle</td><td>~47,000 trận</td></tr>
+          <tr><td>Thứ hạng FIFA 2010–2026</td><td>Kaggle</td><td>~22,000 dòng</td></tr>
+          <tr><td>Chỉ số ELO đội quốc gia</td><td>eloratings.net</td><td>200+ đội</td></tr>
+          <tr><td>Kinh nghiệm World Cup</td><td>Wikipedia/Kaggle</td><td>80+ đội</td></tr>
+          <tr><td>Lịch thi đấu WC2026</td><td>FIFA Official</td><td>104 trận</td></tr>
+        </tbody>
+      </table>
+      <div class="ghi-chu">Tổng: ~1.5 MB dữ liệu đã xử lý từ 5 nguồn khác nhau.</div>
+    </div>
+    <div>
+      <h4 style="color:var(--accent-2); margin-bottom:8px; font-size:.88rem">Pipeline tiền xử lý</h4>
+      <div style="display:flex; flex-direction:column; gap:7px; font-size:.82rem">
+        <div class="item-dac-trung"><span class="nhan">Bước 1 · Chuẩn hóa tên đội</span>24 ánh xạ chuẩn (VD: "IR Iran"→"Iran", "USA"→"United States")</div>
+        <div class="item-dac-trung"><span class="nhan">Bước 2 · Xử lý giá trị thiếu (Missing Value)</span>ELO default=1500; FIFA Rank default=210 (đội yếu nhất giả định)</div>
+        <div class="item-dac-trung"><span class="nhan">Bước 3 · Tạo nhãn mục tiêu</span>y = sign(ban_thang_A − ban_thang_B) → {0,1,2}</div>
+        <div class="item-dac-trung"><span class="nhan">Bước 4 · Phân chia theo thời gian (Temporal Split)</span>Train: 2010–2023 (~37,600) &nbsp;|&nbsp; Test: 2024–2025 (~9,400)</div>
+      </div>
+      <div class="cong-thuc" style="margin-top:10px; font-size:.78rem; padding:8px 14px">
+        <strong style="color:var(--accent)">Lưu ý:</strong> Dùng Temporal Split (không phải Random Split)<br>
+        <span style="color:var(--text-3)">→ Tránh data leakage: mô hình không nhìn thấy tương lai</span>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><strong>4. THIẾT KẾ DATA PIPELINE VÀ CHIẾN LƯỢC OOT (OUT-OF-TIME) VALIDATION</strong></p>
+    <p>Dữ liệu được hợp nhất thông qua phép toán Left Join đa chiều trên 5 bộ Dataset, tạo ra không gian mẫu có kích thước $N \approx 47,000$. Các điểm dị thường (Outliers) và khuyết thiếu (Missing Values) được nội suy (Imputation) thông qua neo tham chiếu thống kê: Điểm ELO khởi tạo theo phân phối chuẩn $\mu=1500$, thứ hạng FIFA được gạt về mức penalty cực đại (Rank 210) để phân tách nhiễu.</p>
+    <p>Luận điểm kỹ thuật mang tính sống còn ở bước này là chiến lược Cross-Validation. Đối với dữ liệu Tabular tĩnh (như ảnh, văn bản), phương pháp K-Fold ngẫu nhiên là tiêu chuẩn vì thỏa mãn giả định i.i.d (Independent and Identically Distributed). Tuy nhiên, dữ liệu thể thao chứa tính tự tương quan thời gian (Temporal Autocorrelation). Nếu áp dụng Random Split, thông tin phong độ tương lai (ví dụ phong độ tháng 6/2024) có thể bị rò rỉ (Data Leakage) sang tập Train để dự báo quá khứ (trận đấu tháng 12/2023).</p>
+    <p>Để giải quyết, luận báo cáo sử dụng cấu trúc Out-Of-Time (OOT) Split, một nhánh của Time-Series Cross Validation. Điểm cắt (Temporal Cutoff) thiết lập cứng ở ranh giới năm 2023. Tập Train giới hạn nghiêm ngặt ở không gian thời gian $T \le 2023$, tập Test/Validation thuộc không gian $T \ge 2024$. Kiến trúc này đảm bảo mô hình mô phỏng hoàn hảo môi trường Zero-Knowledge (không có thông tin tương lai), đẩy độ tin cậy của bài kiểm định lên mức thực tiễn công nghiệp.</p>
+  </aside>
+</section>
+
+<!-- ===================== SLIDE 5: ĐẶC TRƯNG ===================== -->
+<section class="slide" data-title="Feature Engineering">
+  <p style="color:var(--accent); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; font-family:monospace">Chương III · Feature Engineering</p>
+  <h2 class="h2" style="margin-bottom:6px">Trích xuất Đặc trưng (12 Features)</h2>
+  <div class="divider-grad" style="margin-bottom:24px"></div>
+  
+  <p style="font-size:0.9rem; color:var(--text-2); margin-bottom:20px;">Tất cả đặc trưng được tính theo công thức chênh lệch: <strong><span style="font-family:monospace; color:var(--accent);">Δ = Đội A − Đội B</span></strong> (tập trung vào sức mạnh tương quan).</p>
+
+  <div class="grid g3" style="gap:16px">
+    <!-- Cột 1: Thông kê -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; box-shadow:var(--shadow);">
+      <h4 style="color:var(--text-1); margin-bottom:12px; font-size:1rem; border-bottom:1px solid var(--border); padding-bottom:8px;">Nhóm Thống kê</h4>
+      <ul style="font-size:0.85rem; color:var(--text-2); line-height:1.8; margin:0; padding-left:20px;">
+        <li><strong>F1.</strong> Phong độ 5 trận</li>
+        <li><strong>F2.</strong> Hiệu suất Tấn công</li>
+        <li><strong>F3.</strong> Hiệu suất Phòng thủ</li>
+        <li><strong>F4.</strong> Lịch sử đối đầu (H2H)</li>
+      </ul>
+    </div>
+
+    <!-- Cột 2: Xếp hạng & Xác suất -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; box-shadow:var(--shadow);">
+      <h4 style="color:var(--text-1); margin-bottom:12px; font-size:1rem; border-bottom:1px solid var(--border); padding-bottom:8px;">Nhóm Xếp hạng</h4>
+      <ul style="font-size:0.85rem; color:var(--text-2); line-height:1.8; margin:0; padding-left:20px;">
+        <li><strong>F5.</strong> Điểm FIFA Rank</li>
+        <li><strong>F6.</strong> Điểm số ELO</li>
+        <li><strong style="color:var(--accent-3);">F7. Xác suất thắng ELO</strong></li>
+      </ul>
+    </div>
+
+    <!-- Cột 3: Ngoại cảnh -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; box-shadow:var(--shadow);">
+      <h4 style="color:var(--text-1); margin-bottom:12px; font-size:1rem; border-bottom:1px solid var(--border); padding-bottom:8px;">Nhóm Ngoại cảnh</h4>
+      <ul style="font-size:0.85rem; color:var(--text-2); line-height:1.8; margin:0; padding-left:20px;">
+        <li><strong>F8.</strong> Số lần dự World Cup</li>
+        <li><strong>F9.</strong> Số trận thắng ở WC</li>
+        <li><strong>F10.</strong> Trận sân trung lập?</li>
+        <li><strong>F11.</strong> A là chủ nhà?</li>
+        <li><strong>F12.</strong> B là chủ nhà?</li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <p><strong>5. BIẾN ĐỔI KHÔNG GIAN ĐẶC TRƯNG (FEATURE ENGINEERING)</strong></p>
+    <p>Để khử đa cộng tuyến (Multicollinearity) và giảm chiều dữ liệu từ $2M$ (chỉ số riêng rẽ của Đội A và B) xuống còn chiều $M$, toàn bộ các thông số liên tục (Continuous variables) được chuyển đổi thành Tensor chênh lệch ($\Delta X = X_A - X_B$). Phép vi phân này ép hàm mục tiêu phải học sự chênh lệch (Relative Magnitude) thay vì ghi nhớ giá trị tuyệt đối thô.</p>
+    <p>Khối đặc trưng được trích xuất từ chuỗi thời gian thông qua phép cuộn cửa sổ trượt (Sliding Window / Rolling Mean) với $w=5$, nhằm cô lập xung tín hiệu phong độ ngắn hạn (Short-term Signal).</p>
+    <p>Trọng tâm toán học chói sáng nhất của hệ đặc trưng là việc tích hợp hệ số ELO. Mô hình không nạp trực tiếp giá trị $\Delta ELO$ vì mối quan hệ tuyến tính của nó với không gian mục tiêu là rất thấp. Thay vào đó, áp dụng phép biến đổi phi tuyến bằng hàm Logistic (Sigmoid Activation Function): $P(A) = \frac{1}{1 + 10^{(ELO_B - ELO_A) / 400}}$. Hàm này bóp nghẹt toàn bộ trục thực $(-\infty, +\infty)$ của $\Delta ELO$ vào không gian xác suất $[0, 1]$. Kỹ thuật này cung cấp cho các thuật toán phân nhánh một ngưỡng phân lớp tối ưu (Optimal Threshold) có sẵn tính chất phân phối tiệm cận, giảm tải hàng ngàn phép chia cắt (splits) vô ích trong việc dò tìm biên quyết định.</p>
+  </aside>
+</section>
+
+<!-- ===================== SLIDE 6: MÔ HÌNH ===================== -->
+<section class="slide" data-title="Mô hình ML">
+  <p style="color:var(--accent); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; font-family:monospace">Chương IV · Mô hình Học Máy</p>
+  <h2 class="h2" style="margin-bottom:6px">Lựa chọn Thuật toán</h2>
+  <div class="divider-grad" style="margin-bottom:32px"></div>
+  
+  <div class="grid g2" style="align-items:stretch; gap:24px">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:24px; box-shadow:var(--shadow);">
+      <h4 style="color:var(--accent-2); margin-bottom:12px; font-size:1.4rem; font-weight:800;">Random Forest</h4>
+      <div style="font-size:0.85rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px;">Học song song (Bagging)</div>
+      <p style="font-size:0.95rem; color:var(--text-2); line-height:1.6">Xây dựng nhiều cây quyết định độc lập và lấy kết quả theo đa số. Cách tiếp cận này giúp mô hình giảm thiểu nhiễu (noise) hiệu quả.</p>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px dashed var(--border); font-size:0.85rem; color:var(--text-3);">
+        <strong style="color:var(--text-1)">Lưu ý:</strong> Áp dụng trọng số lớp <code style="color:var(--accent)">class_weight='balanced'</code> để xử lý tình trạng mất cân bằng của dữ liệu trận Hòa.
+      </div>
+    </div>
+    
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:24px; box-shadow:var(--shadow);">
+      <h4 style="color:var(--accent-2); margin-bottom:12px; font-size:1.4rem; font-weight:800;">XGBoost</h4>
+      <div style="font-size:0.85rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px;">Học nối tiếp (Boosting)</div>
+      <p style="font-size:0.95rem; color:var(--text-2); line-height:1.6">Các cây quyết định được tạo ra nối tiếp nhau, cây sau tập trung sửa sai cho cây trước để tăng độ chính xác lên mức tối đa.</p>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px dashed var(--border); font-size:0.85rem; color:var(--text-3);">
+        <strong style="color:var(--text-1)">Lưu ý:</strong> Sử dụng thêm kỹ thuật <code style="color:var(--accent)">Regularization</code> (điều chuẩn) để tránh mô hình học vẹt (overfitting).
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top:24px; background:rgba(255,255,255,0.03); border-left:4px solid var(--accent-3); padding:16px; font-size:0.9rem; color:var(--text-2)">
+    <strong style="color:var(--text-1)">Hệ quy chiếu (Baseline Heuristic):</strong> Em tính thêm xác suất trực tiếp từ công thức ELO mà không qua học máy. Đây là mốc cơ bản để đánh giá xem mô hình học máy có thực sự hiệu quả hơn toán học thuần túy hay không.
+  </div>
+
+  <aside class="notes">
+    <p><strong>6. CẤU TRÚC ENSEMBLE LEARNING: PHÂN TÍCH BIAS-VARIANCE TRONG BÓNG ĐÁ</strong></p>
+    <p>Quyết định thiết kế thuật toán được định hình bởi đặc tính dữ liệu bóng đá: Chứa tỷ lệ "Nhiễu không thể khử" (Irreducible Error / Bayes Error Rate) cực cao do yếu tố may rủi. Hai trường phái Ensemble được đối chiếu trực tiếp để giải quyết bài toán này.</p>
+    <p><strong>Cơ chế giảm Bias của XGBoost:</strong> XGBoost tối ưu hóa hàm suy hao (Log-loss) bằng Gradient Descent trên không gian hàm. Mỗi cây nối tiếp học cách sửa sai (fit the residuals) của cây trước. Tuy nhiên, trong bóng đá, "phần sai số" thường chính là "sự may rủi" (một quả penalty phút 90). Việc XGBoost cố gắng khớp (fit) các sai số ngẫu nhiên này khiến nó nhanh chóng vi phạm giới hạn tổng quát hóa (Generalization bound), dẫn đến hiện tượng học vẹt (Overfitting) trầm trọng trên tập Train (90%). Điều này buộc hệ thống phải can thiệp bằng các siêu tham số điều chuẩn L2 (Ridge Penalty) cực mạnh để cắt tỉa cây.</p>
+    <p><strong>Cơ chế giảm Variance của Random Forest:</strong> Ngược lại, Random Forest sử dụng Bagging. Thay vì cố học cái sai, nó tiêm thêm sự hỗn loạn (Random Subspace & Bootstrapping) để xây dựng các cây yếu độc lập. Khi biểu quyết đa số (Majority Voting), nhiễu ngẫu nhiên bị triệt tiêu theo Luật số lớn (Law of Large Numbers). Thực tiễn chứng minh: Trong các hệ thống phi tuyến có Bayes Error Rate cao như thể thao, chiến lược "Dung thứ nhiễu" (Variance Reduction) của Random Forest mang lại độ Robustness (bền vững) cao hơn hẳn chiến lược "Cố gắng giải thích nhiễu" (Bias Reduction) của XGBoost.</p>
+  </aside>
+</section>
+
+<!-- ===================== BOARD 1: THE PERFORMANCE TRUTH (METRICS) ===================== -->
+<section class="slide" data-title="Dashboard: Hiệu năng">
+  <div class="dash-title">
+    <span class="num">Board 01</span>
+    <h2 class="h2">Đánh giá Hiệu năng Mô hình</h2>
+  </div>
+  <p class="dash-subtitle">So sánh sự đánh đổi giữa các chỉ số để tìm ra mô hình cân bằng nhất.</p>
+  
+  <div class="bento-container">
+    <!-- Main: Heatmap -->
+    <div class="bento-item bento-main">
+      <h5>Ma trận Nhiệt (Metrics Heatmap)</h5>
+      <img src="/static/anh/model_metrics_heatmap_soft_purple_yellow.png" alt="Heatmap" class="anh-click" onclick="moAnh(this)">
+    </div>
+    <!-- Side Top: Bump Chart -->
+    <div class="bento-item bento-side-top">
+      <h5>Thứ hạng mô hình (Bump Chart)</h5>
+      <img src="/static/anh/model_ranking_bump_chart.png" alt="Bump Chart" class="anh-click" onclick="moAnh(this)">
+    </div>
+    <!-- Side Bottom: Grouped Bar -->
+    <div class="bento-item bento-side-bottom">
+      <h5>So sánh trực diện (Grouped Bar)</h5>
+      <img src="/static/anh/model_comparison_grouped_bar.png" alt="Bar Chart" class="anh-click" onclick="moAnh(this)">
+    </div>
+  </div>
+
+  <aside class="notes">
+    <p><strong>7. ĐÁNH GIÁ CHÉO ĐA HỆ SỐ VÀ SỰ SỤP ĐỔ CỦA XGBOOST TRÊN LỚP HÒA</strong></p>
+    <p>Phân tích cụm biểu đồ này làm bộc lộ rõ "Ảo ảnh thống kê" (Statistical Illusion) khi đánh giá các hệ thống máy học mất cân bằng.</p>
+    <p>Nhìn vào <strong>Biểu đồ Bump Chart</strong>, XGBoost thể hiện sự vượt trội giả tạo khi đứng đầu về chỉ số Accuracy tổng thể. Tuy nhiên, khi đối chiếu sang trục F1-Score của lớp Hòa (Class 1), đường định tuyến của XGBoost sụp đổ hoàn toàn xuống đáy. Lý giải về mặt toán học tối ưu: Hàm Log-loss của XGBoost phạt rất nặng các dự đoán sai có độ tự tin cao. Do tính chất bất định của kết quả "Hòa", XGBoost đã hội tụ về một trạng thái "Hedge" (phòng vệ rủi ro): Nó chủ động dự đoán lệch sang lớp Thắng/Thua (lớp đa số) để thu về giá trị Gradient an toàn hơn, qua đó đánh đổi khả năng phát hiện lớp thiểu số để lấy điểm Accuracy bề mặt. Đây là một hành vi "gian lận" điển hình của thuật toán.</p>
+    <p>Biểu đồ <strong>Grouped Bar (Generalization Gap)</strong> cung cấp một bài kiểm tra tính hội tụ. XGBoost nguyên bản có khoảng hở Train-Test lên tới 30%, minh chứng nó đã học thuộc lòng các "nhiễu" thay vì quy luật. Ngược lại, <strong>Ma trận Nhiệt (Heatmap)</strong> chứng minh Random Forest Tuned (với cấu hình class_weight='balanced') đã ép hàm Cost Function phải nội suy chính xác lớp Hòa. Cấu hình này duy trì cực đại địa phương đồng đều trên toàn bộ bề mặt không gian (Precision, Recall, Macro F1), khẳng định Random Forest là kiến trúc duy nhất thực sự học được phân phối biên (Marginal distribution) của cả 3 kết quả.</p>
+  </aside>
+</section>
+
+<!-- ===================== BOARD 2: THE MODEL'S PERSONALITY (LOGIC) ===================== -->
+<section class="slide" data-title="Dashboard: Logic">
+  <div class="dash-title">
+    <span class="num">Board 02</span>
+    <h2 class="h2">Giải thích Mô hình & Phân tích Lỗi</h2>
+  </div>
+  <p class="dash-subtitle">Phân tích tầm quan trọng của các đặc trưng và lý giải sai số qua ma trận nhầm lẫn.</p>
+  
+  <div class="bento-container">
+    <!-- Main: Feature Importance -->
+    <div class="bento-item bento-main">
+      <h5>Mức độ quan trọng (Feature Importance)</h5>
+      <img src="/static/anh/feature_importance_best_model.png" alt="Importance" class="anh-click" onclick="moAnh(this)">
+    </div>
+    <!-- Side Top: Radar Chart -->
+    <div class="bento-item bento-side-top">
+      <h5>So sánh độ bao phủ (Radar Chart)</h5>
+      <img src="/static/anh/model_comparison_radar_chart.png" alt="Radar" class="anh-click" onclick="moAnh(this)">
+    </div>
+    <!-- Side Bottom: Confusion Matrix -->
+    <div class="bento-item bento-side-bottom">
+      <h5>Ma trận nhầm lẫn (Confusion Matrix)</h5>
+      <img src="/static/anh/confusion_matrix_random_forest_tuned.png" alt="Confusion" class="anh-click" onclick="moAnh(this)">
+    </div>
+  </div>
+
+  <aside class="notes">
+    <p><strong>8. EXPLAINABLE AI (XAI) VÀ PHÂN TÍCH NHIỄU PHI CẤU TRÚC (ALEATORIC UNCERTAINTY)</strong></p>
+    <p>Sự minh bạch của mô hình Hộp đen (Black-box) được chiết xuất bằng kỹ thuật tính MDI (Mean Decrease Impurity). Đồ thị Feature Importance chứng minh sự áp đảo tuyệt đối của đặc trưng <em>Xác suất thắng ELO</em>, xử lý trên 40% lượng Information Gain tổng thể tại các nút tách gốc (Root Splits). Trong khi đó, nhóm chuỗi thời gian trượt (Rolling Forms 5 trận) chỉ hấp thụ được $<5\%$ Gini Impurity. Về mặt học thuật, thông số này tái khẳng định lý thuyết: Biến động tín hiệu cục bộ (Local variance) không có sức giải thích (Predictive Power) bền vững bằng Chuỗi tích lũy trạng thái dài hạn (Long-term state accumulation - ELO).</p>
+    <p>Thảo luận quan trọng nhất tập trung vào Ma trận Nhầm lẫn (Confusion Matrix). Mật độ xác suất (Probability Density) quy tụ dày đặc tại các ô phân loại đúng biên $(0,0)$ và $(2,2)$. Tuy nhiên, tại cột trung tâm $Y_{true} = 1$ (Hòa), ma trận phân rã, phân phối dự đoán bị tràn (Leakage) diện rộng sang lớp $Y_{pred} = 0$ và $2$.</p>
+    <p>Sự sụp đổ này không xuất phát từ kiến trúc mô hình (Epistemic Uncertainty - Nhiễu nhận thức có thể giảm thiểu bằng thêm dữ liệu), mà là bản chất của <strong>Aleatoric Uncertainty</strong> (Nhiễu cấu trúc ngẫu nhiên nội tại). Trong không gian Vector của 1 trận Hòa và 1 trận thắng sát nút $(1-0)$, Vector độ lệch chênh lệch $\Delta X$ gần như đẳng cấu (Isomorphic). Biến cố quyết định sự phân rẽ nằm ở các tham số vĩ mô/vi mô bị lược bỏ hoặc ngẫu nhiên (chấn thương đột ngột, sai số trọng tài, hướng gió). Đây là biên giới không thể xâm phạm (Upper Bound Limit) của các hệ phương trình dạng bảng (Tabular equations) trong việc giải quyết bài toán hỗn loạn phi tuyến của thể thao.</p>
+  </aside>
+</section>
+
+<!-- ===================== BOARD 3: THE PREDICTION ENGINE (RESULTS) ===================== -->
+<section class="slide" data-title="Dashboard: Kết quả">
+  <div class="dash-title">
+    <span class="num">Board 03</span>
+    <h2 class="h2">Kết quả Mô phỏng WC 2026</h2>
+  </div>
+  <p class="dash-subtitle">So sánh kết quả dự đoán giữa các mô hình và toàn cảnh nhánh đấu loại trực tiếp.</p>
+  
+  <div class="bento-container">
+    <!-- Main: Knockout Bracket -->
+    <div class="bento-item bento-main">
+      <h5>Toàn cảnh Nhánh đấu (Final Bracket)</h5>
+      <img src="/static/anh/knockout_table_beautiful_compact.png" alt="Bracket" class="anh-click" onclick="moAnh(this)">
+    </div>
+    <!-- Side Top: Battle Cards -->
+    <div class="bento-item bento-side-top">
+      <h5>So sánh top 4 dự kiến</h5>
+      <img src="/static/anh/top4_battle_cards_rf_vs_xgb.png" alt="Battle Cards" class="anh-click" onclick="moAnh(this)">
+    </div>
+    <!-- Side Bottom: Podium -->
+    <div class="bento-item bento-side-bottom">
+      <h5>Bảng xếp hạng chung cuộc</h5>
+      <img src="/static/anh/top4_podium_mirror_rf_vs_xgb.png" alt="Podium" class="anh-click" onclick="moAnh(this)">
+    </div>
+  </div>
+
+  <aside class="notes">
+    <p><strong>9. MÔ PHỎNG GRAPH-BASED (MẠNG PHÂN BỐ XÁC SUẤT ĐỘNG)</strong></p>
+    <p>Biểu đồ nhánh đấu (Knockout Bracket) không phải là sự nối tiếp tĩnh của các vòng lặp đơn lẻ, mà là một hệ đồ thị chuỗi Markov hữu hạn (Finite Markov Chain-based Graph). Ở mỗi node n, xác suất chuyển trạng thái (Transition Probability) $P(A \rightarrow n+1)$ được sinh ra bởi lớp Output (Softmax activation function) của mô hình Ensemble. Đặc tính ưu việt của mô hình là thuật toán Propagation: Khi đội A tiến lên vòng sau, vector đặc trưng của họ tự động tái tính toán động (Dynamic re-calculation) với vector của đội đối thủ mới, thay vì giữ nguyên tĩnh.</p>
+    <p>Battle Cards bộc lộ sự phân kỳ cấu trúc (Structural Divergence) của 2 thuật toán trên mặt phẳng tối ưu. Bagging (RF) và Boosting (XGBoost) đều tối đa hóa sự đồng thuận tại hàm phạt biên (Marginal constraints) cho các cực trị trên cùng (Tây Ban Nha, Argentina). Tuy nhiên, với không gian tranh chấp trung vị (Median competitive space) tranh hạng 3-4, Boosting có xu hướng khuếch đại nhiễu cấu trúc thành lợi thế quyết định nhờ Gradient dư thừa (Residual gradients), trong khi Bagging làm phẳng nhiễu bằng thuật toán trung bình cộng (Majority Voting). Từ đó nảy sinh xung đột cục bộ giữa suy diễn Anh và Brazil.</p>
+    <p>Sản phẩm Podium là kết xuất cuối cùng từ Soft-Voting Ensemble (trung bình xác suất của tất cả mô hình). Thuật toán này đóng vai trò bộ lọc giảm nhiễu (Noise Filter), bù trừ sai số hệ thống của từng mô hình lõi để tạo ra đường biên phân kỳ độ tin cậy cực đại (Maximum Confidence Boundary) cho các thứ hạng tổng quát.</p>
+  </aside>
+</section>
+
+<!-- ===================== SLIDE: KẾT LUẬN ===================== -->
+<section class="slide" data-title="Kết luận">
+  <p style="color:var(--accent); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; font-family:monospace">Chương VIII · Kết luận</p>
+  <h2 class="h2" style="margin-bottom:6px">Tổng kết & Hướng Phát triển</h2>
+  <div class="divider-grad" style="margin-bottom:24px"></div>
+  
+  <div class="grid g2" style="gap:24px; align-items: stretch;">
+    <!-- Cột Trái: Đóng góp -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:20px; box-shadow:var(--shadow);">
+      <h4 style="color:var(--accent-2); margin-bottom:16px; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+        3 Đóng góp cốt lõi
+      </h4>
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <div>
+          <div style="font-size:0.95rem; font-weight:700; color:var(--text-1); margin-bottom:4px;">01. Pipeline Dữ liệu chuẩn mực</div>
+          <div style="font-size:0.85rem; color:var(--text-2); line-height:1.5;">Xử lý 47,000+ trận đấu, giải quyết triệt để Data Leakage bằng Temporal Split (chia theo trục thời gian).</div>
+        </div>
+        <div>
+          <div style="font-size:0.95rem; font-weight:700; color:var(--text-1); margin-bottom:4px;">02. Khám phá tri thức (Feature Engineering)</div>
+          <div style="font-size:0.85rem; color:var(--text-2); line-height:1.5;">Chứng minh hệ số ELO Win Probability (Δ) có sức mạnh dự báo áp đảo (40% trọng số) so với phong độ ngắn hạn.</div>
+        </div>
+        <div>
+          <div style="font-size:0.95rem; font-weight:700; color:var(--text-1); margin-bottom:4px;">03. Ứng dụng thực tiễn (Full-stack)</div>
+          <div style="font-size:0.85rem; color:var(--text-2); line-height:1.5;">Không dừng lại ở Notebook, mô hình được đóng gói thành Web App mô phỏng toàn bộ lịch thi đấu FIFA WC2026.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột Phải: Hạn chế & Tương lai -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:20px; box-shadow:var(--shadow); display:flex; flex-direction:column; justify-content:space-between;">
+      <div>
+        <h4 style="color:var(--bad); margin-bottom:16px; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+          Hạn chế hiện tại
+        </h4>
+        <div style="display:flex; flex-direction:column; gap:12px; font-size:0.85rem; color:var(--text-2); line-height:1.5;">
+          <div style="padding-left:12px; border-left:3px solid var(--bad);"><strong>Nỗi ám ảnh mang tên "Trận Hòa":</strong> Recall lớp Hòa vẫn chỉ ở mức 30%. Sự ngẫu nhiên của bóng đá (thẻ đỏ, VAR, xà ngang) tạo ra nhiễu (noise) quá lớn đối với Tabular Data.</div>
+          <div style="padding-left:12px; border-left:3px solid var(--warn);"><strong>Thiếu hụt dữ liệu vi mô:</strong> Chưa thu thập được dữ liệu chấn thương cầu thủ trụ cột hoặc chiến thuật đội hình (Formation 4-3-3 vs 3-5-2).</div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <h4 style="color:var(--good); margin-bottom:12px; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+          Hướng nghiên cứu tiếp theo
+        </h4>
+        <div style="background:rgba(255,255,255,0.03); border:1px dashed var(--border); border-radius:8px; padding:12px; font-size:0.85rem; color:var(--text-1);">
+          Sử dụng <strong>Deep Learning (Mạng LSTM hoặc Transformer)</strong> để học chuỗi dữ liệu chuỗi thời gian (Time-series sequence) thay vì chỉ dùng snapshot tĩnh trước mỗi trận đấu.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <p><strong>10. TỔNG KẾT VÀ HƯỚNG PHÁT TRIỂN KIẾN TRÚC AI TƯƠNG LAI</strong></p>
+    <p>Nghiên cứu đã hoàn thành ba đóng góp hàm lượng khoa học (Scientific Contributions). Một là, cô lập và vô hiệu hóa thành công rủi ro Data Leakage - thứ thường xuyên đánh lừa các nghiên cứu AI chuỗi thời gian, thông qua thiết kế cấu trúc Temporal OOT Validation chặt chẽ. Hai là, lượng hóa (Quantified) tầm quan trọng thống kê của phương thức ELO, chứng minh độ nhạy (Sensitivity) của nó vượt trội hơn 8 lần so với phương sai ngắn hạn. Ba là, dịch chuyển thành công thuật toán lõi (Core algorithms) thành hệ thống Microservices thông qua Web API Serialization, đẩy khoảng cách từ mô hình học thuật đến ứng dụng thực tiễn công nghiệp về 0.</p>
+    <p>Giới hạn lớn nhất của luận báo cáo thuộc về biên độ lý thuyết của bản thân dữ liệu Tabular tĩnh. Với chỉ số Recall cực đại trên lớp Hòa mắc kẹt tại $30\%$, hệ thống không có cách nào quan sát và nội suy các ma trận không gian trạng thái vi mô (Spatial state matrices) như sơ đồ đội hình (Formations), chấn thương cá nhân, hay nhịp độ trận đấu (Tempo). Tính chất Markov bậc 1 của dữ liệu tĩnh đã vô tình loại bỏ hoàn toàn các thông tin phụ thuộc dài hạn.</p>
+    <p>Định hướng giải quyết triệt để vấn đề này là từ bỏ mô hình tĩnh và chuyển đổi sang kiến trúc Sequence-to-Sequence Models. Tương lai hệ thống sẽ triển khai kiến trúc <strong>LSTM (Long Short-Term Memory)</strong> hoặc bộ suy diễn cơ chế chú ý <strong>Transformer (Self-Attention Mechanism)</strong>. Bằng cách nhúng (Embedding) chuỗi 20 trận lịch sử liên tiếp dưới dạng 1 vector chuỗi thời gian duy nhất thay vì chỉ gộp trung bình cộng đơn điệu, các cổng trạng thái ẩn (Hidden gates) của RNN/Transformer sẽ tự động học được mô thức biến thiên phong độ (Momentum shifting patterns) tinh vi của từng đội bóng theo trục t, nâng cao cực hạn phân tách không gian đa biến.</p>
+  </aside>
+</section>
+
+<!-- ===================== SLIDE: CẢM ƠN ===================== -->
+<section class="slide center tc" data-title="Cảm ơn">
+  <div>
+    <div class="divider-grad" style="max-width:360px; margin:0 auto 32px"></div>
+    <h2 class="h2" style="font-size:3rem; margin-bottom:16px; font-weight: 900;">Cảm ơn Hội đồng!</h2>
+    <p style="color:var(--text-2); font-size:1.1rem; max-width:540px; margin:0 auto 32px; line-height:1.7">
+      Nhóm xin trân trọng tiếp thu mọi câu hỏi, nhận xét và phản biện từ Quý Thầy Cô để hoàn thiện hướng nghiên cứu.
+    </p>
+    
+    <div style="display:flex; justify-content:center; gap:32px; margin-bottom: 24px;">
+      <div style="background:var(--surface); border:1px solid var(--border); padding:16px 24px; border-radius:16px; text-align:left; box-shadow:var(--shadow);">
+        <div style="font-size:0.75rem; color:var(--text-3); text-transform:uppercase; margin-bottom:4px;">Trải nghiệm mô phỏng Web App</div>
+        <div style="font-size:1.1rem; font-weight:700; color:var(--accent); font-family:monospace;">wc-model.vercel.app</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); padding:16px 24px; border-radius:16px; text-align:left; box-shadow:var(--shadow);">
+        <div style="font-size:0.75rem; color:var(--text-3); text-transform:uppercase; margin-bottom:4px;">Sinh viên thực hiện</div>
+        <div style="font-size:1.1rem; font-weight:700; color:var(--text-1);">Nguyễn Thị Lan Anh (24022941)</div>
+      </div>
+    </div>
+  </div>
+  
+  <aside class="notes">
+    <p>Nội dung trình bày đã khép lại. Nhóm nghiên cứu chân thành cảm ơn Hội đồng đã theo dõi.</p>
+    <p>Nhóm trân trọng đón nhận các câu hỏi phản biện và những đóng góp chuyên môn từ Quý Thầy Cô để tiếp tục hoàn thiện và phát triển hệ thống trong tương lai.</p>
+  </aside>
+</section>
+
+</div><!-- end .deck -->
+
+<!-- ===================== LIGHTBOX ===================== -->
+<div id="hop-anh" onclick="dongAnh()">
+  <span class="dong" onclick="dongAnh()">&times;</span>
+  <img id="anh-lon" src="" alt="">
+</div>
+
+<script src="../ppt-assets/runtime.js?v=4"></script>
+<script>
+function moAnh(el) {
+  var hop = document.getElementById('hop-anh');
+  var anh = document.getElementById('anh-lon');
+  anh.src = el.src;
+  anh.alt = el.alt;
+  hop.classList.add('hien');
+  // Ngăn chuyển slide khi đang xem ảnh
+  hop.addEventListener('keydown', function(e){ e.stopPropagation(); });
+}
+function dongAnh(e) {
+  document.getElementById('hop-anh').classList.remove('hien');
+}
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') dongAnh();
+});
+</script>
+</body></html>

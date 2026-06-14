@@ -1,0 +1,10 @@
+KẾT LUẬN SO SÁNH 4 PHIÊN BẢN MÔ HÌNH
+
+Random Forest Baseline: Train Accuracy = 0.9997, Test Accuracy = 0.6407, Macro F1 = 0.5131, Weighted F1 = 0.5996, Overfit gap = 0.3589
+Random Forest Tuned: Train Accuracy = 0.7630, Test Accuracy = 0.6234, Macro F1 = 0.5577, Weighted F1 = 0.6223, Overfit gap = 0.1396
+XGBoost Baseline: Train Accuracy = 0.6757, Test Accuracy = 0.6600, Macro F1 = 0.5039, Weighted F1 = 0.5962, Overfit gap = 0.0157
+XGBoost Tuned: Train Accuracy = 0.6936, Test Accuracy = 0.5993, Macro F1 = 0.5503, Weighted F1 = 0.6065, Overfit gap = 0.0943
+
+Mô hình được chọn cho mô phỏng World Cup 2026:
+Random Forest Tuned
+Lý do: Random Forest Tuned có hiệu năng cân bằng tốt và cải thiện rõ khả năng nhận diện lớp Hòa.

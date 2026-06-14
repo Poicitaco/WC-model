@@ -1,0 +1,12 @@
+﻿nhom_du_lieu,duong_dan,ton_tai
+matches_raw,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/all_matches.csv,True
+country_names,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/countries_names.csv,True
+fifa_rank,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/fifa_mens_rank_kaggle.csv,True
+elo_current,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/elo_world_2026.csv,True
+elo_backup,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/eloratings_kaggle.csv,True
+wc_history_1,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/matches_1930_2022.csv,True
+wc_history_2,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/world_cup_matches.csv,True
+wc_groups,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/wc_2026_groups.csv,True
+wc_schedule_group,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/wc_2026_schedule_vong_bang.csv,True
+wc_schedule_knockout,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/wc_2026_schedule_knockout.csv,True
+host_cities,/content/gdrive/MyDrive/WC2026_FINAL/DATA_RAW/host_cities.csv,True

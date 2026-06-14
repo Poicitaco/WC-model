@@ -1,0 +1,245 @@
+﻿team,elo_rank,elo_rating
+Spain,1,2165
+Argentina,2,2113
+France,3,2082
+England,4,2020
+Brazil,5,1984
+Portugal,5,1984
+Colombia,7,1975
+Netherlands,8,1961
+Ecuador,9,1933
+Croatia,10,1930
+Germany,11,1923
+Norway,12,1912
+Japan,13,1904
+Turkey,14,1902
+Uruguay,15,1892
+Switzerland,16,1889
+Senegal,17,1878
+Denmark,18,1870
+Belgium,19,1866
+Mexico,20,1858
+Italy,21,1856
+Paraguay,22,1833
+Austria,23,1827
+Morocco,24,1821
+Canada,25,1784
+Australia,26,1783
+Russia,27,1776
+Serbia,28,1770
+Scotland,29,1767
+Ukraine,29,1767
+Iran,31,1760
+South Korea,32,1752
+Nigeria,32,1752
+Greece,32,1752
+Algeria,35,1743
+Panama,36,1737
+Poland,37,1729
+Uzbekistan,38,1727
+Venezuela,38,1727
+Czechia,40,1726
+United States,41,1721
+Kosovo,41,1721
+Sweden,43,1719
+Chile,44,1710
+Hungary,45,1703
+Wales,46,1698
+Peru,47,1695
+Slovenia,48,1694
+Ireland,49,1691
+Jordan,50,1690
+Egypt,51,1689
+Ivory Coast,52,1676
+Slovakia,53,1673
+DR Congo,54,1655
+Georgia,55,1653
+Albania,56,1646
+Bolivia,57,1645
+Tunisia,58,1636
+Israel,59,1634
+Romania,60,1627
+Cameroon,61,1614
+Costa Rica,62,1613
+Iraq,63,1607
+Northern Ireland,64,1601
+Mali,65,1596
+Bosnia and Herzegovina,66,1594
+North Macedonia,67,1589
+New Zealand,68,1585
+Honduras,69,1571
+Iceland,69,1571
+Saudi Arabia,71,1568
+Cape Verde,72,1549
+Angola,73,1543
+Finland,74,1542
+United Arab Emirates,75,1540
+Jamaica,76,1535
+Haiti,77,1532
+Burkina Faso,78,1530
+South Africa,79,1524
+Guatemala,80,1515
+Belarus,81,1513
+Ghana,82,1505
+Syria,83,1491
+Oman,84,1490
+Bulgaria,85,1475
+Guinea,86,1470
+Palestine,86,1470
+Northern Cyprus,88,1457
+Montenegro,89,1440
+Curaçao,90,1436
+Luxembourg,90,1436
+Kazakhstan,92,1430
+Suriname,92,1430
+Benin,94,1429
+Qatar,95,1425
+Kurdistan,96,1424
+China,97,1423
+Gambia,97,1423
+Libya,99,1420
+Bahrain,100,1418
+Gabon,101,1401
+Uganda,102,1394
+Niger,103,1393
+Trinidad and Tobago,104,1392
+Equatorial Guinea,105,1390
+Madagascar,106,1382
+Faroe Islands,106,1382
+Armenia,108,1379
+Thailand,109,1376
+North Korea,110,1375
+Mozambique,111,1372
+Zambia,112,1371
+Zimbabwe,112,1371
+Comoros,114,1362
+Togo,115,1358
+Kenya,116,1356
+Vietnam,117,1351
+Sudan,118,1350
+Sierra Leone,119,1348
+Reunion,120,1345
+El Salvador,121,1341
+Azerbaijan,122,1340
+Estonia,123,1339
+Guadeloupe,124,1338
+Rwanda,125,1336
+Lebanon,126,1333
+Indonesia,127,1331
+Kuwait,128,1328
+Nicaragua,129,1327
+Zanzibar,130,1321
+Tanzania,131,1313
+Martinique,132,1311
+Mauritania,132,1311
+Namibia,134,1303
+Latvia,135,1301
+Cyprus,135,1301
+Liberia,137,1297
+Malaysia,138,1293
+Guyana,139,1292
+Lithuania,140,1291
+Kyrgyzstan,140,1291
+Burundi,142,1286
+New Caledonia,142,1286
+Tajikistan,144,1285
+Ethiopia,144,1285
+Dominican Republic,146,1284
+Botswana,147,1267
+Moldova,148,1262
+Guinea-Bissau,149,1248
+Malawi,150,1241
+Cuba,151,1239
+Central African Republic,152,1237
+Malta,152,1237
+French Guiana,154,1223
+Mayotte,155,1216
+Turkmenistan,156,1209
+Congo,157,1207
+Lesotho,158,1205
+Eritrea,159,1201
+Tahiti,160,1176
+Philippines,161,1167
+Yemen,162,1151
+Eswatini,163,1149
+St Vincent & Grenadines,164,1141
+India,165,1138
+Puerto Rico,165,1138
+Singapore,167,1137
+Papua New Guinea,168,1135
+Hong Kong,169,1120
+Bermuda,170,1118
+Vanuatu,171,1114
+South Sudan,172,1109
+Fiji,173,1108
+Grenada,174,1099
+Andorra,175,1077
+Mauritius,176,1073
+Chad,176,1073
+Belize,176,1073
+Solomon Islands,179,1054
+Saint Martin,180,1042
+Sao Tome and Principe,181,1035
+Saint Kitts and Nevis,182,1029
+Afghanistan,183,1011
+Somaliland,184,1005
+Saint Lucia,185,1003
+Gibraltar,186,1002
+Western Sahara,187,996
+Myanmar,188,982
+Aruba,189,979
+Somalia,189,979
+Sint Maarten,191,975
+Montserrat,192,971
+Greenland,193,946
+Djibouti,194,940
+Dominica,195,934
+Bangladesh,196,932
+Liechtenstein,197,904
+Monaco,198,903
+Barbados,199,898
+Antigua and Barbuda,200,894
+Nepal,201,893
+Seychelles,202,853
+Maldives,203,848
+Cambodia,204,844
+San Marino,205,836
+Bonaire,205,836
+Sri Lanka,207,827
+Taiwan,208,821
+Pakistan,209,812
+Cayman Islands,210,805
+Chagos Islands,211,782
+Tuvalu,212,756
+Sint Eustatius,213,737
+Laos,214,734
+Mongolia,215,730
+Samoa,216,728
+British Virgin Islands,217,727
+Saint Barthelemy,218,725
+Guam,219,718
+Wallis and Futuna,220,699
+Vatican,221,692
+Saba,222,691
+Bahamas,223,685
+St Pierre and Miquelon,224,677
+East Timor,225,673
+Turks and Caicos Islands,226,657
+Anguilla,227,646
+Bhutan,228,636
+Brunei,229,632
+Tibet,230,629
+US Virgin Islands,231,627
+Cook Islands,232,622
+Macao,233,588
+Christmas Island,234,578
+Falkland Islands,235,571
+FS Micronesia,236,563
+Marshall Islands,237,559
+Kiribati,238,544
+Tonga,239,520
+Niue,240,496
+Northern Marianas,241,432
+Cocos Islands,242,422
+Palau,243,402
+Eastern Samoa,244,369
