@@ -27,9 +27,8 @@ MAT_KHAU_ADMIN = os.environ.get("ADMIN_PASSWORD", "24022941")
 DUONG_DAN_ADMIN_AN = os.environ.get("ADMIN_PATH", "quan-tri-khung-anh-24022941")
 DINH_DANG_KHUNG_CHO_PHEP = {".png", ".webp", ".svg"}
 INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "https://poicitaco-wc2026-inference.hf.space").rstrip("/")
-INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "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")
-FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "c20d6c506f214513ac824b7432783fc8")
-
+INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "")
+FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "")
 # Dữ liệu kết quả đã mô phỏng sẵn trong thư mục outputs
 duong_dan_kq_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_stage_predictions_with_scores.csv")
 duong_dan_bxh_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_standings_best_model.csv")
@@ -278,7 +277,7 @@ def doc_danh_sach_khung_anh():
             danh_sach = json.load(tep)
 
     # Đọc thêm từ Vercel Blob nếu có
-    token = os.environ.get("BLOB_READ_WRITE_TOKEN", "vercel_blob_rw_JMlmEp15tU60RKY0_F7PIXsiCGUvnzW9ecumhMHX0eRsc2f")
+    token = os.environ.get("BLOB_READ_WRITE_TOKEN")
     if token:
         try:
             req = urllib.request.Request("https://blob.vercel-storage.com/")
@@ -646,7 +645,7 @@ def api_them_khung_anh():
     if phan_mo_rong not in DINH_DANG_KHUNG_CHO_PHEP:
         return jsonify({"loi": "Chỉ hỗ trợ PNG, WEBP hoặc SVG"}), 400
 
-    token = os.environ.get("BLOB_READ_WRITE_TOKEN", "vercel_blob_rw_JMlmEp15tU60RKY0_F7PIXsiCGUvnzW9ecumhMHX0eRsc2f")
+    token = os.environ.get("BLOB_READ_WRITE_TOKEN")
     if token:
         # Nếu có token thì upload lên Vercel Blob
         try:
@@ -703,7 +702,7 @@ def api_xoa_khung_anh():
     if not khung_can_xoa:
         return jsonify({"loi": "Không tìm thấy khung ảnh"}), 404
 
-    token = os.environ.get("BLOB_READ_WRITE_TOKEN", "vercel_blob_rw_JMlmEp15tU60RKY0_F7PIXsiCGUvnzW9ecumhMHX0eRsc2f")
+    token = os.environ.get("BLOB_READ_WRITE_TOKEN")
     if khung_id.startswith("http") and token:
         try:
             req = urllib.request.Request("https://blob.vercel-storage.com/delete", method="POST")
