@@ -28,7 +28,7 @@ DUONG_DAN_ADMIN_AN = os.environ.get("ADMIN_PATH", "quan-tri-khung-anh-24022941")
 DINH_DANG_KHUNG_CHO_PHEP = {".png", ".webp", ".svg"}
 INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "https://itentad-wc-2026-model-inference.hf.space").rstrip("/")
 INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "")
-FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "")
+FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "892cc89cd1c2431b8dbc4c28229d86f1")
 # Dữ liệu kết quả đã mô phỏng sẵn trong thư mục outputs
 duong_dan_kq_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_stage_predictions_with_scores.csv")
 duong_dan_bxh_vong_bang = os.path.join(DUONG_DAN_GOC, "outputs", "group_standings_best_model.csv")
@@ -999,36 +999,7 @@ def api_lich_thi_dau_chinh_thuc():
             danh_sach_tran = du_lieu_api
 
     if not danh_sach_tran:
-        try:
-            from datetime import datetime, timedelta
-            now = datetime.now()
-            cac_tep = [
-                os.path.join(DUONG_DAN_GOC, "data_processed", "ket_qua_vong_bang.csv"),
-                os.path.join(DUONG_DAN_GOC, "data_processed", "ket_qua_knockout.csv")
-            ]
-            danh_sach_tran = []
-            for duong_dan in cac_tep:
-                if not os.path.exists(duong_dan): continue
-                for _, tran in pd.read_csv(duong_dan, encoding="utf-8-sig").fillna("").iterrows():
-                    dt = datetime.fromisoformat(tran["ngay_gio"].replace(" ", "T"))
-                    end_dt = dt + timedelta(hours=2)
-                    if now > end_dt: tt = "FINISHED"
-                    elif now >= dt: tt = "IN_PLAY"
-                    else: tt = "TIMED"
-                    
-                    danh_sach_tran.append({
-                        "vong": tran["vong"],
-                        "ma_tran": int(tran["ma_tran"]),
-                        "bang": "" if str(tran.get("bang", "")).lower() == "nan" else tran.get("bang", ""),
-                        "ngay_gio": tran["ngay_gio"],
-                        "doi_a": tran["doi_a"],
-                        "doi_b": tran["doi_b"],
-                        "ban_thang_a": int(tran.get("ban_thang_a", 0)),
-                        "ban_thang_b": int(tran.get("ban_thang_b", 0)),
-                        "trang_thai": tt
-                    })
-        except Exception as e:
-            return jsonify({"loi": f"Khong thể đọc lịch thi đấu: {str(e)}"}), 500
+        return jsonify({"loi": "Không lấy được dữ liệu từ API Football-Data"}), 500
 
     danh_sach_tran.sort(key=lambda tran: tran["ngay_gio"])
     return jsonify({
