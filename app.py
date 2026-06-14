@@ -56,6 +56,7 @@ def lay_lich_thi_dau_tu_api():
 
             du_lieu = json.loads(phan_hoi.read().decode("utf-8"))
             danh_sach_tran = []
+            from datetime import datetime, timedelta
             for tran in du_lieu.get("matches", []):
                 doi_a = tran["homeTeam"]["name"]
                 doi_b = tran["awayTeam"]["name"]
@@ -63,11 +64,17 @@ def lay_lich_thi_dau_tu_api():
                 bt_a = tran.get("score", {}).get("fullTime", {}).get("home")
                 bt_b = tran.get("score", {}).get("fullTime", {}).get("away")
 
+                # Chuyển đổi từ UTC sang Giờ Việt Nam (GMT+7)
+                utc_date_str = tran.get("utcDate", "").replace("Z", "+00:00")
+                utc_dt = datetime.fromisoformat(utc_date_str)
+                vn_dt = utc_dt + timedelta(hours=7)
+                ngay_gio_vn = vn_dt.strftime("%Y-%m-%d %H:%M")
+
                 danh_sach_tran.append({
                     "vong": str(tran.get("stage", "")).replace("_", " ").title(),
                     "ma_tran": tran.get("id"),
                     "bang": str(tran.get("group", "")).replace("GROUP_", ""),
-                    "ngay_gio": str(tran.get("utcDate", "")).replace("T", " ").replace("Z", "")[:16],
+                    "ngay_gio": ngay_gio_vn,
                     "doi_a": chuan_hoa_ten_doi(doi_a),
                     "doi_b": chuan_hoa_ten_doi(doi_b),
                     "ban_thang_a": int(bt_a) if bt_a is not None else 0,

@@ -1039,17 +1039,17 @@
                 const hienTai = new Date();
                 
                 let trangThai = hienTai < batDau
-                    ? {lop: 'sap-toi', nhan: 'SẮP TỚI'}
+                    ? {lop: 'sap-toi', nhan: 'SẮP TỚI', mau: '#f5b914'}
                     : hienTai <= ketThucDuKien
-                        ? {lop: 'dang-dien-ra', nhan: 'ĐANG DIỄN RA'}
-                        : {lop: 'da-ket-thuc', nhan: 'ĐÃ KẾT THÚC'};
+                        ? {lop: 'dang-dien-ra', nhan: 'ĐANG DIỄN RA', mau: '#137333'}
+                        : {lop: 'da-ket-thuc', nhan: 'ĐÃ KẾT THÚC', mau: '#c5221f'};
 
-                if (tran.trang_thai === 'FINISHED') trangThai = {lop: 'da-ket-thuc', nhan: 'ĐÃ KẾT THÚC'};
-                else if (tran.trang_thai === 'IN_PLAY' || tran.trang_thai === 'PAUSED') trangThai = {lop: 'dang-dien-ra', nhan: 'ĐANG DIỄN RA'};
+                if (tran.trang_thai === 'FINISHED') trangThai = {lop: 'da-ket-thuc', nhan: 'ĐÃ KẾT THÚC', mau: '#c5221f'};
+                else if (tran.trang_thai === 'IN_PLAY' || tran.trang_thai === 'PAUSED') trangThai = {lop: 'dang-dien-ra', nhan: 'ĐANG DIỄN RA', mau: '#137333'};
 
                 const tySoHienThi = (trangThai.nhan === 'ĐÃ KẾT THÚC' || trangThai.nhan === 'ĐANG DIỄN RA')
-                    ? `<div class="ken-ty-so">${tran.ban_thang_a} - ${tran.ban_thang_b}</div>`
-                    : `<div class="nhan-trang-thai-tran ${trangThai.lop}">${trangThai.nhan}</div>`;
+                    ? `<div class="ken-ty-so" style="background-color: ${trangThai.mau}22; color: ${trangThai.mau}; border-color: ${trangThai.mau}44;">${tran.ban_thang_a} - ${tran.ban_thang_b}</div>`
+                    : `<div class="nhan-trang-thai-tran ${trangThai.lop}" style="background-color: ${trangThai.mau}22; color: ${trangThai.mau}; border-color: ${trangThai.mau}44;">${trangThai.nhan}</div>`;
 
                 card.innerHTML = `
                     <div class="cot-gio-lich">
