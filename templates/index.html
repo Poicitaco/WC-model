@@ -1047,9 +1047,16 @@
                 if (tran.trang_thai === 'FINISHED') trangThai = {lop: 'da-ket-thuc', nhan: 'ĐÃ KẾT THÚC', mau: '#c5221f'};
                 else if (tran.trang_thai === 'IN_PLAY' || tran.trang_thai === 'PAUSED') trangThai = {lop: 'dang-dien-ra', nhan: 'ĐANG DIỄN RA', mau: '#137333'};
 
+                const nhãnTrangThai = `<div class="nhan-trang-thai-nho ${trangThai.lop}" style="color: ${trangThai.mau}; border-color: ${trangThai.mau}44; background-color: ${trangThai.mau}15;">${trangThai.nhan}</div>`;
                 const tySoHienThi = (trangThai.nhan === 'ĐÃ KẾT THÚC' || trangThai.nhan === 'ĐANG DIỄN RA')
-                    ? `<div class="ken-ty-so" style="background-color: ${trangThai.mau}22; color: ${trangThai.mau}; border-color: ${trangThai.mau}44;">${tran.ban_thang_a} - ${tran.ban_thang_b}</div>`
-                    : `<div class="nhan-trang-thai-tran ${trangThai.lop}" style="background-color: ${trangThai.mau}22; color: ${trangThai.mau}; border-color: ${trangThai.mau}44;">${trangThai.nhan}</div>`;
+                    ? `<div class="khung-ty-so-moi">
+                           ${nhãnTrangThai}
+                           <div class="ken-ty-so-dong-nhat">${tran.ban_thang_a} - ${tran.ban_thang_b}</div>
+                       </div>`
+                    : `<div class="khung-ty-so-moi">
+                           ${nhãnTrangThai}
+                           <div class="ken-ty-so-dong-nhat text-gray-300">vs</div>
+                       </div>`;
 
                 card.innerHTML = `
                     <div class="cot-gio-lich">
@@ -1066,7 +1073,7 @@
                                 <span>${tran.doi_a}</span>
                                 <img class="co-quoc-gia" src="${layDuongDanCo(tran.doi_a)}" alt="Cờ ${tran.doi_a}">
                             </div>
-                            <div class="khung-ty-so-giua">
+                            <div class="khung-ty-so-giua-v2">
                                 ${tySoHienThi}
                             </div>
                             <div class="doi-b-khung">
