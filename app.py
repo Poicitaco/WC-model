@@ -60,8 +60,18 @@ def lay_lich_thi_dau_tu_api():
                 doi_a = tran["homeTeam"]["name"]
                 doi_b = tran["awayTeam"]["name"]
 
-                bt_a = tran.get("score", {}).get("fullTime", {}).get("home")
-                bt_b = tran.get("score", {}).get("fullTime", {}).get("away")
+                score_obj = tran.get("score", {})
+                
+                def get_score(period):
+                    p = score_obj.get(period)
+                    return (p.get("home"), p.get("away")) if p else (None, None)
+
+                h_ft, a_ft = get_score("fullTime")
+                h_rt, a_rt = get_score("regularTime")
+                h_ht, a_ht = get_score("halfTime")
+
+                bt_a = h_ft if h_ft is not None else (h_rt if h_rt is not None else h_ht)
+                bt_b = a_ft if a_ft is not None else (a_rt if a_rt is not None else a_ht)
 
                 # Chuyển đổi từ UTC sang Giờ Việt Nam (GMT+7)
                 utc_date_str = tran.get("utcDate", "").replace("Z", "+00:00")
