@@ -26,7 +26,7 @@ duong_dan_cau_hinh_khung = os.path.join(duong_dan_khung_anh, "frames.json")
 MAT_KHAU_ADMIN = os.environ.get("ADMIN_PASSWORD", "24022941")
 DUONG_DAN_ADMIN_AN = os.environ.get("ADMIN_PATH", "quan-tri-khung-anh-24022941")
 DINH_DANG_KHUNG_CHO_PHEP = {".png", ".webp", ".svg"}
-INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "https://poicitaco-wc2026-inference.hf.space").rstrip("/")
+INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "https://itentad-wc-2026-model-inference.hf.space").rstrip("/")
 INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "")
 FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "")
 # Dữ liệu kết quả đã mô phỏng sẵn trong thư mục outputs
@@ -813,10 +813,17 @@ def api_du_doan_tran_dau():
             return jsonify({"loi": "Thuật toán không hợp lệ"}), 400
 
         if INFERENCE_API_URL and cau_hinh_thuat_toan.get("loai") != "heuristic":
-            ket_qua_tu_xa = goi_inference_tu_xa(ten_thuat_toan, X_tran_dau)
-            nhan_du_doan = int(ket_qua_tu_xa["nhan_du_doan"])
-            xac_suat_ti_le = ket_qua_tu_xa["ti_le"]
-            nguon_inference = "Hugging Face inference"
+            try:
+                ket_qua_tu_xa = goi_inference_tu_xa(ten_thuat_toan, X_tran_dau)
+                nhan_du_doan = int(ket_qua_tu_xa["nhan_du_doan"])
+                xac_suat_ti_le = ket_qua_tu_xa["ti_le"]
+                nguon_inference = "Hugging Face inference"
+            except Exception as e:
+                print(f"Fallback to local model due to remote API error: {e}")
+                mo_hinh_da_chon = tai_mo_hinh(ten_thuat_toan)
+                nhan_du_doan = int(mo_hinh_da_chon.predict(X_tran_dau)[0])
+                xac_suat_ti_le = lay_xac_suat_ket_qua(mo_hinh_da_chon, X_tran_dau)
+                nguon_inference = "Máy chủ hiện tại (Fallback)"
         else:
             mo_hinh_da_chon = tai_mo_hinh(ten_thuat_toan)
             nhan_du_doan = int(mo_hinh_da_chon.predict(X_tran_dau)[0])
@@ -1065,6 +1072,118 @@ def api_so_lieu_mo_hinh():
         "hinh_anh": cac_anh,
         "so_lieu": so_lieu_so_sanh
     })
+
+
+@app.route("/api/bieu-do-ky-thuat", methods=["GET"])
+def api_bieu_do_ky_thuat():
+    danh_sach_bieu_do = [
+        {
+            "ten": "Phân Bố Mô Phỏng Bóng Bóng",
+            "url": "/static/anh/bubble_chart_mo_phong_4_mo_hinh.png",
+            "giai_thich": "Biểu đồ bong bóng so sánh mô phỏng 4 mô hình khác nhau, thể hiện độ lệch và hiệu suất phân loại của từng mô hình qua các kịch bản trận đấu."
+        },
+        {
+            "ten": "Ma Trận Nhầm Lẫn Random Forest Baseline",
+            "url": "/static/anh/confusion_matrix_random_forest_baseline.png",
+            "giai_thich": "Ma trận nhầm lẫn của mô hình Random Forest Baseline, cho thấy mức độ dự đoán chính xác và các sai sót (nhầm lẫn) giữa các kết quả Thắng, Hòa, Thua."
+        },
+        {
+            "ten": "Ma Trận Nhầm Lẫn Random Forest Tuned",
+            "url": "/static/anh/confusion_matrix_random_forest_tuned.png",
+            "giai_thich": "Ma trận nhầm lẫn của Random Forest sau khi đã tinh chỉnh siêu tham số, giúp cải thiện độ chính xác và giảm thiểu dự đoán sai."
+        },
+        {
+            "ten": "Ma Trận Nhầm Lẫn XGBoost Baseline",
+            "url": "/static/anh/confusion_matrix_xgboost_baseline.png",
+            "giai_thich": "Ma trận nhầm lẫn cơ bản của mô hình XGBoost, cho thấy xu hướng dự đoán ban đầu chưa qua tối ưu."
+        },
+        {
+            "ten": "Ma Trận Nhầm Lẫn XGBoost Tuned",
+            "url": "/static/anh/confusion_matrix_xgboost_tuned.png",
+            "giai_thich": "Ma trận nhầm lẫn của XGBoost sau khi được tối ưu hóa siêu tham số để cân bằng khả năng dự đoán."
+        },
+        {
+            "ten": "Mức Độ Quan Trọng Của Đặc Trưng (Feature Importance)",
+            "url": "/static/anh/feature_importance_best_model.png",
+            "giai_thich": "Đánh giá mức độ đóng góp của từng yếu tố đầu vào (chênh lệch Elo, tỷ lệ thắng theo Elo, v.v.) vào kết quả quyết định của mô hình tốt nhất."
+        },
+        {
+            "ten": "Độ Chính Xác Giữa Train & Test",
+            "url": "/static/anh/hat_graph_train_test_accuracy_green_yellow.png",
+            "giai_thich": "Biểu đồ mũ so sánh độ chính xác giữa tập dữ liệu huấn luyện và tập kiểm thử, giúp phát hiện tình trạng quá khớp (overfitting)."
+        },
+        {
+            "ten": "Bảng Dự Đoán Vòng Loại Trực Tiếp (Chi Tiết)",
+            "url": "/static/anh/knockout_predictions_table_best_model.png",
+            "giai_thich": "Bảng dự đoán chi tiết tất cả các trận đấu vòng loại trực tiếp từ vòng 32 đội cho đến trận chung kết của mô hình tốt nhất."
+        },
+        {
+            "ten": "Bảng Vòng Loại Trực Tiếp (Thu Gọn)",
+            "url": "/static/anh/knockout_table_beautiful_compact.png",
+            "giai_thich": "Bảng tổng hợp dự đoán vòng loại trực tiếp với giao diện thu gọn, thiết kế đẹp mắt và dễ nhìn."
+        },
+        {
+            "ten": "Bảng Vòng Loại Trực Tiếp (Tối Giản)",
+            "url": "/static/anh/knockout_table_clean_style.png",
+            "giai_thich": "Bảng hiển thị các trận đấu vòng loại trực tiếp theo phong cách thiết kế tối giản, tập trung vào số liệu cốt lõi."
+        },
+        {
+            "ten": "Bảng Vòng Loại Trực Tiếp (Đầy Đủ Cột)",
+            "url": "/static/anh/knockout_table_full_columns_best_model.png",
+            "giai_thich": "Bảng dự đoán vòng loại trực tiếp với đầy đủ tất cả các cột thống kê về xác suất, tỷ số và quyết định cuối cùng."
+        },
+        {
+            "ten": "Bảng Vòng Loại Trực Tiếp (Không Quyết Định)",
+            "url": "/static/anh/knockout_table_without_decision_best_model.png",
+            "giai_thich": "Bảng thông tin dự đoán vòng loại trực tiếp tập trung vào các xác suất thắng/hòa/thua mà chưa bao gồm cột quyết định thắng cuộc."
+        },
+        {
+            "ten": "Biểu Đồ Cột 3D Đánh Giá Mô Hình",
+            "url": "/static/anh/model_3d_bar_bright.png",
+            "giai_thich": "Biểu đồ cột 3D sáng màu so sánh trực quan hiệu năng và các điểm số đánh giá giữa nhiều mô hình."
+        },
+        {
+            "ten": "Biểu Đồ Cột Nhóm So Sánh Hiệu Năng",
+            "url": "/static/anh/model_comparison_grouped_bar.png",
+            "giai_thich": "Biểu đồ cột nhóm so sánh chi tiết các chỉ số như Accuracy, Macro F1, Weighted F1 giữa các mô hình huấn luyện."
+        },
+        {
+            "ten": "Biểu Đồ Radar Đánh Giá Đa Chiều",
+            "url": "/static/anh/model_comparison_radar_chart.png",
+            "giai_thich": "Biểu đồ Radar giúp đánh giá và so sánh toàn diện nhiều mô hình trên cùng một trục đa chiều (Accuracy, F1, Log Loss)."
+        },
+        {
+            "ten": "Bản Đồ Nhiệt Chỉ Số (Heatmap)",
+            "url": "/static/anh/model_metrics_heatmap_soft_purple_yellow.png",
+            "giai_thich": "Bản đồ nhiệt (Heatmap) thể hiện tổng quan các chỉ số đánh giá của các mô hình, màu đậm hơn biểu thị hiệu năng cao hơn."
+        },
+        {
+            "ten": "Biểu Đồ Xếp Hạng Biến Động",
+            "url": "/static/anh/model_ranking_bump_chart.png",
+            "giai_thich": "Biểu đồ xếp hạng (Bump chart) theo dõi sự thay đổi thứ hạng của các mô hình dựa trên nhiều loại thang đo chỉ số khác nhau."
+        },
+        {
+            "ten": "Thẻ Chiến Đấu Top 4: RF vs XGBoost",
+            "url": "/static/anh/top4_battle_cards_rf_vs_xgb.png",
+            "giai_thich": "Giao diện thẻ chiến đấu so sánh mô phỏng top 4 đội mạnh nhất tiến sâu vào vòng trong giữa Random Forest và XGBoost."
+        },
+        {
+            "ten": "Mức Độ Trùng Khớp Top 4",
+            "url": "/static/anh/top4_overlap_rf_vs_xgb.png",
+            "giai_thich": "Biểu đồ Venn hoặc đồ thị phần trăm thể hiện mức độ trùng khớp trong việc dự đoán 4 đội mạnh nhất giữa 2 mô hình."
+        },
+        {
+            "ten": "Bục Vinh Quang Top 4",
+            "url": "/static/anh/top4_podium_mirror_rf_vs_xgb.png",
+            "giai_thich": "Hình ảnh đối xứng bục vinh quang so sánh thứ hạng của các đội tuyển đạt thành tích cao nhất theo dự đoán của RF và XGBoost."
+        },
+        {
+            "ten": "Bảng Tham Khảo Knockout XGBoost",
+            "url": "/static/anh/xgb_knockout_table_reference.png",
+            "giai_thich": "Bảng tham khảo kết quả chi tiết các trận đấu vòng loại trực tiếp dựa trên dự đoán mô phỏng của XGBoost."
+        }
+    ]
+    return jsonify(danh_sach_bieu_do)
 
 
 if __name__ == "__main__":
