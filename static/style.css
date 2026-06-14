@@ -522,7 +522,29 @@ body.intro-dang-chay {
 }
 
 .bo-qua-mo-dau { color: #aab7ca; }
-.bo-qua-mo-dau:hover { color: #fff; }
+.nut-loc-trang-thai {
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    border: 1px solid var(--vien-kinh);
+    background: var(--nen-phu);
+    color: var(--chu-mo);
+    cursor: pointer;
+}
+
+.nut-loc-trang-thai:hover {
+    border-color: var(--diem-nhan);
+    color: var(--diem-nhan);
+}
+
+.nut-loc-trang-thai.active {
+    background: var(--diem-nhan) !important;
+    color: #ffffff !important;
+    border-color: var(--diem-nhan) !important;
+    box-shadow: 0 4px 12px var(--diem-nhan-mo);
+}
 
 @keyframes phi-hanh-gia-bay {
     0%, 100% { transform: translateY(0) rotate(-4deg); }

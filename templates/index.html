@@ -339,6 +339,14 @@
                 <p class="text-[#5f6368] text-sm">Theo dõi lịch thi đấu chính thức từ vòng bảng đến chung kết. Lịch này không hiển thị tỷ số dự đoán.</p>
             </div>
 
+            <!-- Bộ lọc trạng thái trận đấu -->
+            <div class="flex justify-center gap-2 mb-4">
+                <button onclick="locTrangThaiLich('ALL')" id="nut-loc-all" class="nut-loc-trang-thai active">Tất cả</button>
+                <button onclick="locTrangThaiLich('LIVE')" id="nut-loc-live" class="nut-loc-trang-thai">Đang diễn ra</button>
+                <button onclick="locTrangThaiLich('FINISHED')" id="nut-loc-finished" class="nut-loc-trang-thai">Đã kết thúc</button>
+                <button onclick="locTrangThaiLich('UPCOMING')" id="nut-loc-upcoming" class="nut-loc-trang-thai">Sắp tới</button>
+            </div>
+
             <div class="khung-thanh-ngay md3-card bg-white p-3">
                 <div class="flex justify-end items-center gap-2 mb-3">
                     <div class="flex items-center gap-2">
@@ -549,6 +557,7 @@
         let duLieuKnockout = null;
         let duLieuMoHinh = null;
         let ngayLichHienTai = null;
+        let locTrangThaiHienTai = 'ALL';
         let ngayDuDoanHienTai = null;
         let bangHienTai = 'A';
         let vongKnockoutHienTai = 'vong-32';
@@ -940,13 +949,45 @@
             hienThiLichTheoNgay();
         }
 
+        function locTrangThaiLich(trangThai) {
+            locTrangThaiHienTai = trangThai;
+            // Cập nhật giao diện nút
+            const cacNut = ['all', 'live', 'finished', 'upcoming'];
+            cacNut.forEach(n => {
+                const nut = document.getElementById(`nut-loc-${n}`);
+                if (nut) {
+                    nut.classList.toggle('active', n.toUpperCase() === trangThai);
+                }
+            });
+            hienThiLichTheoNgay();
+        }
+
         function hienThiLichTheoNgay() {
             if (!duLieuLichThiDau || !ngayLichHienTai) return;
 
             const cacNgay = duLieuLichThiDau.cac_ngay;
-            const tranTrongNgay = duLieuLichThiDau.danh_sach_tran.filter(
+            let tranTrongNgay = duLieuLichThiDau.danh_sach_tran.filter(
                 tran => tran.ngay_gio.slice(0, 10) === ngayLichHienTai
             );
+
+            // Áp dụng bộ lọc trạng thái
+            const hienTai = new Date();
+            tranTrongNgay = tranTrongNgay.filter(tran => {
+                const batDau = new Date(tran.ngay_gio.replace(' ', 'T'));
+                const ketThucDuKien = new Date(batDau.getTime() + 2 * 60 * 60 * 1000);
+                
+                let s = 'UPCOMING';
+                if (tran.trang_thai === 'FINISHED') s = 'FINISHED';
+                else if (tran.trang_thai === 'IN_PLAY' || tran.trang_thai === 'PAUSED') s = 'LIVE';
+                else {
+                    if (hienTai >= batDau && hienTai <= ketThucDuKien) s = 'LIVE';
+                    else if (hienTai > ketThucDuKien) s = 'FINISHED';
+                }
+
+                if (locTrangThaiHienTai === 'ALL') return true;
+                return s === locTrangThaiHienTai;
+            });
+
             const viTriNgay = cacNgay.indexOf(ngayLichHienTai);
             const laNgayCoTran = viTriNgay !== -1;
 
