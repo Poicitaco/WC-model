@@ -820,10 +820,13 @@ def api_du_doan_tran_dau():
                 nguon_inference = "Hugging Face inference"
             except Exception as e:
                 print(f"Fallback to local model due to remote API error: {e}")
-                mo_hinh_da_chon = tai_mo_hinh(ten_thuat_toan)
-                nhan_du_doan = int(mo_hinh_da_chon.predict(X_tran_dau)[0])
-                xac_suat_ti_le = lay_xac_suat_ket_qua(mo_hinh_da_chon, X_tran_dau)
-                nguon_inference = "Máy chủ hiện tại (Fallback)"
+                try:
+                    mo_hinh_da_chon = tai_mo_hinh(ten_thuat_toan)
+                    nhan_du_doan = int(mo_hinh_da_chon.predict(X_tran_dau)[0])
+                    xac_suat_ti_le = lay_xac_suat_ket_qua(mo_hinh_da_chon, X_tran_dau)
+                    nguon_inference = "Máy chủ hiện tại (Fallback)"
+                except FileNotFoundError:
+                    return jsonify({"loi": f"Hugging Face API lỗi ({e}) và máy chủ Vercel không có model nội bộ."}), 500
         else:
             mo_hinh_da_chon = tai_mo_hinh(ten_thuat_toan)
             nhan_du_doan = int(mo_hinh_da_chon.predict(X_tran_dau)[0])
