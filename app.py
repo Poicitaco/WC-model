@@ -26,8 +26,8 @@ duong_dan_cau_hinh_khung = os.path.join(duong_dan_khung_anh, "frames.json")
 MAT_KHAU_ADMIN = os.environ.get("ADMIN_PASSWORD", "24022941")
 DUONG_DAN_ADMIN_AN = os.environ.get("ADMIN_PATH", "quan-tri-khung-anh-24022941")
 DINH_DANG_KHUNG_CHO_PHEP = {".png", ".webp", ".svg"}
-INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "").rstrip("/")
-INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "")
+INFERENCE_API_URL = os.environ.get("INFERENCE_API_URL", "https://poicitaco-wc2026-inference.hf.space").rstrip("/")
+INFERENCE_API_TOKEN = os.environ.get("INFERENCE_API_TOKEN", "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")
 FOOTBALL_API_TOKEN = os.environ.get("FOOTBALL_API_TOKEN", "c20d6c506f214513ac824b7432783fc8")
 
 # Dữ liệu kết quả đã mô phỏng sẵn trong thư mục outputs

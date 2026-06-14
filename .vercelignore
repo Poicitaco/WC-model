@@ -1,12 +1,10 @@
 Bản_sao_của_CUỐI_KÌ_(2).ipynb
 DATA_RAW/
 figures/
-models/random_forest_baseline.pkl
-models/random_forest_tuned.pkl
-models/xgboost_baseline.pkl
-models/xgboost_tuned.pkl
+models/
 hf_space/
-test_*.py
+DATA_RAW/
+figures/
 vercel_recovered/
 vercel_source_new/
 static.rar
@@ -15,15 +13,13 @@ static.rar
 vercel_token.txt
 vercel_download_log.txt
 *.rar
-*.png
 *_diff.txt
 extracted_*.txt
 scratch_*.py
-DATA_RAW/
-figures/
 __pycache__/
 *.pyc
 .git/
 .venv/
 venv/
+test_*.py
 
