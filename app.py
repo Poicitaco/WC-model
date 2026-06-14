@@ -70,8 +70,19 @@ def lay_lich_thi_dau_tu_api():
                 vn_dt = utc_dt + timedelta(hours=7)
                 ngay_gio_vn = vn_dt.strftime("%Y-%m-%d %H:%M")
 
+                # Dịch tên vòng đấu sang Tiếng Việt
+                vong_goc = str(tran.get("stage", "")).upper()
+                vong_vn = vong_goc.replace("_", " ").title()
+                if vong_goc == "GROUP_STAGE": vong_vn = "Vòng bảng"
+                elif vong_goc == "LAST_32": vong_vn = "Vòng 1/16"
+                elif vong_goc == "LAST_16": vong_vn = "Vòng 1/8"
+                elif vong_goc == "QUARTER_FINALS": vong_vn = "Tứ kết"
+                elif vong_goc == "SEMI_FINALS": vong_vn = "Bán kết"
+                elif vong_goc == "FINAL": vong_vn = "Chung kết"
+                elif vong_goc == "THIRD_PLACE": vong_vn = "Tranh hạng ba"
+
                 danh_sach_tran.append({
-                    "vong": str(tran.get("stage", "")).replace("_", " ").title(),
+                    "vong": vong_vn,
                     "ma_tran": tran.get("id"),
                     "bang": str(tran.get("group", "")).replace("GROUP_", ""),
                     "ngay_gio": ngay_gio_vn,

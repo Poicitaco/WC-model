@@ -1014,7 +1014,7 @@
             });
 
             const tomTat = document.getElementById('tom-tat-ngay-lich');
-            const soTranVongBang = tranTrongNgay.filter(tran => tran.vong === 'Vòng bảng').length;
+            const soTranVongBang = tranTrongNgay.filter(tran => tran.vong.toLowerCase().includes('bảng') || tran.vong.toLowerCase().includes('group')).length;
             const soTranKnockout = tranTrongNgay.length - soTranVongBang;
             tomTat.innerHTML = `
                 <div class="the-tom-tat-lich"><i class="ph ph-soccer-ball"></i><div><strong>${tranTrongNgay.length}</strong><span>Tổng số trận</span></div></div>
