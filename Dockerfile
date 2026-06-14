@@ -10,12 +10,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt scikit-learn==1.6.1 xgboost gunicorn
 
 COPY . .
 
 # Hugging Face tự động gán cổng qua biến môi trường PORT (thường là 7860)
 ENV PORT=7860
+ENV INFERENCE_API_URL=""
 EXPOSE 7860
 
 # Chạy bằng Gunicorn cho hiệu năng ổn định trên production
