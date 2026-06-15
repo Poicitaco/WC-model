@@ -528,8 +528,27 @@
                 <p class="text-[#5f6368] text-sm">Danh mục tổng hợp toàn bộ các biểu đồ phân tích kỹ thuật của các mô hình học máy và mô phỏng trận đấu.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="danh-sach-bieu-do-ky-thuat">
-                <!-- Chèn bằng JS -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- Cột trái: Danh sách các biểu đồ -->
+                <div class="lg:col-span-4 md3-card bg-white max-h-[650px] overflow-y-auto">
+                    <div class="p-4 sticky top-0 bg-white border-b border-gray-100 z-10">
+                        <h3 class="text-sm font-bold text-[#1f1f1f]"><i class="ph ph-list-bullets"></i> Danh sách biểu đồ</h3>
+                    </div>
+                    <div id="danh-sach-bieu-do-ky-thuat" class="p-2 space-y-1">
+                        <!-- Chèn bằng JS -->
+                    </div>
+                </div>
+                
+                <!-- Cột phải: Chi tiết biểu đồ đang chọn -->
+                <div class="lg:col-span-8 md3-card p-6 bg-white flex flex-col" id="chi-tiet-bieu-do-ky-thuat">
+                    <div id="hien-thi-anh-bieu-do" class="flex-grow flex items-center justify-center bg-[#f8f9fa] rounded-xl p-3 border border-gray-200 mb-6 min-h-[450px]">
+                        <p class="text-gray-400">Đang tải biểu đồ...</p>
+                    </div>
+                    <div id="thong-tin-bieu-do-ky-thuat">
+                        <h3 id="tieu-de-bieu-do" class="text-xl font-bold text-[#1f1f1f] mb-2">Tên biểu đồ</h3>
+                        <p id="mo-ta-bieu-do" class="text-sm text-[#5f6368] leading-relaxed">Phân tích chi tiết biểu đồ...</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1430,32 +1449,47 @@
                 const khungDanhSach = document.getElementById('danh-sach-bieu-do-ky-thuat');
                 khungDanhSach.innerHTML = '';
                 
-                duLieuBieuDo.forEach(bieuDo => {
-                    const card = document.createElement('div');
-                    card.className = "md3-card bg-white overflow-hidden flex flex-col border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300";
-                    card.innerHTML = `
-                        <div class="bg-[#f8f9fa] border-b border-gray-100 flex items-center justify-center p-4 h-64 overflow-hidden group cursor-pointer relative">
-                            <img class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105" src="${bieuDo.url}" alt="${bieuDo.ten}">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-                                <a href="${bieuDo.url}" target="_blank" class="bg-white text-[#1f1f1f] px-4 py-2 rounded-full font-bold text-sm shadow hover:bg-gray-50 flex items-center gap-2">
-                                    <i class="ph ph-arrows-out"></i> Phóng to
-                                </a>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <h3 class="font-bold text-[#1f1f1f] mb-3 text-[15px] line-clamp-2">${bieuDo.ten}</h3>
-                            <p class="text-[13px] text-[#5f6368] leading-relaxed mt-auto border-t border-gray-100 pt-3 flex items-start gap-2">
-                                <i class="ph ph-info text-[#0b57d0] mt-1 text-lg shrink-0"></i>
-                                <span>${bieuDo.giai_thich}</span>
-                            </p>
-                        </div>
+                duLieuBieuDo.forEach((bieuDo, index) => {
+                    const nut = document.createElement('button');
+                    nut.className = "w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#0b57d0] transition border border-transparent focus:outline-none nut-chon-bieu-do flex items-center gap-3";
+                    nut.innerHTML = `
+                        <i class="ph ph-chart-line-up text-[#0b57d0]"></i>
+                        <span class="truncate">${bieuDo.ten}</span>
                     `;
-                    khungDanhSach.appendChild(card);
+                    nut.onclick = () => chonBieuDoKyThuat(bieuDo, nut);
+                    khungDanhSach.appendChild(nut);
+                    
+                    // Chọn biểu đồ đầu tiên mặc định
+                    if (index === 0) {
+                        chonBieuDoKyThuat(bieuDo, nut);
+                    }
                 });
             } catch (loi) {
-                console.error("Lỗi khi tải biểu đồ kỹ thuật:", loi);
+                console.error("Lỗi khi tải danh sách biểu đồ kỹ thuật:", loi);
+                document.getElementById('hien-thi-anh-bieu-do').innerHTML = `<p class="text-red-500">Lỗi khi tải dữ liệu</p>`;
             }
         };
+
+        function chonBieuDoKyThuat(bieuDo, nutDangChon) {
+            // Xóa trạng thái active của các nút khác
+            document.querySelectorAll('.nut-chon-bieu-do').forEach(n => {
+                n.classList.remove('bg-blue-50', 'text-[#0b57d0]', 'border-blue-100');
+                n.classList.add('border-transparent');
+            });
+            // Thêm trạng thái active cho nút vừa click
+            nutDangChon.classList.remove('border-transparent');
+            nutDangChon.classList.add('bg-blue-50', 'text-[#0b57d0]', 'border-blue-100');
+
+            // Cập nhật nội dung hiển thị bên phải
+            const khungAnh = document.getElementById('hien-thi-anh-bieu-do');
+            khungAnh.innerHTML = `
+                <img class="max-h-[500px] w-auto rounded object-contain cursor-pointer hover:scale-[1.02] transition duration-300" 
+                     src="${bieuDo.url}" alt="${bieuDo.ten}">
+            `;
+            
+            document.getElementById('tieu-de-bieu-do').textContent = bieuDo.ten;
+            document.getElementById('mo-ta-bieu-do').textContent = bieuDo.giai_thich;
+        }
 
         // Chuyển tab
         function chuyenTab(tenTab) {

@@ -266,6 +266,7 @@ ANH_XA_TEN_DOI = {
     "Côte d'Ivoire": "Ivory Coast",
     "Cote d'Ivoire": "Ivory Coast",
     "Cabo Verde": "Cape Verde",
+    "Cape Verde Islands": "Cape Verde",
     "Curacao": "Curaçao",
     "DR Congo": "Democratic Republic of the Congo",
     "Congo DR": "Democratic Republic of the Congo",
