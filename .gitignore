@@ -20,7 +20,6 @@ hf_space/models/*.pkl
 vercel_token.txt
 vercel_download_log.txt
 *.rar
-*.png
 *_diff.txt
 extracted_*.txt
 scratch_*.py
