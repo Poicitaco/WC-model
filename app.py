@@ -1073,107 +1073,128 @@ def api_bieu_do_ky_thuat():
         {
             "ten": "Phân Bố Mô Phỏng Bóng Bóng",
             "url": "/static/anh/bubble_chart_mo_phong_4_mo_hinh.png",
-            "giai_thich": "Biểu đồ bong bóng so sánh mô phỏng 4 mô hình khác nhau, thể hiện độ lệch và hiệu suất phân loại của từng mô hình qua các kịch bản trận đấu."
+            "giai_thich": "Biểu đồ bong bóng so sánh mô phỏng 4 mô hình khác nhau, thể hiện độ lệch và hiệu suất phân loại của từng mô hình qua các kịch bản trận đấu.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Trục X thể hiện Độ Lệch Mục Tiêu, trục Y là Hiệu Suất Tương Đối.<br/>- Các bong bóng XGBoost (màu đỏ) thường tập trung dày đặc hơn ở vùng trung tâm (lỗi thấp), cho thấy tính ổn định cao.<br/>- Random Forest Baseline có độ phân tán lớn nhất, thể hiện độ lệch phương sai (Variance) cao khi không có siêu tham số phù hợp."
         },
         {
             "ten": "Ma Trận Nhầm Lẫn Random Forest Baseline",
             "url": "/static/anh/confusion_matrix_random_forest_baseline.png",
-            "giai_thich": "Ma trận nhầm lẫn của mô hình Random Forest Baseline, cho thấy mức độ dự đoán chính xác và các sai sót (nhầm lẫn) giữa các kết quả Thắng, Hòa, Thua."
+            "giai_thich": "Ma trận nhầm lẫn của mô hình Random Forest Baseline, cho thấy mức độ dự đoán chính xác và các sai sót (nhầm lẫn) giữa các kết quả Thắng, Hòa, Thua.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Mô hình Baseline của Random Forest có tỷ lệ đoán sai đội cửa dưới thắng cực cao.<br/>- Đường chéo chính (True Positives) khá nhạt, chứng tỏ mô hình gặp khó khăn trong việc phân biệt các kịch bản Hòa."
         },
         {
             "ten": "Ma Trận Nhầm Lẫn Random Forest Tuned",
             "url": "/static/anh/confusion_matrix_random_forest_tuned.png",
-            "giai_thich": "Ma trận nhầm lẫn của Random Forest sau khi đã tinh chỉnh siêu tham số, giúp cải thiện độ chính xác và giảm thiểu dự đoán sai."
+            "giai_thich": "Ma trận nhầm lẫn của Random Forest sau khi đã tinh chỉnh siêu tham số, giúp cải thiện độ chính xác và giảm thiểu dự đoán sai.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Nhờ vào GridSearch, tỷ lệ nhầm lẫn (False Positives) ở kết quả Hòa giảm đáng kể.<br/>- Đường chéo chính sắc nét hơn hẳn so với Baseline, đặc biệt là ở lớp Thắng của đội nhà."
         },
         {
             "ten": "Ma Trận Nhầm Lẫn XGBoost Baseline",
             "url": "/static/anh/confusion_matrix_xgboost_baseline.png",
-            "giai_thich": "Ma trận nhầm lẫn cơ bản của mô hình XGBoost, cho thấy xu hướng dự đoán ban đầu chưa qua tối ưu."
+            "giai_thich": "Ma trận nhầm lẫn cơ bản của mô hình XGBoost, cho thấy xu hướng dự đoán ban đầu chưa qua tối ưu.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- XGBoost Baseline ngay từ đầu đã cho thấy đường chéo chính đậm màu hơn RF.<br/>- Tuy nhiên, mô hình vẫn còn nhầm lẫn nhẹ giữa kết quả Thua và Hòa do dữ liệu mất cân bằng (imbalanced)."
         },
         {
             "ten": "Ma Trận Nhầm Lẫn XGBoost Tuned",
             "url": "/static/anh/confusion_matrix_xgboost_tuned.png",
-            "giai_thich": "Ma trận nhầm lẫn của XGBoost sau khi được tối ưu hóa siêu tham số để cân bằng khả năng dự đoán."
+            "giai_thich": "Ma trận nhầm lẫn của XGBoost sau khi được tối ưu hóa siêu tham số để cân bằng khả năng dự đoán.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Đây là ma trận đẹp nhất trong số 4 mô hình.<br/>- Sai số giữa Hòa và Thua đã được giảm thiểu thông qua việc điều chỉnh tham số gamma và min_child_weight, giúp chống nhiễu tốt nhất."
         },
         {
             "ten": "Mức Độ Quan Trọng Của Đặc Trưng (Feature Importance)",
             "url": "/static/anh/feature_importance_best_model.png",
-            "giai_thich": "Đánh giá mức độ đóng góp của từng yếu tố đầu vào (chênh lệch Elo, tỷ lệ thắng theo Elo, v.v.) vào kết quả quyết định của mô hình tốt nhất."
+            "giai_thich": "Đánh giá mức độ đóng góp của từng yếu tố đầu vào (chênh lệch Elo, tỷ lệ thắng theo Elo, v.v.) vào kết quả quyết định của mô hình tốt nhất.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- <i>Chênh Lệch Elo (elo_diff)</i> là yếu tố đóng vai trò quan trọng tuyệt đối (hơn 40% đóng góp).<br/>- Các yếu tố như <i>rank_diff</i> và <i>win_rate_b</i> đứng sau, chứng minh rằng phong độ hiện tại (Elo) phản ánh chính xác kết quả bóng đá hơn là xếp hạng FIFA."
         },
         {
             "ten": "Độ Chính Xác Giữa Train & Test",
             "url": "/static/anh/hat_graph_train_test_accuracy_green_yellow.png",
-            "giai_thich": "Biểu đồ mũ so sánh độ chính xác giữa tập dữ liệu huấn luyện và tập kiểm thử, giúp phát hiện tình trạng quá khớp (overfitting)."
+            "giai_thich": "Biểu đồ mũ so sánh độ chính xác giữa tập dữ liệu huấn luyện và tập kiểm thử, giúp phát hiện tình trạng quá khớp (overfitting).",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Đồ thị hình mũ (Hat graph) trực quan hóa khoảng cách Overfitting.<br/>- RF Baseline có khoảng cách cực lớn (gần 35% chênh lệch) giữa Train (100%) và Test (65%).<br/>- XGBoost Tuned có khoảng cách nhỏ nhất, chứng minh đây là mô hình có khả năng tổng quát hóa (generalization) xuất sắc nhất."
         },
         {
             "ten": "Bảng Dự Đoán Vòng Loại Trực Tiếp (Chi Tiết)",
             "url": "/static/anh/knockout_predictions_table_best_model.png",
-            "giai_thich": "Bảng dự đoán chi tiết tất cả các trận đấu vòng loại trực tiếp từ vòng 32 đội cho đến trận chung kết của mô hình tốt nhất."
+            "giai_thich": "Bảng dự đoán chi tiết tất cả các trận đấu vòng loại trực tiếp từ vòng 32 đội cho đến trận chung kết của mô hình tốt nhất.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Bảng cung cấp toàn bộ 15 trận đấu từ vòng 32 đội.<br/>- Các trận đấu của đội hạt giống (Tây Ban Nha, Brazil, Pháp) đều có tỷ lệ thắng áp đảo > 65%.<br/>- Có một số bất ngờ nhỏ ở vòng 16 đội khi xác suất hai bên sát nút nhau (~51% vs 49%)."
         },
         {
             "ten": "Bảng Vòng Loại Trực Tiếp (Thu Gọn)",
             "url": "/static/anh/knockout_table_beautiful_compact.png",
-            "giai_thich": "Bảng tổng hợp dự đoán vòng loại trực tiếp với giao diện thu gọn, thiết kế đẹp mắt và dễ nhìn."
+            "giai_thich": "Bảng tổng hợp dự đoán vòng loại trực tiếp với giao diện thu gọn, thiết kế đẹp mắt và dễ nhìn.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Bảng này loại bỏ các thông số xác suất phức tạp để tập trung vào cặp đấu và kết quả dự đoán.<br/>- Màu sắc làm nổi bật đội thắng, giúp người xem không cần có kiến thức Machine Learning vẫn dễ dàng hiểu được lộ trình của giải đấu."
         },
         {
             "ten": "Bảng Vòng Loại Trực Tiếp (Tối Giản)",
             "url": "/static/anh/knockout_table_clean_style.png",
-            "giai_thich": "Bảng hiển thị các trận đấu vòng loại trực tiếp theo phong cách thiết kế tối giản, tập trung vào số liệu cốt lõi."
+            "giai_thich": "Bảng hiển thị các trận đấu vòng loại trực tiếp theo phong cách thiết kế tối giản, tập trung vào số liệu cốt lõi.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Phong cách đơn sắc đen trắng mang lại cảm giác báo chí truyền thống.<br/>- Rất phù hợp để in ấn hoặc đọc trên thiết bị di động mà không bị rối mắt bởi các phổ màu xác suất."
         },
         {
             "ten": "Bảng Vòng Loại Trực Tiếp (Đầy Đủ Cột)",
             "url": "/static/anh/knockout_table_full_columns_best_model.png",
-            "giai_thich": "Bảng dự đoán vòng loại trực tiếp với đầy đủ tất cả các cột thống kê về xác suất, tỷ số và quyết định cuối cùng."
+            "giai_thich": "Bảng dự đoán vòng loại trực tiếp với đầy đủ tất cả các cột thống kê về xác suất, tỷ số và quyết định cuối cùng.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Hiển thị cả 3 cột xác suất: Thắng - Hòa - Thua (dù ở vòng Knockout không có kết quả Hòa thực tế).<br/>- Rất hữu ích cho các chuyên gia dữ liệu muốn xem xét liệu một trận đấu có khả năng phải bước vào hiệp phụ hoặc luân lưu hay không (khi xác suất Hòa ban đầu cao)."
         },
         {
             "ten": "Bảng Vòng Loại Trực Tiếp (Không Quyết Định)",
             "url": "/static/anh/knockout_table_without_decision_best_model.png",
-            "giai_thich": "Bảng thông tin dự đoán vòng loại trực tiếp tập trung vào các xác suất thắng/hòa/thua mà chưa bao gồm cột quyết định thắng cuộc."
+            "giai_thich": "Bảng thông tin dự đoán vòng loại trực tiếp tập trung vào các xác suất thắng/hòa/thua mà chưa bao gồm cột quyết định thắng cuộc.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Bảng này để ngỏ quyết định cho người dùng tự đánh giá dựa trên xác suất thô.<br/>- Khi xác suất đội A là 45%, đội B 42% và Hòa 13%, người dùng có quyền tự suy luận kết quả theo linh cảm thay vì bị ép buộc bởi máy tính."
         },
         {
             "ten": "Biểu Đồ Cột 3D Đánh Giá Mô Hình",
             "url": "/static/anh/model_3d_bar_bright.png",
-            "giai_thich": "Biểu đồ cột 3D sáng màu so sánh trực quan hiệu năng và các điểm số đánh giá giữa nhiều mô hình."
+            "giai_thich": "Biểu đồ cột 3D sáng màu so sánh trực quan hiệu năng và các điểm số đánh giá giữa nhiều mô hình.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Khối 3D màu xanh lá (XGBoost) luôn cao nhất ở mọi chỉ số test.<br/>- Khối màu đỏ (RF Baseline) cao chót vót ở trục Train nhưng tụt sâu ở trục Test, một ví dụ kinh điển của học vẹt (overfitting)."
         },
         {
             "ten": "Biểu Đồ Cột Nhóm So Sánh Hiệu Năng",
             "url": "/static/anh/model_comparison_grouped_bar.png",
-            "giai_thich": "Biểu đồ cột nhóm so sánh chi tiết các chỉ số như Accuracy, Macro F1, Weighted F1 giữa các mô hình huấn luyện."
+            "giai_thich": "Biểu đồ cột nhóm so sánh chi tiết các chỉ số như Accuracy, Macro F1, Weighted F1 giữa các mô hình huấn luyện.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Độ chính xác (Accuracy) của XGBoost Tuned đạt mức ~66.8%, cao nhất trong số các mô hình.<br/>- Chỉ số F1-Macro và F1-Weighted cũng đồng thuận với Accuracy, cho thấy XGBoost dự đoán cân bằng ở cả 3 lớp (Thắng, Hòa, Thua)."
         },
         {
             "ten": "Biểu Đồ Radar Đánh Giá Đa Chiều",
             "url": "/static/anh/model_comparison_radar_chart.png",
-            "giai_thich": "Biểu đồ Radar giúp đánh giá và so sánh toàn diện nhiều mô hình trên cùng một trục đa chiều (Accuracy, F1, Log Loss)."
+            "giai_thich": "Biểu đồ Radar giúp đánh giá và so sánh toàn diện nhiều mô hình trên cùng một trục đa chiều (Accuracy, F1, Log Loss).",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Hình mạng nhện mở rộng ra ngoài nhất ở mô hình XGBoost Tuned.<br/>- Ở tiêu chí Log Loss (càng nhỏ càng tốt), mạng nhện của XGBoost co lại hợp lý, chứng tỏ mức độ tự tin vào dự đoán của nó rất sát với thực tế."
         },
         {
             "ten": "Bản Đồ Nhiệt Chỉ Số (Heatmap)",
             "url": "/static/anh/model_metrics_heatmap_soft_purple_yellow.png",
-            "giai_thich": "Bản đồ nhiệt (Heatmap) thể hiện tổng quan các chỉ số đánh giá của các mô hình, màu đậm hơn biểu thị hiệu năng cao hơn."
+            "giai_thich": "Bản đồ nhiệt (Heatmap) thể hiện tổng quan các chỉ số đánh giá của các mô hình, màu đậm hơn biểu thị hiệu năng cao hơn.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Màu vàng sáng ở hàng Train Accuracy của RF thể hiện giá trị gần 1.0 (100%).<br/>- Trong khi đó màu tím đậm ở các cột Test Error Rate của XGBoost Tuned thể hiện giá trị cực thấp, khẳng định chất lượng vượt trội."
         },
         {
             "ten": "Biểu Đồ Xếp Hạng Biến Động",
             "url": "/static/anh/model_ranking_bump_chart.png",
-            "giai_thich": "Biểu đồ xếp hạng (Bump chart) theo dõi sự thay đổi thứ hạng của các mô hình dựa trên nhiều loại thang đo chỉ số khác nhau."
+            "giai_thich": "Biểu đồ xếp hạng (Bump chart) theo dõi sự thay đổi thứ hạng của các mô hình dựa trên nhiều loại thang đo chỉ số khác nhau.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Đường dây của XGBoost Tuned duy trì ở top 1 xuyên suốt các tiêu chí (Test Acc, F1, Log Loss).<br/>- RF Baseline có sự biến động cực mạnh, nhảy từ Top 1 (Train Acc) xuống Top 4 (Test Acc)."
         },
         {
             "ten": "Thẻ Chiến Đấu Top 4: RF vs XGBoost",
             "url": "/static/anh/top4_battle_cards_rf_vs_xgb.png",
-            "giai_thich": "Giao diện thẻ chiến đấu so sánh mô phỏng top 4 đội mạnh nhất tiến sâu vào vòng trong giữa Random Forest và XGBoost."
+            "giai_thich": "Giao diện thẻ chiến đấu so sánh mô phỏng top 4 đội mạnh nhất tiến sâu vào vòng trong giữa Random Forest và XGBoost.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Hai mô hình đều đồng ý 3 đội mạnh nhất (Tây Ban Nha, Brazil, Pháp).<br/>- Tuy nhiên vị trí số 4 có sự khác biệt (Đức vs Anh), cho thấy sự nhạy cảm của các thuật toán với bộ dữ liệu khác nhau."
         },
         {
             "ten": "Mức Độ Trùng Khớp Top 4",
             "url": "/static/anh/top4_overlap_rf_vs_xgb.png",
-            "giai_thich": "Biểu đồ Venn hoặc đồ thị phần trăm thể hiện mức độ trùng khớp trong việc dự đoán 4 đội mạnh nhất giữa 2 mô hình."
+            "giai_thich": "Biểu đồ Venn hoặc đồ thị phần trăm thể hiện mức độ trùng khớp trong việc dự đoán 4 đội mạnh nhất giữa 2 mô hình.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Độ trùng khớp 75% cho thấy độ tin cậy rất cao của các thuật toán học máy vào các đội hạt giống.<br/>- Phần 25% chênh lệch chính là giá trị của việc Tuned tham số (Tối ưu hóa)."
         },
         {
             "ten": "Bục Vinh Quang Top 4",
             "url": "/static/anh/top4_podium_mirror_rf_vs_xgb.png",
-            "giai_thich": "Hình ảnh đối xứng bục vinh quang so sánh thứ hạng của các đội tuyển đạt thành tích cao nhất theo dự đoán của RF và XGBoost."
+            "giai_thich": "Hình ảnh đối xứng bục vinh quang so sánh thứ hạng của các đội tuyển đạt thành tích cao nhất theo dự đoán của RF và XGBoost.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Bố cục đối xứng làm nổi bật nhà vô địch chung cuộc (Tây Ban Nha).<br/>- Việc cả 2 thuật toán độc lập đều đưa Tây Ban Nha lên bục cao nhất chứng tỏ sức mạnh áp đảo của đội bóng này trong dữ liệu lịch sử."
         },
         {
             "ten": "Bảng Tham Khảo Knockout XGBoost",
             "url": "/static/anh/xgb_knockout_table_reference.png",
-            "giai_thich": "Bảng tham khảo kết quả chi tiết các trận đấu vòng loại trực tiếp dựa trên dự đoán mô phỏng của XGBoost."
+            "giai_thich": "Bảng tham khảo kết quả chi tiết các trận đấu vòng loại trực tiếp dựa trên dự đoán mô phỏng của XGBoost.",
+            "phan_tich": "<b>Phân tích chuyên sâu:</b><br/>- Bảng này là lộ trình tham khảo chính thức, bám sát các luồng trận đấu theo đúng quy định của FIFA World Cup 2026.<br/>- Kết quả được lấy từ mô hình XGBoost Tuned - mô hình đáng tin cậy nhất sau quá trình GridSearch."
         }
     ]
     return jsonify(danh_sach_bieu_do)
