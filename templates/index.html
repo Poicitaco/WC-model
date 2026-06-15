@@ -546,7 +546,8 @@
                     </div>
                     <div id="thong-tin-bieu-do-ky-thuat">
                         <h3 id="tieu-de-bieu-do" class="text-xl font-bold text-[#1f1f1f] mb-2">Tên biểu đồ</h3>
-                        <p id="mo-ta-bieu-do" class="text-sm text-[#5f6368] leading-relaxed">Phân tích chi tiết biểu đồ...</p>
+                        <p id="mo-ta-bieu-do" class="text-sm text-[#5f6368] leading-relaxed mb-4">Phân tích chi tiết biểu đồ...</p>
+                        <div id="phan-tich-bieu-do" class="text-sm text-[#3c4043] leading-relaxed bg-[#f1f3f4] p-4 rounded-xl border border-gray-200 hidden"></div>
                     </div>
                 </div>
             </div>
@@ -1491,6 +1492,14 @@
             
             document.getElementById('tieu-de-bieu-do').textContent = bieuDo.ten;
             document.getElementById('mo-ta-bieu-do').textContent = bieuDo.giai_thich;
+            
+            const phanTichDiv = document.getElementById('phan-tich-bieu-do');
+            if (bieuDo.phan_tich) {
+                phanTichDiv.innerHTML = bieuDo.phan_tich;
+                phanTichDiv.classList.remove('hidden');
+            } else {
+                phanTichDiv.classList.add('hidden');
+            }
         }
 
         // Chuyển tab
