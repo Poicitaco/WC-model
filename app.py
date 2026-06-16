@@ -744,7 +744,8 @@ def api_xoa_khung_anh():
             data = json.dumps({"urls": [khung_id]}).encode("utf-8")
             with urllib.request.urlopen(req, data=data) as res:
                 pass
-            return jsonify({"thanh_cong": True})
+            luu_danh_sach_khung_anh([khung for khung in danh_sach if khung["id"] != khung_id])
+            return jsonify({"thanh_cong": True, "deleted_id": khung_id})
         except Exception as e:
             return jsonify({"loi": f"Lỗi xóa Vercel Blob: {str(e)}"}), 503
     else:
@@ -753,7 +754,7 @@ def api_xoa_khung_anh():
             if os.path.exists(duong_dan_tep):
                 os.remove(duong_dan_tep)
             luu_danh_sach_khung_anh([khung for khung in danh_sach if khung["id"] != khung_id])
-            return jsonify({"thanh_cong": True})
+            return jsonify({"thanh_cong": True, "deleted_id": khung_id})
         except OSError:
             return jsonify({"loi": "Máy chủ hiện không cho phép xóa tệp"}), 503
 

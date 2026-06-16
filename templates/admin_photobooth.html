@@ -165,18 +165,30 @@
         }
 
         async function thucHienXoaKhung(item, matKhau) {
-            if (!confirm(`Xóa khung "${item.ten}"? Hành động này không thể hoàn tác.`)) return;
-            const phanHoi = await fetch('/api/admin/khung-anh', {
-                method: 'DELETE',
-                headers: {'X-Admin-Password': matKhau, 'Content-Type': 'application/json'},
-                body: JSON.stringify({id: item.id})
-            });
-            const duLieu = await phanHoi.json();
-            thongBao.textContent = duLieu.loi || 'Đã xóa khung ảnh.';
-            thongBao.dataset.loai = phanHoi.ok ? 'thanh-cong' : 'loi';
-            if (phanHoi.ok) taiDanhSachKhung();
+            thongBao.textContent = 'Dang xoa khung...';
+            thongBao.dataset.loai = '';
+            try {
+                const phanHoi = await fetch('/api/admin/khung-anh', {
+                    method: 'DELETE',
+                    headers: {'X-Admin-Password': matKhau, 'Content-Type': 'application/json'},
+                    body: JSON.stringify({id: item.id})
+                });
+                const duLieu = await phanHoi.json().catch(() => ({}));
+                thongBao.textContent = duLieu.loi || 'Da xoa khung anh.';
+                thongBao.dataset.loai = phanHoi.ok ? 'thanh-cong' : 'loi';
+                if (phanHoi.ok) {
+                    danhSachKhung = danhSachKhung.filter(khung => khung.id !== item.id);
+                    document.getElementById('dem-all').textContent = danhSachKhung.length;
+                    document.getElementById('dem-2').textContent = danhSachKhung.filter(khung => Number(khung.cuts || 2) === 2).length;
+                    document.getElementById('dem-4').textContent = danhSachKhung.filter(khung => Number(khung.cuts || 2) === 4).length;
+                    hienThiDanhSach();
+                    taiDanhSachKhung();
+                }
+            } catch (e) {
+                thongBao.textContent = 'Khong the ket noi may chu de xoa khung.';
+                thongBao.dataset.loai = 'loi';
+            }
         }
-
         function xoaKhung(item) {
             yeuCauMatKhau('Xóa khung ảnh', `Nhập mật khẩu quản trị để xóa "${item.ten}".`, matKhau => thucHienXoaKhung(item, matKhau));
         }
