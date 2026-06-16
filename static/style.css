@@ -1415,6 +1415,18 @@ body.intro-dang-chay {
     border-radius: 8px;
 }
 
+.lua-chon-khung.khung-loi-anh::before {
+    content: "";
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 8px;
+    background:
+        linear-gradient(#dce4df 0 0) 10% 8% / 80% 38% no-repeat,
+        linear-gradient(#dce4df 0 0) 10% 50% / 80% 38% no-repeat,
+        #101214;
+}
+
 .lua-chon-khung span {
     display: block;
     padding: 6px 3px 2px;

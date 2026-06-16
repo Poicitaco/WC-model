@@ -39,7 +39,7 @@
             <section class="admin-upload-panel md3-card">
                 <div class="admin-section-title">
                     <b>01</b>
-                    <span><strong>Tải khung mới</strong><small>PNG, WEBP hoặc SVG trong suốt · 1200 × 1800 px</small></span>
+                    <span><strong>Tải khung mới</strong><small>PNG, WEBP hoặc SVG · lỗ ảnh trong suốt hoặc màu đen · 1200 × 1800 px</small></span>
                 </div>
 
                 <form id="form-khung-anh" class="admin-form-moi">
@@ -53,7 +53,7 @@
             </section>
 
             <aside class="admin-preview-panel md3-card">
-                <div class="admin-section-title"><b>02</b><span><strong>Xem trước</strong><small>Kiểm tra nền trong suốt trước khi tải</small></span></div>
+                <div class="admin-section-title"><b>02</b><span><strong>Xem trước</strong><small>Kiểm tra vùng lỗ ảnh trước khi tải</small></span></div>
                 <div id="xem-truoc-khung" class="xem-truoc-khung"><i class="ph ph-image"></i><span>Chưa chọn tệp</span></div>
             </aside>
         </div>
@@ -128,8 +128,8 @@
         function capNhatQuyCach() {
             const soCut = document.getElementById('so-cut-khung').value;
             document.getElementById('quy-cach-khung').innerHTML = soCut === '2'
-                ? '<strong>Quy cách 2 cut</strong><span>Hai vùng ảnh trong suốt: 1080 × 680 px.</span>'
-                : '<strong>Quy cách 4 cut</strong><span>Bốn vùng ảnh trong suốt: 560 × 330 px, nằm giữa photostrip.</span>';
+                ? '<strong>Quy cách 2 cut</strong><span>Hai vùng lỗ ảnh trong suốt hoặc màu đen: khoảng 1080 × 680 px.</span>'
+                : '<strong>Quy cách 4 cut</strong><span>Bốn vùng lỗ ảnh trong suốt hoặc màu đen: khoảng 560 × 330 px.</span>';
         }
 
         function locKhung(boLoc, nut) {
