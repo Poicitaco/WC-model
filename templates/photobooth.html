@@ -97,6 +97,14 @@
             4: [{x: 320, y: 100, rong: 560, cao: 330}, {x: 320, y: 450, rong: 560, cao: 330}, {x: 320, y: 800, rong: 560, cao: 330}, {x: 320, y: 1150, rong: 560, cao: 330}]
         };
 
+        function layUrlKhung(khung) {
+            const url = khung ? String(khung.url || '') : '';
+            if (url.startsWith('https://') && !url.startsWith(window.location.origin)) {
+                return `/api/khung-anh-proxy?url=${encodeURIComponent(url)}`;
+            }
+            return url;
+        }
+
         function laPixelLo(data, viTri) {
             const r = data[viTri];
             const g = data[viTri + 1];
@@ -210,7 +218,7 @@
                 nut.type = 'button';
                 nut.className = `lua-chon-khung ${viTri === 0 ? 'kich-hoat' : ''}`;
                 const anhKhung = document.createElement('img');
-                anhKhung.src = khung.url;
+                anhKhung.src = layUrlKhung(khung);
                 anhKhung.alt = khung.ten;
                 anhKhung.loading = 'lazy';
                 anhKhung.onerror = () => {
@@ -229,6 +237,7 @@
                 danhSach.appendChild(nut);
             });
             khungPhotoboothHienTai = phuHop[0] || null;
+            window.khungCacheUrl = null;
             vePhotobooth();
         }
 
@@ -280,9 +289,12 @@
                 else if (viTri === cacAnhChup.length && coVideo) veAnhVaoVung(context, video, vung, true);
             });
             if (khungPhotoboothHienTai) {
-                if (!window.khungCache || window.khungCacheUrl !== khungPhotoboothHienTai.url) {
+                const khungUrl = layUrlKhung(khungPhotoboothHienTai);
+                if (!window.khungCache || window.khungCacheUrl !== khungUrl) {
                     window.khungCache = new Image();
                     window.khungCache.crossOrigin = "anonymous";
+                    window.khungCacheLoi = false;
+                    window.khungCacheCanvas = null;
                     window.khungCache.onload = () => {
                         window.khungCacheLoi = false;
                         if (!khungPhotoboothHienTai.vungCuts) {
@@ -297,8 +309,8 @@
                         console.warn('KhÃ´ng thá»ƒ táº£i khung photobooth:', khungPhotoboothHienTai.url);
                         vePhotobooth();
                     };
-                    window.khungCache.src = khungPhotoboothHienTai.url;
-                    window.khungCacheUrl = khungPhotoboothHienTai.url;
+                    window.khungCache.src = khungUrl;
+                    window.khungCacheUrl = khungUrl;
                 }
                 if (!window.khungCacheLoi && window.khungCache.complete && window.khungCache.naturalWidth) {
                     context.drawImage(window.khungCacheCanvas || window.khungCache, 0, 0, canvas.width, canvas.height);
@@ -362,20 +374,42 @@
             bao('Đã xóa các cut. Bạn có thể bắt đầu lại.');
         }
 
-        function taiAnhPhotobooth() {
+        async function taiAnhPhotobooth() {
             if (cacAnhChup.length !== soCutPhotobooth) return bao(`Hãy thêm đủ ${soCutPhotobooth} cut trước khi tải.`);
-            const lienKet = document.createElement('a');
-            lienKet.download = `world-cup-photobooth-${Date.now()}.png`;
-            lienKet.href = document.getElementById('canvas-photobooth').toDataURL('image/png');
-            lienKet.click();
+            const canvas = document.getElementById('canvas-photobooth');
+            try {
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Khong tao duoc anh PNG')), 'image/png');
+                });
+                const lienKet = document.createElement('a');
+                const objectUrl = URL.createObjectURL(blob);
+                lienKet.download = `world-cup-photobooth-${Date.now()}.png`;
+                lienKet.href = objectUrl;
+                document.body.appendChild(lienKet);
+                lienKet.click();
+                lienKet.remove();
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+                bao('Da tao file photostrip. Kiem tra thu muc tai xuong cua trinh duyet.');
+            } catch (e) {
+                console.error(e);
+                bao('Khong the tai photostrip. Hay tai lai khung hoac anh roi bam tai lai.');
+            }
         }
 
         document.getElementById('tai-anh-photobooth').addEventListener('change', suKien => {
             const tep = suKien.target.files[0];
             if (!tep) return;
             const anh = new Image();
-            anh.onload = () => themAnh(anh);
-            anh.src = URL.createObjectURL(tep);
+            const objectUrl = URL.createObjectURL(tep);
+            anh.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                themAnh(anh);
+            };
+            anh.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                bao('Khong the doc anh vua chon. Hay thu anh khac.');
+            };
+            anh.src = objectUrl;
             suKien.target.value = '';
         });
 

@@ -1,6 +1,7 @@
 import os
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 import joblib
 import pandas as pd
@@ -636,6 +637,27 @@ def trang_admin_khung_anh():
 @app.route("/api/khung-anh", methods=["GET"])
 def api_khung_anh():
     return jsonify(doc_danh_sach_khung_anh())
+
+
+@app.route("/api/khung-anh-proxy", methods=["GET"])
+def api_proxy_khung_anh():
+    url = request.args.get("url", "").strip()
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.netloc.lower()
+    if parsed.scheme != "https" or not host.endswith("blob.vercel-storage.com"):
+        return jsonify({"loi": "URL khung khong hop le"}), 400
+
+    try:
+        with urllib.request.urlopen(url, timeout=15) as phan_hoi:
+            du_lieu = phan_hoi.read(8 * 1024 * 1024)
+            content_type = phan_hoi.headers.get("Content-Type", "application/octet-stream")
+    except Exception:
+        return jsonify({"loi": "Khong tai duoc khung anh"}), 502
+
+    phan_hoi = app.response_class(du_lieu, mimetype=content_type.split(";")[0])
+    phan_hoi.headers["Cache-Control"] = "public, max-age=86400"
+    phan_hoi.headers["Access-Control-Allow-Origin"] = "*"
+    return phan_hoi
 
 
 @app.route("/api/admin/khung-anh", methods=["POST"])
