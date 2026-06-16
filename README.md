@@ -1,106 +1,350 @@
----
-title: Dự Đoán World Cup 2026 bằng Trí Tuệ Nhân Tạo (AI)
-emoji: ⚽
-colorFrom: blue
-colorTo: green
-sdk: docker
-pinned: false
----
+# Du doan World Cup 2026 bang AI
 
-# 🏆 Hệ Thống Phân Tích & Dự Đoán World Cup 2026 bằng Machine Learning
+Ung dung web Flask dung de phan tich, mo phong va du doan World Cup 2026 bang du lieu lich su, ranking FIFA, Elo va cac ket qua mo phong san. Du an co giao dien chinh, API du doan tran dau, lich thi dau, bang dau, knockout, che do thuyet trinh va photobooth chu de World Cup.
 
-Chào mừng đến với dự án **Dự Đoán World Cup 2026**. Đây là một ứng dụng web kết hợp khoa học dữ liệu (Data Science) và trí tuệ nhân tạo (Machine Learning) để mô phỏng và đưa ra dự báo kết quả của giải đấu bóng đá hấp dẫn nhất hành tinh.
 
-![World Cup Banner](https://upload.wikimedia.org/wikipedia/en/thumb/f/fa/2026_FIFA_World_Cup.svg/1200px-2026_FIFA_World_Cup.svg.png)
 
----
+## Tinh nang chinh
 
-## ✨ Tính Năng Chính
+- Du doan ket qua tran dau theo doi A, doi B va thuat toan duoc chon.
+- Xem du doan vong bang, bang xep hang, top doi di tiep va nhanh knockout.
+- Hien thi cac bieu do danh gia mo hinh trong `static/anh`.
+- Doc du lieu CSV da xu ly trong `data_processed` va ket qua mo phong trong `outputs`.
+- Trang thuyet trinh HTML tai `/thuyettrinh`.
+- Photobooth tai `/photobooth` va trang quan tri khung anh an.
+- Ho tro deploy Vercel thong qua `vercel.json`.
 
-Dự án cung cấp một bộ công cụ phân tích bóng đá toàn diện với các tính năng:
-- **📊 Mô Phỏng & Phân Tích Kỹ Thuật:** Hiển thị 21+ biểu đồ khoa học dữ liệu chuyên sâu (Ma trận nhầm lẫn, Feature Importance, Hat Graph, Radar Chart, v.v.) kèm theo phân tích chi tiết cho từng loại thuật toán (XGBoost, Random Forest).
-- **📅 Lịch Thi Đấu Tích Hợp:** Lấy dữ liệu lịch thi đấu thực tế tự động từ API (football-data.org), tự động cập nhật khi có biến động.
-- **🔮 Lịch Dự Đoán AI:** Tự động áp dụng mô hình Machine Learning (đã được fine-tune) vào lịch thi đấu để đưa ra dự báo trực tiếp về Tỷ lệ Thắng / Hòa / Thua.
-- **🏆 Sơ Đồ Knockout (Vòng Loại Trực Tiếp):** Vẽ sơ đồ luồng giải đấu từ Vòng bảng đến Vòng 32 đội, 16 đội, Tứ kết, Bán kết và Chung kết, tìm ra nhà Vô địch có xác suất cao nhất.
-- **🎤 Chế Độ Thuyết Trình (Presentation):** Tích hợp sẵn HTML Presentation Slideshow chuyên nghiệp, biến toàn bộ nghiên cứu thành tài liệu thuyết trình mượt mà (hỗ trợ chuyển slide tự động).
-- **📸 Photobooth:** Trải nghiệm tương tác với hệ thống chụp hình Photobooth chủ đề World Cup 2026 có tính năng quản lý khung hình.
+## Cong nghe
 
----
+- Backend: Python, Flask, pandas, numpy, joblib.
+- Frontend: HTML, CSS, JavaScript.
+- Runtime Vercel: `@vercel/python`.
+- Static files: thu muc `static`.
+- Du lieu: CSV trong `data_processed` va `outputs`.
 
-## 🛠️ Công Nghệ Sử Dụng
+## Cau truc du an
 
-- **Backend:** Python, Flask, Pandas, Scikit-Learn, XGBoost
-- **Frontend:** HTML5, Tailwind CSS, JavaScript thuần (Vanilla JS), FontAwesome, Phosphor Icons
-- **Deployment:** 
-  - Tích hợp CI/CD tự động lên nền tảng **Vercel** (`vercel.json`).
-  - Hỗ trợ triển khai thông qua **Docker** (có sẵn `Dockerfile`) dành cho Hugging Face Spaces hoặc AWS/GCP.
-
----
-
-## 📂 Cấu Trúc Dự Án
-
-```bash
+```text
 WC2026_FINAL/
-├── app.py                      # Flask Application Backend (API, Routing, Data Processing)
-├── data_processed/             # Dữ liệu CSV đã qua xử lý (Team data, Elo, Lịch thi đấu)
-├── templates/                  # Frontend HTML Views
-│   ├── index.html              # Giao diện chính của hệ thống dự đoán
-│   ├── photobooth.html         # Chức năng chụp ảnh Photobooth
-│   └── admin_photobooth.html   # Quản lý khung ảnh
-├── static/                     # Tài nguyên tĩnh
-│   ├── anh/                    # Chứa 21+ ảnh biểu đồ Data Science (không dùng LFS)
-│   ├── images/                 # Hình ảnh cờ quốc gia, logo giải đấu
-│   └── presentation/           # Source code cho chế độ Slide Thuyết trình
-├── outputs/                    # Log dự đoán và các bảng kết quả xuất ra dạng file
-├── models/                     # Các file trọng số mô hình đã huấn luyện (.pkl)
-├── requirements.txt            # Danh sách thư viện Python phụ thuộc
-└── vercel.json                 # Cấu hình triển khai lên nền tảng Vercel
+|-- app.py                         # Flask app, routes va API
+|-- requirements.txt               # Thu vien Python can cai
+|-- vercel.json                    # Cau hinh deploy Vercel
+|-- .vercelignore                  # File/thu muc khong upload len Vercel
+|-- templates/                     # HTML templates
+|   |-- index.html
+|   |-- photobooth.html
+|   `-- admin_photobooth.html
+|-- static/                        # CSS, anh, presentation, khung photobooth
+|-- data_processed/                # Du lieu CSV da xu ly
+|-- outputs/                       # Ket qua du doan/mo phong da xuat san
+|-- models/                        # Model local .pkl, bi ignore khi deploy Vercel
+`-- hf_space/                      # Ban Docker/Hugging Face Space rieng
 ```
 
----
+## Chay local truoc khi deploy
 
-## 🚀 Hướng Dẫn Cài Đặt (Chạy Local)
+### 1. Cai Python
 
-Nếu bạn muốn chạy thử nghiệm dự án này ngay trên máy tính cá nhân của mình:
+Khuyen dung Python 3.10 hoac 3.11. Kiem tra bang:
 
-### 1. Chuẩn bị môi trường
-Yêu cầu hệ thống phải cài đặt sẵn **Python 3.8+** và công cụ quản lý package `pip`. Khuyên dùng môi trường ảo (Virtual Environment) để cài đặt thư viện.
+```bash
+python --version
+```
 
-### 2. Cài đặt các thư viện phụ thuộc
-Di chuyển vào thư mục gốc của dự án và chạy lệnh sau:
+### 2. Tao moi truong ao
+
+Tren Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Tren macOS/Linux:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Cai dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Khởi chạy Server
-Khởi động Flask Server bằng lệnh:
+### 4. Chay ung dung
+
 ```bash
 python app.py
 ```
-Sau đó, hãy mở trình duyệt web và truy cập địa chỉ: [http://127.0.0.1:5000](http://127.0.0.1:5000) để trải nghiệm.
 
----
+Mo trinh duyet tai:
 
-## ☁️ Hướng Dẫn Triển Khai (Deployment)
-
-### Lựa chọn 1: Triển khai lên Vercel (Khuyên dùng)
-Dự án đã được cấu hình sẵn để chạy cực nhẹ trên Vercel qua Serverless Functions.
-1. Khởi tạo tài khoản Vercel và kết nối với Github Repository của bạn.
-2. Tại Vercel Dashboard, thêm dự án mới. Vercel sẽ tự động đọc file `vercel.json` và cấu hình Python Runtime.
-3. Nhấn **Deploy**. *Lưu ý: Tất cả hình ảnh trong thư mục `static/anh/` đã được gỡ LFS nên Vercel sẽ render bình thường không bị lỗi.*
-
-### Lựa chọn 2: Triển khai qua Docker
-Nếu muốn host trên server riêng (VPS) hoặc Hugging Face Spaces:
-```bash
-docker build -t wc2026-simulator .
-docker run -p 7860:7860 wc2026-simulator
+```text
+http://127.0.0.1:5000
 ```
-Truy cập qua cổng đã map (mặc định là cổng `7860`).
 
----
+Mot so duong dan can test:
 
-## 👨‍💻 Đóng Góp
-Mọi ý kiến đóng góp nhằm tối ưu thuật toán hoặc cải thiện giao diện đều được hoan nghênh. Vui lòng tạo *Pull Request* hoặc mở *Issues* trên Github.
+- `/` - trang chinh
+- `/photobooth` - photobooth
+- `/thuyettrinh` - slide thuyet trinh
+- `/api/danh-sach-doi` - API danh sach doi
+- `/api/thuat-toan` - API danh sach thuat toan
 
----
-*Dự án phục vụ mục đích nghiên cứu học thuật và học tập. Xác suất dự đoán được tính toán từ thuật toán máy học, không mang tính chất cổ xúy cá cược.*
+## Bien moi truong
+
+Ung dung co the chay khong can bien moi truong, nhung khi deploy that nen cau hinh cac bien sau trong Vercel.
+
+| Bien | Bat buoc | Gia tri goi y | Y nghia |
+| --- | --- | --- | --- |
+| `ADMIN_PASSWORD` | Khuyen dung | Mat khau manh cua ban | Mat khau trang quan tri photobooth. Neu khong set, app dung mac dinh trong code. |
+| `ADMIN_PATH` | Khuyen dung | `quan-tri-khung-anh-<chuoi-bi-mat>` | Duong dan trang admin photobooth. |
+| `INFERENCE_API_URL` | Khuyen dung | URL Hugging Face/API inference | API du doan tu xa. Mac dinh code dang tro den Hugging Face Space co san. |
+| `INFERENCE_API_TOKEN` | Tuy chon | Token API neu endpoint rieng can auth | Gui qua header `Authorization: Bearer ...`. |
+| `FOOTBALL_API_TOKEN` | Tuy chon | Token tu football-data.org | Lay lich thi dau chinh thuc tu Football-Data API. Khong co token thi app dung du lieu local/fallback. |
+| `BLOB_READ_WRITE_TOKEN` | Tuy chon | Token Vercel Blob | Chi can neu muon upload/xoa khung photobooth tren Vercel. |
+
+Luu y: Khong commit token that vao GitHub. Hay them trong Vercel Dashboard.
+
+## Luu y quan trong ve model khi deploy Vercel
+
+Thu muc `models/` dang nam trong `.vercelignore`, vi vay cac file `.pkl` se khong duoc dua len Vercel. Cach nay giup deployment nhe hon va tranh loi dung luong function.
+
+Voi cau hinh hien tai, du doan dong se uu tien goi `INFERENCE_API_URL`. Neu endpoint tu xa bi loi, app co co che fallback local, nhung tren Vercel fallback local co the that bai vi khong co file model.
+
+Neu ban muon deploy Vercel on dinh, nen lam mot trong hai cach:
+
+1. Giu `models/` trong `.vercelignore` va cau hinh `INFERENCE_API_URL` toi mot API inference rieng.
+2. Bo `models/` khoi `.vercelignore` chi khi chac chan tong dung luong nam trong gioi han Vercel va dependencies co the load model thanh cong.
+
+Khuyen dung cach 1.
+
+## Deploy len Vercel bang GitHub
+
+### 1. Day source len GitHub
+
+Neu chua co repository:
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/<username>/<repo-name>.git
+git push -u origin main
+```
+
+Neu da co repository, chi can commit va push:
+
+```bash
+git add .
+git commit -m "Update project"
+git push
+```
+
+Truoc khi push, dam bao cac thu muc sau co trong repository:
+
+- `app.py`
+- `templates/`
+- `static/`
+- `data_processed/`
+- `outputs/`
+- `requirements.txt`
+- `vercel.json`
+
+### 2. Import project tren Vercel
+
+1. Dang nhap https://vercel.com.
+2. Chon **Add New** -> **Project**.
+3. Chon repository GitHub cua du an.
+4. O man hinh cau hinh, giu mac dinh vi repo da co `vercel.json`.
+5. Framework Preset co the de **Other**.
+6. Root Directory de la thu muc goc chua `app.py`.
+7. Bam **Deploy**.
+
+### 3. Them Environment Variables
+
+Trong Vercel Dashboard:
+
+1. Vao project vua tao.
+2. Chon **Settings** -> **Environment Variables**.
+3. Them cac bien can dung, toi thieu nen co:
+
+```text
+ADMIN_PASSWORD=<mat-khau-admin-cua-ban>
+ADMIN_PATH=<duong-dan-admin-bi-mat>
+INFERENCE_API_URL=<url-api-inference-cua-ban>
+```
+
+Neu dung Football-Data API:
+
+```text
+FOOTBALL_API_TOKEN=<token-football-data>
+```
+
+Neu dung Vercel Blob cho photobooth frame upload:
+
+```text
+BLOB_READ_WRITE_TOKEN=<token-vercel-blob>
+```
+
+Sau khi them bien moi truong, vao tab **Deployments** va bam **Redeploy** deployment moi nhat.
+
+## Deploy bang Vercel CLI
+
+### 1. Cai Vercel CLI
+
+```bash
+npm install -g vercel
+```
+
+### 2. Dang nhap
+
+```bash
+vercel login
+```
+
+### 3. Link project
+
+Chay lenh trong thu muc goc du an:
+
+```bash
+vercel
+```
+
+Lan dau CLI se hoi mot so cau hoi:
+
+- Set up and deploy? Chon `Y`.
+- Which scope? Chon tai khoan/team cua ban.
+- Link to existing project? Chon `N` neu tao moi.
+- Project name? Nhap ten du an.
+- Directory? De mac dinh `./`.
+- Override settings? Thuong chon `N`.
+
+### 4. Them bien moi truong bang CLI
+
+```bash
+vercel env add ADMIN_PASSWORD
+vercel env add ADMIN_PATH
+vercel env add INFERENCE_API_URL
+vercel env add FOOTBALL_API_TOKEN
+vercel env add BLOB_READ_WRITE_TOKEN
+```
+
+Bien nao khong dung thi co the bo qua.
+
+### 5. Deploy production
+
+```bash
+vercel --prod
+```
+
+Sau khi xong, CLI se in ra URL production.
+
+## Cau hinh Vercel cua du an
+
+File `vercel.json` hien tai:
+
+```json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ]
+}
+```
+
+Y nghia:
+
+- Moi request khong phai static se duoc route vao `app.py`.
+- File trong `static/` duoc phuc vu nhu static asset.
+- Vercel se cai dependencies tu `requirements.txt`.
+
+## Kiem tra sau khi deploy
+
+Sau khi co URL Vercel, test cac duong dan:
+
+```text
+https://<ten-du-an>.vercel.app/
+https://<ten-du-an>.vercel.app/photobooth
+https://<ten-du-an>.vercel.app/thuyettrinh
+https://<ten-du-an>.vercel.app/api/danh-sach-doi
+https://<ten-du-an>.vercel.app/api/thuat-toan
+https://<ten-du-an>.vercel.app/api/du-doan-vong-bang
+https://<ten-du-an>.vercel.app/api/du-doan-knockout
+```
+
+Neu co cau hinh `ADMIN_PATH`, trang admin nam tai:
+
+```text
+https://<ten-du-an>.vercel.app/<ADMIN_PATH>
+```
+
+## Loi thuong gap khi deploy Vercel
+
+### 1. Trang bi loi 500
+
+Vao **Vercel Dashboard** -> project -> **Logs** de xem loi. Nguyen nhan hay gap:
+
+- Thieu file CSV trong `data_processed`.
+- Thieu file CSV trong `outputs`.
+- Sai hoac thieu bien `INFERENCE_API_URL`.
+- Endpoint inference tu xa dang sleep hoac loi.
+
+### 2. Anh/bieu do khong hien thi
+
+Kiem tra:
+
+- Thu muc `static/anh` da duoc commit len GitHub chua.
+- Duong dan anh trong app co dung `/static/...` khong.
+- File anh co bi ignore trong `.gitignore` hoac `.vercelignore` khong.
+
+### 3. Du doan dong bi loi model
+
+Neu log bao thieu file trong `models/`, nghia la app dang fallback sang model local. Tren Vercel, `models/` dang bi ignore. Hay:
+
+- Kiem tra `INFERENCE_API_URL`.
+- Dam bao API inference tu xa dang chay.
+- Neu API can token, them `INFERENCE_API_TOKEN`.
+
+### 4. Lich thi dau chinh thuc khong cap nhat
+
+API `/api/lich-thi-dau-chinh-thuc` can `FOOTBALL_API_TOKEN`. Neu khong co token hoac bi rate limit, app co the khong lay duoc du lieu moi tu Football-Data.
+
+### 5. Upload/xoa khung photobooth khong hoat dong tren Vercel
+
+Vercel Serverless khong phu hop de ghi file truc tiep lau dai vao filesystem. App co ho tro `BLOB_READ_WRITE_TOKEN`; hay cau hinh Vercel Blob neu muon luu khung photobooth sau deploy.
+
+## Bao mat
+
+- Doi `ADMIN_PASSWORD` truoc khi public project.
+- Doi `ADMIN_PATH` thanh duong dan kho doan.
+- Khong commit file `.env`, token Vercel, token Football-Data hoac API token.
+- Kiem tra `.gitignore` truoc khi push.
+
+## Ghi chu ve Docker va Hugging Face
+
+Repo co `Dockerfile` va thu muc `hf_space/` cho cach deploy khac ngoai Vercel. Neu deploy Hugging Face Space, xem them `hf_space/README.md`.
+
+## License va muc dich su dung
+
+Du an phuc vu muc dich hoc tap, nghien cuu va minh hoa ung dung Machine Learning trong phan tich bong da. Ket qua du doan chi mang tinh tham khao, khong phai khuyen nghi ca cuoc.
